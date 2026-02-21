@@ -213,21 +213,27 @@ export default function Services() {
 
             {/* Map Area */}
             <div className="w-full lg:w-2/3 order-1 lg:order-2">
-              <div className="relative aspect-[3/4] md:aspect-square bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border-4 border-white ring-1 ring-slate-200 group">
+              <div className="relative aspect-[3/4] md:aspect-square bg-slate-950 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(30,58,138,0.2)] border-4 border-white ring-1 ring-slate-200 group">
+                {/* Tactical Scanlines Effect Overlay */}
+                <div className="absolute inset-0 pointer-events-none opacity-[0.05] z-20 pointer-events-none" style={{
+                  backgroundImage: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
+                  backgroundSize: '100% 2px, 3px 100%'
+                }} />
+
                 {/* Simulated Map Background */}
-                <div className="absolute inset-0 opacity-40 transition-opacity group-hover:opacity-60 duration-700">
-                  <img 
-                    src="/placeholder.svg" 
-                    alt="San Andreas Map Background" 
-                    className="w-full h-full object-cover grayscale brightness-50"
+                <div className="absolute inset-0 opacity-80 transition-opacity group-hover:opacity-100 duration-700">
+                  <img
+                    src="https://www.bragitoff.com/wp-content/uploads/2015/11/GTAV_ATLUS_8192x8192.png"
+                    alt="San Andreas Map Background"
+                    className="w-full h-full object-cover grayscale-[40%] brightness-[0.8] contrast-[1.1]"
                   />
                 </div>
                 
                 {/* Map Grid / Topographic lines simulation */}
-                <div className="absolute inset-0 pointer-events-none opacity-10">
-                  <div className="w-full h-full" style={{ 
-                    backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', 
-                    backgroundSize: '40px 40px' 
+                <div className="absolute inset-0 pointer-events-none opacity-20">
+                  <div className="w-full h-full" style={{
+                    backgroundImage: 'radial-gradient(circle, white 0.5px, transparent 0.5px)',
+                    backgroundSize: '20px 20px'
                   }} />
                 </div>
 
@@ -256,7 +262,7 @@ export default function Services() {
                           
                           {/* Label on Hover / Selected */}
                           {(selectedLocation?.id === loc.id) && (
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 whitespace-nowrap bg-slate-900 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest shadow-xl">
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 whitespace-nowrap bg-slate-900/90 text-white px-3 py-1.5 rounded text-[10px] font-black uppercase tracking-widest shadow-2xl border border-white/20 backdrop-blur-sm z-50">
                               {loc.name}
                             </div>
                           )}
@@ -275,21 +281,21 @@ export default function Services() {
                 </div>
 
                 {/* Map Legend */}
-                <div className="absolute bottom-6 left-6 bg-slate-900/80 backdrop-blur-md p-4 rounded border border-white/10 flex gap-6 z-30">
+                <div className="absolute bottom-6 left-6 bg-slate-900/90 backdrop-blur-md p-4 rounded border border-white/20 flex gap-6 z-30 shadow-2xl">
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-primary rounded-full" />
-                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">LSPD / BCSO</span>
+                    <div className="w-3 h-3 bg-primary rounded-full shadow-[0_0_8px_rgba(30,58,138,0.8)]" />
+                    <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">LSPD / BCSO</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-secondary rounded-full" />
-                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">Hôpitaux / EMS</span>
+                    <div className="w-3 h-3 bg-secondary rounded-full shadow-[0_0_8px_rgba(200,16,46,0.8)]" />
+                    <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">Hôpitaux / EMS</span>
                   </div>
                 </div>
                 
                 {/* Watermark */}
-                <div className="absolute top-6 right-6 flex flex-col items-end opacity-40">
-                  <span className="text-xl font-black text-white uppercase tracking-tighter">SAN ANDREAS</span>
-                  <span className="text-[10px] font-bold text-white uppercase tracking-[0.4em]">MAP SYSTEM v4.2</span>
+                <div className="absolute top-6 right-6 flex flex-col items-end opacity-60">
+                  <span className="text-xl font-black text-white uppercase tracking-tighter drop-shadow-lg font-mono">SAN ANDREAS</span>
+                  <span className="text-[10px] font-bold text-white uppercase tracking-[0.4em] drop-shadow-md font-mono">MAP SYSTEM v4.2</span>
                 </div>
               </div>
             </div>
