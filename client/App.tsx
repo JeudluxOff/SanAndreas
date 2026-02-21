@@ -2,7 +2,11 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Placeholder from "./pages/Placeholder";
-import Gouvernement from "./pages/Gouvernement";
+import Governance from "./pages/Gouvernement";
+import Security from "./pages/Security";
+import Justice from "./pages/Justice";
+import Economy from "./pages/Economy";
+import Health from "./pages/Health";
 import Services from "./pages/Services";
 import Login from "./pages/Login";
 import Dashboard from "./pages/intranet/Dashboard";
@@ -10,6 +14,8 @@ import Documents from "./pages/intranet/Documents";
 import Dossiers from "./pages/intranet/Dossiers";
 import DossierDetail from "./pages/intranet/DossierDetail";
 import Workspace from "./pages/intranet/Workspace";
+import Workspaces from "./pages/intranet/Workspaces";
+import Calendar from "./pages/intranet/Calendar";
 import HR from "./pages/intranet/HR";
 import AuditLogs from "./pages/intranet/AuditLogs";
 import Communication from "./pages/intranet/Communication";
@@ -28,11 +34,11 @@ const AppRoutes = () => (
   <Routes>
     {/* Public Routes */}
     <Route path="/" element={<Index />} />
-    <Route path="/gouvernement" element={<Gouvernement />} />
-    <Route path="/securite" element={<Placeholder />} />
-    <Route path="/justice" element={<Placeholder />} />
-    <Route path="/economie" element={<Placeholder />} />
-    <Route path="/sante" element={<Placeholder />} />
+    <Route path="/gouvernement" element={<Governance />} />
+    <Route path="/securite" element={<Security />} />
+    <Route path="/justice" element={<Justice />} />
+    <Route path="/economie" element={<Economy />} />
+    <Route path="/sante" element={<Health />} />
     <Route path="/services" element={<Services />} />
     <Route path="/login" element={<Login />} />
 
@@ -47,8 +53,8 @@ const AppRoutes = () => (
             <Route path="/dossiers" element={<Dossiers />} />
             <Route path="/dossiers/:id" element={<DossierDetail />} />
             <Route path="/workspace/:serviceId" element={<Workspace />} />
-            <Route path="/workspaces" element={<Placeholder title="Espaces de Travail" />} />
-            <Route path="/calendar" element={<Placeholder title="Planning & Réunions" />} />
+            <Route path="/workspaces" element={<Workspaces />} />
+            <Route path="/calendar" element={<Calendar />} />
             <Route path="/logs" element={<AuditLogs />} />
             <Route path="/hr" element={<HR />} />
             <Route path="/communication" element={<Communication />} />
