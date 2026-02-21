@@ -72,22 +72,22 @@ const locations: Location[] = [
     phone: "911-LSPD-02"
   },
   {
-    id: 'bcso-sandy-shores',
-    name: "BCSO - Sandy Shores",
+    id: 'lssd-sandy-shores',
+    name: "LSSD - Sandy Shores",
     type: 'police',
     description: "Bureau du shérif du comté de Blaine. Responsable de la sécurité rurale.",
     coords: { top: '35.975%', left: '65.458%' },
     address: "Alhambra Drive, Sandy Shores",
-    phone: "911-BCSO-01"
+    phone: "911-LSSD-01"
   },
   {
-    id: 'bcso-paleto-bay',
-    name: "BCSO - Paleto Bay",
+    id: 'lssd-paleto-bay',
+    name: "LSSD - Paleto Bay",
     type: 'police',
     description: "Poste avancé du shérif situé à l'extrémité nord de l'État.",
     coords: { top: '16.575%', left: '46.333%' },
     address: "Duluoz Avenue, Paleto Bay",
-    phone: "911-BCSO-02"
+    phone: "911-LSSD-02"
   },
   {
     id: 'sams-central',
@@ -312,7 +312,7 @@ export default function Services() {
             {/* Control Panel */}
             <div className="w-full lg:w-1/3 space-y-8 order-2 lg:order-1">
               <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 space-y-6">
-                <h3 className="text-xl font-black text-primary uppercase tracking-tight flex itsams-center gap-2">
+                <h3 className="text-xl font-black text-primary uppercase tracking-tight flex items-center gap-2">
                   <Info className="w-5 h-5 text-secondary" />
                   Filtres de recherche
                 </h3>
@@ -359,7 +359,7 @@ export default function Services() {
 
               {/* Admin Tools */}
               <div className="bg-slate-900 p-6 rounded-lg shadow-xl border border-white/10 space-y-4">
-                <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] flex itsams-center gap-2">
+                <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
                   <Edit2 className="w-4 h-4 text-secondary" />
                   Outils d'Administration
                 </h3>
@@ -396,7 +396,7 @@ export default function Services() {
               {selectedLocation ? (
                 <div className="bg-white p-8 rounded-lg shadow-xl border-t-4 border-secondary animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <div className="space-y-6">
-                    <div className="flex itsams-center gap-3">
+                    <div className="flex items-center gap-3">
                       {selectedLocation.type === 'police' ?
                         <ShieldCheck className="w-8 h-8 text-primary" /> :
                         selectedLocation.type === 'hospital' ?
@@ -418,15 +418,15 @@ export default function Services() {
                           <p>Left: {selectedLocation.coords.left}</p>
                         </div>
                       )}
-                      <div className="flex itsams-start gap-3 text-sm">
+                      <div className="flex items-start gap-3 text-sm">
                         <MapPin className="w-5 h-5 text-slate-400 flex-shrink-0" />
                         <span className="font-bold text-slate-700">{selectedLocation.address}</span>
                       </div>
-                      <div className="flex itsams-center gap-3 text-sm">
+                      <div className="flex items-center gap-3 text-sm">
                         <Phone className="w-5 h-5 text-slate-400 flex-shrink-0" />
                         <span className="font-bold text-slate-700">{selectedLocation.phone}</span>
                       </div>
-                      <div className="flex itsams-center gap-3 text-sm">
+                      <div className="flex items-center gap-3 text-sm">
                         <Clock className="w-5 h-5 text-slate-400 flex-shrink-0" />
                         <span className="font-bold text-green-600 uppercase tracking-widest text-[10px]">Ouvert 24h/24 - 7j/7</span>
                       </div>
@@ -438,7 +438,7 @@ export default function Services() {
                 </div>
               ) : (
                 <div className="bg-slate-100 p-8 rounded-lg border-2 border-dashed border-slate-300 text-center space-y-4">
-                  <div className="w-16 h-16 bg-slate-200 rounded-full flex itsams-center justify-center mx-auto">
+                  <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto">
                     <MapPin className="w-8 h-8 text-slate-400" />
                   </div>
                   <h4 className="text-lg font-black text-slate-400 uppercase tracking-tighter">Sélectionnez un point</h4>
@@ -613,22 +613,22 @@ export default function Services() {
 
                 {/* Map Legend */}
                 <div className="absolute bottom-6 left-6 bg-slate-900/90 backdrop-blur-md p-4 rounded border border-white/20 flex gap-6 z-30 shadow-2xl">
-                  <div className="flex itsams-center gap-2">
+                  <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-primary rounded-full shadow-[0_0_8px_rgba(30,58,138,0.8)]" />
-                    <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">LSPD / BCSO</span>
+                    <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">LSPD / LSSD</span>
                   </div>
-                  <div className="flex itsams-center gap-2">
+                  <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-secondary rounded-full shadow-[0_0_8px_rgba(200,16,46,0.8)]" />
                     <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">Hôpitaux / SAMS</span>
                   </div>
-                  <div className="flex itsams-center gap-2">
+                  <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-slate-700 rounded-full shadow-[0_0_8px_rgba(51,65,85,0.8)]" />
                     <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">Gouv. / DOJ</span>
                   </div>
                 </div>
                 
                 {/* Watermark */}
-                <div className="absolute top-6 right-6 flex flex-col itsams-end opacity-60">
+                <div className="absolute top-6 right-6 flex flex-col items-end opacity-60">
                   <span className="text-xl font-black text-white uppercase tracking-tighter drop-shadow-lg font-mono">SAN ANDREAS</span>
                   <span className="text-[10px] font-bold text-white uppercase tracking-[0.4em] drop-shadow-md font-mono">MAP SYSTEM v4.2</span>
                 </div>
@@ -662,14 +662,14 @@ export default function Services() {
               {
                 title: "Recrutement",
                 icon: <UsersIcon className="w-10 h-10 text-primary" />,
-                desc: "Rejoignez les rangs du LSPD, BCSO ou SAMS. Postulez dès aujourd'hui pour servir votre État."
+                desc: "Rejoignez les rangs du LSPD, LSSD ou SAMS. Postulez dès aujourd'hui pour servir votre État."
               }
             ].map((service, idx) => (
               <div key={idx} className="p-10 bg-slate-50 border border-slate-200 rounded-lg hover:bg-white hover:shadow-xl hover:border-primary/20 transition-all group">
                 <div className="mb-6">{service.icon}</div>
                 <h3 className="text-2xl font-black text-primary uppercase tracking-tight mb-4">{service.title}</h3>
                 <p className="text-slate-600 font-medium leading-relaxed mb-8">{service.desc}</p>
-                <Link to="#" className="flex itsams-center gap-2 text-primary font-bold uppercase tracking-widest text-xs group-hover:text-secondary transition-colors">
+                <Link to="#" className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-xs group-hover:text-secondary transition-colors">
                   Accéder au formulaire <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>

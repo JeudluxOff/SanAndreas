@@ -159,7 +159,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <h3 className="text-lg font-bold mb-6 border-b border-white/20 pb-2 inline-block">Départements</h3>
               <ul className="space-y-3 text-slate-300 text-sm">
                 <li><a href="#" className="hover:text-white transition-colors">Justice & Droits</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Sécurité Publique (LSPD/BCSO)</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Sécurité Publique (LSPD/LSSD)</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Santé & SAMS</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Développement Économique</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Transports & Infrastructures</a></li>

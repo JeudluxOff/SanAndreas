@@ -16,7 +16,7 @@ import { Link } from "react-router-dom";
 const priorities = [
   {
     title: "Sécurité Publique",
-    description: "Renforcement des effectifs du LSPD et du BCSO pour assurer la paix dans tout l'État.",
+    description: "Renforcement des effectifs du LSPD et du LSSD pour assurer la paix dans tout l'État.",
     icon: <ShieldCheck className="w-8 h-8 text-secondary" />,
     link: "/securite"
   },
@@ -271,7 +271,7 @@ export default function Index() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
             {[
               { label: "LSPD", icon: <ShieldCheck className="w-6 h-6" /> },
-              { label: "BCSO", icon: <ShieldCheck className="w-6 h-6" /> },
+              { label: "LSSD", icon: <ShieldCheck className="w-6 h-6" /> },
               { label: "SAMS", icon: <HeartPulse className="w-6 h-6" /> },
               { label: "DOJ", icon: <Gavel className="w-6 h-6" /> },
               { label: "IAA", icon: <ShieldCheck className="w-6 h-6" /> },

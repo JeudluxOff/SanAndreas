@@ -36,7 +36,7 @@ const cabinetMembers = [
     role: "Secrétaire à la Sécurité",
     name: "Marcus Thorne",
     image: "/placeholder.svg",
-    description: "Liaison officielle entre le gouvernement et les agences LSPD / BCSO / FIB.",
+    description: "Liaison officielle entre le gouvernement et les agences LSPD / LSSD / FIB.",
     icon: <Shield className="w-5 h-5" />
   },
   {
