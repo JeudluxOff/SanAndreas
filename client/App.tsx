@@ -1,5 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
+import Cabinet from "./pages/Cabinet";
+import LegalDashboard from "./pages/cabinet/Dashboard";
+import LegalDossiers from "./pages/cabinet/Dossiers";
+import LegalPortal from "./pages/cabinet/Portal";
+import LegalBilling from "./pages/cabinet/Billing";
+import LegalAudit from "./pages/cabinet/Audit";
 import NotFound from "./pages/NotFound";
 import Placeholder from "./pages/Placeholder";
 import Governance from "./pages/Gouvernement";
@@ -34,6 +40,23 @@ const AppRoutes = () => (
   <Routes>
     {/* Public Routes */}
     <Route path="/" element={<Index />} />
+    <Route path="/cabinet" element={<Cabinet />} />
+    <Route path="/cabinet/portal" element={
+      <ProtectedRoute>
+        <LegalPortal />
+      </ProtectedRoute>
+    } />
+    <Route path="/cabinet/intranet/*" element={
+      <ProtectedRoute>
+        <Routes>
+          <Route path="/" element={<LegalDashboard />} />
+          <Route path="/dossiers" element={<LegalDossiers />} />
+          <Route path="/billing" element={<LegalBilling />} />
+          <Route path="/audit" element={<LegalAudit />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </ProtectedRoute>
+    } />
     <Route path="/gouvernement" element={<Governance />} />
     <Route path="/securite" element={<Security />} />
     <Route path="/justice" element={<Justice />} />

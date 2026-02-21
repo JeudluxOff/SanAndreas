@@ -169,9 +169,11 @@ export default function Justice() {
                   Le système judiciaire de San Andreas est conçu pour être accessible à tous. Nous mettons à votre disposition des outils pour comprendre vos droits et naviguer dans les procédures légales.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-widest py-8">
-                    Trouver un Avocat
-                  </Button>
+                  <Link to="/cabinet" className="w-full">
+                    <Button size="lg" className="w-full bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-widest py-8">
+                      Trouver un Avocat
+                    </Button>
+                  </Link>
                   <Button size="lg" variant="outline" className="border-2 border-primary text-primary font-bold uppercase tracking-widest py-8 hover:bg-primary/5">
                     Demande de Grâce
                   </Button>
