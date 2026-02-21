@@ -3,14 +3,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   Calendar as CalendarIcon, Clock, MapPin, Users, ChevronLeft, ChevronRight,
-  Plus, MoreVertical, Filter, Search, Shield, Bell, CheckCircle2, AlertTriangle, Info, ShieldAlert
+  Plus, MoreVertical, Filter, Search, Shield, Bell, CheckCircle2, AlertTriangle, Info, ShieldAlert,
+  CalendarDays
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { format, addDays, subDays, isSameDay } from "date-fns";
+import { fr } from "date-fns/locale";
 
-const events = [
+const MOCK_EVENTS = [
   {
     id: 1,
     time: '09:00 - 10:30',
@@ -19,7 +22,7 @@ const events = [
     location: 'Salle de Crise - Cabinet',
     participants: 8,
     type: 'critical',
-    date: '24 Mai 2024'
+    date: new Date()
   },
   {
     id: 2,
@@ -29,7 +32,7 @@ const events = [
     location: 'Visioconférence',
     participants: 12,
     type: 'internal',
-    date: '24 Mai 2024'
+    date: new Date()
   },
   {
     id: 3,
@@ -39,7 +42,7 @@ const events = [
     location: 'Sénat - Bureau 12',
     participants: 5,
     type: 'official',
-    date: '24 Mai 2024'
+    date: addDays(new Date(), 1)
   },
   {
     id: 4,
@@ -49,13 +52,46 @@ const events = [
     location: 'Salle de Presse - RdC',
     participants: 25,
     type: 'public',
-    date: '24 Mai 2024'
+    date: addDays(new Date(), -1)
+  },
+  {
+    id: 5,
+    time: '10:00 - 11:00',
+    title: 'Revue de Protocole',
+    service: 'CABINET',
+    location: 'Bureau du Gouverneur',
+    participants: 3,
+    type: 'internal',
+    date: addDays(new Date(), 2)
   }
 ];
 
 export default function Calendar() {
   const { user, hasPermission, emergencyMode, toggleEmergencyMode } = useAuth();
-  const [selectedDate, setSelectedDate] = useState('24 Mai 2024');
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const scrollerRef = useRef<HTMLDivElement>(null);
+
+  // Generate a range of dates for the scroller (15 days before, 30 days after)
+  const startDate = subDays(new Date(), 15);
+  const scrollDates = Array.from({ length: 45 }, (_, i) => addDays(startDate, i));
+
+  const filteredEvents = MOCK_EVENTS.filter(event => isSameDay(event.date, selectedDate));
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollerRef.current) {
+      const scrollAmount = direction === 'left' ? -300 : 300;
+      scrollerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  useEffect(() => {
+    // Initial scroll to current date in the scroller
+    if (scrollerRef.current) {
+       const todayIndex = 15; // as we start 15 days before
+       const cardWidth = 84; // approximate width of each date card + margin
+       scrollerRef.current.scrollLeft = (todayIndex * cardWidth) - (scrollerRef.current.clientWidth / 2) + (cardWidth / 2);
+    }
+  }, []);
 
   const getServiceColor = (serviceId: string) => {
     switch (serviceId) {
@@ -191,22 +227,98 @@ export default function Calendar() {
 
           {/* Timeline / Events List */}
           <div className="lg:col-span-8 space-y-8">
-            <div className="flex items-center justify-between mb-2">
+            {/* Real Planning Date Scroller */}
+            <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 overflow-hidden relative">
+               <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xs font-black uppercase tracking-widest text-slate-500">Sélecteur de date dynamique</h2>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => scroll('left')}
+                      className="h-8 w-8 text-slate-400 hover:text-primary"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => scroll('right')}
+                      className="h-8 w-8 text-slate-400 hover:text-primary"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+               </div>
+
+               <div
+                 ref={scrollerRef}
+                 className="flex items-center gap-4 overflow-x-auto scrollbar-none pb-2 scroll-smooth no-scrollbar"
+                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+               >
+                  {scrollDates.map((date, idx) => {
+                    const isSelected = isSameDay(date, selectedDate);
+                    const isToday = isSameDay(date, new Date());
+
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedDate(date)}
+                        className={cn(
+                          "flex flex-col items-center min-w-[70px] py-4 rounded-2xl transition-all border-2",
+                          isSelected
+                            ? "bg-primary border-primary text-white shadow-lg -translate-y-1 scale-105"
+                            : "bg-slate-50 border-transparent hover:border-slate-200 text-slate-600",
+                          isToday && !isSelected && "border-primary/20 bg-primary/5"
+                        )}
+                      >
+                        <span className={cn(
+                          "text-[10px] font-black uppercase tracking-widest mb-1 opacity-70",
+                          isSelected && "opacity-100"
+                        )}>
+                          {format(date, 'EEE', { locale: fr })}
+                        </span>
+                        <span className="text-2xl font-black">{format(date, 'd')}</span>
+                        {isToday && !isSelected && (
+                          <div className="w-1 h-1 bg-primary rounded-full mt-1" />
+                        )}
+                        {isSelected && (
+                          <div className="w-1.5 h-1.5 bg-white rounded-full mt-1" />
+                        )}
+                      </button>
+                    );
+                  })}
+               </div>
+            </div>
+
+            <div className="flex items-center justify-between mb-2 px-2">
                <div className="space-y-1">
                   <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-tight">Timeline du Jour</h2>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{selectedDate}</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                    {format(selectedDate, 'EEEE d MMMM yyyy', { locale: fr })}
+                  </p>
                </div>
                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="font-bold border-slate-200 text-slate-500 uppercase tracking-widest text-[10px]">Aujourd'hui</Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const today = new Date();
+                      setSelectedDate(today);
+                    }}
+                    className="font-bold border-slate-200 text-slate-500 uppercase tracking-widest text-[10px] hover:bg-primary hover:text-white hover:border-primary transition-all"
+                  >
+                    Aujourd'hui
+                  </Button>
                   <Button variant="outline" size="icon" className="h-9 w-9 border-slate-200"><Filter className="w-4 h-4 text-slate-400" /></Button>
                </div>
             </div>
 
             <div className="space-y-6 relative">
               <div className="absolute left-12 top-0 bottom-0 w-px bg-slate-200 hidden md:block" />
-              
-              {events.map((event) => (
-                <div key={event.id} className="group relative flex flex-col md:flex-row gap-6 md:gap-12 items-start">
+
+              {filteredEvents.length > 0 ? filteredEvents.map((event) => (
+                <div key={event.id} className="group relative flex flex-col md:flex-row gap-6 md:gap-12 items-start animate-in fade-in slide-in-from-bottom-4 duration-500">
                    <div className="w-24 flex-shrink-0 text-right pt-4 hidden md:block">
                       <span className="block text-xs font-black text-slate-900 uppercase tracking-tighter">{event.time.split(' - ')[0]}</span>
                       <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">{event.time.split(' - ')[1]}</span>
@@ -258,7 +370,13 @@ export default function Calendar() {
                       </CardContent>
                    </Card>
                 </div>
-              ))}
+              )) : (
+                <div className="flex flex-col items-center justify-center p-20 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+                  <CalendarDays className="w-12 h-12 text-slate-300 mb-4" />
+                  <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Aucun événement prévu pour cette date</p>
+                  <p className="text-slate-400 text-[10px] mt-2 italic font-medium">Profitez-en pour planifier une nouvelle réunion</p>
+                </div>
+              )}
             </div>
             
             {/* Quick Actions / Notices */}
