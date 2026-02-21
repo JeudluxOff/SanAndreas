@@ -129,10 +129,8 @@ const locations: Location[] = [
 ];
 
 export default function Services() {
-  const [dynamicLocations, setDynamicLocations] = useState<Location[]>(() => {
-    const saved = localStorage.getItem('sa-map-locations');
-    return saved ? JSON.parse(saved) : locations;
-  });
+  const [dynamicLocations, setDynamicLocations] = useState<Location[]>(locations);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [filter, setFilter] = useState<'all' | 'police' | 'hospital' | 'government'>('all');
   const [zoom, setZoom] = useState(1);
@@ -161,6 +159,23 @@ export default function Services() {
     setZoom(1);
     setOffset({ x: 0, y: 0 });
   };
+
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const response = await fetch('/api/map');
+        if (response.ok) {
+          const data = await response.json();
+          setDynamicLocations(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch locations:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchLocations();
+  }, []);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -298,15 +313,39 @@ export default function Services() {
     toast.success("Coordonnées copiées dans le presse-papier !");
   };
 
-  const handleSavePositions = () => {
-    localStorage.setItem('sa-map-locations', JSON.stringify(dynamicLocations));
-    toast.success("Positions sauvegardées localement !");
+  const handleSavePositions = async () => {
+    try {
+      const response = await fetch('/api/map', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dynamicLocations)
+      });
+      if (response.ok) {
+        toast.success("Positions sauvegardées pour tout le monde !");
+      } else {
+        toast.error("Erreur lors de la sauvegarde globale.");
+      }
+    } catch (error) {
+      toast.error("Erreur réseau lors de la sauvegarde.");
+    }
   };
 
-  const handleResetPositions = () => {
-    localStorage.removeItem('sa-map-locations');
-    setDynamicLocations(locations);
-    toast.info("Positions réinitialisées aux valeurs par défaut.");
+  const handleResetPositions = async () => {
+    if (confirm("Voulez-vous vraiment réinitialiser les positions pour tout le monde ?")) {
+      try {
+        const response = await fetch('/api/map', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(locations)
+        });
+        if (response.ok) {
+          setDynamicLocations(locations);
+          toast.info("Positions réinitialisées aux valeurs par défaut pour tout le monde.");
+        }
+      } catch (error) {
+        toast.error("Erreur lors de la réinitialisation.");
+      }
+    }
   };
 
   return (
@@ -502,6 +541,14 @@ export default function Services() {
                 onTouchMove={onMapTouchMove}
                 onTouchEnd={handleMouseUp}
               >
+                {isLoading && (
+                  <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-4 text-white">
+                      <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                      <p className="text-xs font-black uppercase tracking-[0.3em] animate-pulse">Initialisation Carte Globale...</p>
+                    </div>
+                  </div>
+                )}
                 {/* Tactical Scanlines Effect Overlay */}
                 <div className="absolute inset-0 pointer-events-none opacity-[0.05] z-30" style={{
                   backgroundImage: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
