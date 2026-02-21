@@ -32,7 +32,8 @@ const Navigation = () => {
 
   return (
     <nav className="fixed w-full z-50 bg-[#0a0f18]/90 backdrop-blur-md border-b border-white/5">
-      <div className="container mx-auto px-6 h-24 flex items-center justify-between gap-8">
+      {/* Top Bar: Logo & Actions */}
+      <div className="container mx-auto px-6 h-20 flex items-center justify-between border-b border-white/5">
         <div className="flex items-center gap-8">
           <Link to="/">
             <Button variant="ghost" className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] hover:text-[#c1a461] hover:bg-white/5 gap-2 px-0 group">
@@ -43,34 +44,24 @@ const Navigation = () => {
 
           <Link to="/cabinet" className="flex items-center gap-3 group">
             <div className="p-2 bg-gradient-to-br from-[#c1a461] to-[#927843] rounded shadow-lg group-hover:scale-105 transition-transform">
-              <Scale className="w-6 h-6 text-white" />
+              <Scale className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-black text-white tracking-[0.2em] uppercase leading-none">Harrington <span className="text-[#c1a461]">&</span> Cole</h1>
-              <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em] mt-1">Cabinet d'Avocats</p>
+              <h1 className="text-lg font-black text-white tracking-[0.2em] uppercase leading-none">Harrington <span className="text-[#c1a461]">&</span> Cole</h1>
+              <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.3em] mt-1">Cabinet d'Avocats</p>
             </div>
           </Link>
         </div>
 
-        {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-10">
-          {['Expertise', 'Équipe', 'Méthodologie', 'Honoraires', 'Contact'].map((item) => (
-            <a 
-              key={item} 
-              href={`#${item.toLowerCase()}`} 
-              className="text-[11px] font-black text-white/60 hover:text-[#c1a461] uppercase tracking-[0.2em] transition-colors"
-            >
-              {item}
-            </a>
-          ))}
-          <div className="h-6 w-px bg-white/10 mx-4" />
+        {/* Action Buttons */}
+        <div className="hidden lg:flex items-center gap-4">
           <Link to="/cabinet/login">
-            <Button variant="ghost" className="text-[11px] font-black text-[#c1a461] uppercase tracking-[0.2em] hover:bg-[#c1a461]/10 gap-2 border border-[#c1a461]/20 px-6">
+            <Button variant="ghost" className="text-[10px] font-black text-[#c1a461] uppercase tracking-[0.2em] hover:bg-[#c1a461]/10 gap-2 border border-[#c1a461]/20 px-6 h-10">
               <Lock className="w-3 h-3" /> Accès Avocats
             </Button>
           </Link>
           <Link to="/cabinet/portal">
-            <Button className="bg-[#c1a461] hover:bg-[#927843] text-white font-black uppercase text-[11px] tracking-[0.2em] px-8 h-12 shadow-xl shadow-[#c1a461]/10">
+            <Button className="bg-[#c1a461] hover:bg-[#927843] text-white font-black uppercase text-[10px] tracking-[0.2em] px-8 h-10 shadow-xl shadow-[#c1a461]/10">
               Portail Client
             </Button>
           </Link>
@@ -82,14 +73,32 @@ const Navigation = () => {
         </button>
       </div>
 
+      {/* Sub-Bar: Navigation Menu */}
+      <div className="hidden lg:block bg-white/[0.02]">
+        <div className="container mx-auto px-6 h-12 flex items-center justify-center gap-16">
+          {['Expertise', 'Équipe', 'Méthodologie', 'Honoraires', 'Contact'].map((item) => (
+            <a
+              key={item}
+              href={`#${item.toLowerCase()}`}
+              className="group relative"
+            >
+              <span className="text-[10px] font-black text-white/40 hover:text-[#c1a461] uppercase tracking-[0.4em] transition-colors duration-300">
+                {item}
+              </span>
+              <span className="absolute -bottom-1 left-0 w-0 h-px bg-[#c1a461] transition-all duration-300 group-hover:w-full opacity-50" />
+            </a>
+          ))}
+        </div>
+      </div>
+
       {/* Mobile Nav */}
       {isOpen && (
         <div className="lg:hidden bg-[#0a0f18] border-b border-white/5 p-6 animate-in slide-in-from-top duration-300">
           <div className="flex flex-col gap-6">
             {['Expertise', 'Équipe', 'Méthodologie', 'Honoraires', 'Contact'].map((item) => (
-              <a 
-                key={item} 
-                href={`#${item.toLowerCase()}`} 
+              <a
+                key={item}
+                href={`#${item.toLowerCase()}`}
                 onClick={() => setIsOpen(false)}
                 className="text-[11px] font-black text-white/60 uppercase tracking-[0.2em]"
               >
