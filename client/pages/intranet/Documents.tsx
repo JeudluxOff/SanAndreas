@@ -13,6 +13,7 @@ import {
   FileClock,
   FileLock2,
   FileWarning,
+  FolderOpen,
   Eye,
   Edit3,
   Trash2,
