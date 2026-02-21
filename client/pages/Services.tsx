@@ -220,7 +220,7 @@ export default function Services() {
     setIsDraggingMarker(null);
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
+  const onMapTouchStart = (e: React.TouchEvent) => {
     if (zoom > 1) {
       setIsDraggingMap(true);
       const touch = e.touches[0];
@@ -461,7 +461,7 @@ export default function Services() {
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
-                onTouchStart={handleTouchStart}
+                onTouchStart={onMapTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleMouseUp}
               >
