@@ -1,5 +1,5 @@
 import { Layout } from "@/components/Layout";
-import { Users, UserCheck, Shield, Scale, TrendingUp, HeartPulse } from "lucide-react";
+import { Users, UserCheck, Shield, Scale, TrendingUp, HeartPulse, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const cabinetMembers = [
@@ -32,11 +32,11 @@ const cabinetMembers = [
     icon: <Shield className="w-5 h-5" />
   },
   {
-    role: "Trésorier de l'État",
+    role: "Press Secretary",
     name: "Elena Rodriguez",
     image: "/placeholder.svg",
-    description: "Gestionnaire des finances publiques, de la fiscalité et des programmes de soutien économique.",
-    icon: <TrendingUp className="w-5 h-5" />
+    description: "Porte-parole officielle du Gouvernement, responsable de la communication avec les médias et de la transparence de l'administration.",
+    icon: <MessageSquare className="w-5 h-5" />
   },
   {
     role: "Secrétaire à la Santé",
@@ -165,7 +165,7 @@ export default function Gouvernement() {
                     <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Agences de Sécurité</div>
                     <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Services Sociaux</div>
                     <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Département Justice</div>
-                    <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Trésor de l'État</div>
+                    <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Service de Presse</div>
                   </div>
                 </div>
                 
