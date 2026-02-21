@@ -32,7 +32,7 @@ const locations: Location[] = [
     name: "LSPD - Mission Row",
     type: 'police',
     description: "Quartier général de la police de Los Santos. Centre de commandement principal.",
-    coords: { top: '68%', left: '52%' },
+    coords: { top: '81%', left: '52%' },
     address: "Mission Row, Los Santos",
     phone: "911-LSPD-01"
   },
@@ -41,7 +41,7 @@ const locations: Location[] = [
     name: "LSPD - Vespucci",
     type: 'police',
     description: "Poste de police desservant les quartiers de Vespucci et Del Perro.",
-    coords: { top: '72%', left: '42%' },
+    coords: { top: '85%', left: '41%' },
     address: "Vespucci Boulevard, Los Santos",
     phone: "911-LSPD-02"
   },
@@ -50,7 +50,7 @@ const locations: Location[] = [
     name: "BCSO - Sandy Shores",
     type: 'police',
     description: "Bureau du shérif du comté de Blaine. Responsable de la sécurité rurale.",
-    coords: { top: '38%', left: '65%' },
+    coords: { top: '35%', left: '68%' },
     address: "Alhambra Drive, Sandy Shores",
     phone: "911-BCSO-01"
   },
@@ -59,7 +59,7 @@ const locations: Location[] = [
     name: "BCSO - Paleto Bay",
     type: 'police',
     description: "Poste avancé du shérif situé à l'extrémité nord de l'État.",
-    coords: { top: '12%', left: '45%' },
+    coords: { top: '10%', left: '53%' },
     address: "Duluoz Avenue, Paleto Bay",
     phone: "911-BCSO-02"
   },
@@ -68,7 +68,7 @@ const locations: Location[] = [
     name: "Central Los Santos Medical Center",
     type: 'hospital',
     description: "Hôpital principal de l'État, spécialisé dans les urgences chirurgicales.",
-    coords: { top: '74%', left: '55%' },
+    coords: { top: '88%', left: '54%' },
     address: "Capital Boulevard, Los Santos",
     phone: "911-EMS-01"
   },
@@ -77,7 +77,7 @@ const locations: Location[] = [
     name: "Mount Zonah Medical Center",
     type: 'hospital',
     description: "Centre médical de renommée mondiale, leader en recherche et soins spécialisés.",
-    coords: { top: '58%', left: '45%' },
+    coords: { top: '78%', left: '44%' },
     address: "Dorset Drive, Rockford Hills",
     phone: "911-EMS-02"
   },
@@ -86,7 +86,7 @@ const locations: Location[] = [
     name: "Pillbox Hill Medical Center",
     type: 'hospital',
     description: "Hôpital de proximité au cœur du centre-ville, ouvert 24h/24.",
-    coords: { top: '64%', left: '50%' },
+    coords: { top: '82%', left: '50%' },
     address: "Elgin Avenue, Los Santos",
     phone: "911-EMS-03"
   },
@@ -95,7 +95,7 @@ const locations: Location[] = [
     name: "Sandy Shores Medical Center",
     type: 'hospital',
     description: "Seul centre de soins disponible dans la région du désert de Grand Senora.",
-    coords: { top: '35%', left: '60%' },
+    coords: { top: '36%', left: '64%' },
     address: "Panorama Drive, Sandy Shores",
     phone: "911-EMS-04"
   }
@@ -213,7 +213,7 @@ export default function Services() {
 
             {/* Map Area */}
             <div className="w-full lg:w-2/3 order-1 lg:order-2">
-              <div className="relative aspect-[3/4] md:aspect-square bg-slate-950 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(30,58,138,0.2)] border-4 border-white ring-1 ring-slate-200 group">
+              <div className="relative aspect-square bg-slate-950 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(30,58,138,0.2)] border-4 border-white ring-1 ring-slate-200 group">
                 {/* Tactical Scanlines Effect Overlay */}
                 <div className="absolute inset-0 pointer-events-none opacity-[0.05] z-20 pointer-events-none" style={{
                   backgroundImage: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
