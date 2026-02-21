@@ -132,57 +132,68 @@ export default function Calendar() {
           {/* Calendar Sidebar */}
           <div className="lg:col-span-4 space-y-8">
             <Card className="shadow-xl border-none overflow-hidden rounded-3xl">
-               <CardHeader className="bg-slate-900 text-white pb-8">
-                  <div className="flex items-center justify-between mb-4">
-                     <span className="text-sm font-black uppercase tracking-widest text-slate-400">Mai 2024</span>
-                     <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/10"><ChevronLeft className="w-4 h-4" /></Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/10"><ChevronRight className="w-4 h-4" /></Button>
+               <CardHeader className="bg-[#0f172a] text-white pb-10 pt-8 px-8">
+                  <div className="flex items-center justify-between mb-6">
+                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">MAI 2024</span>
+                     <div className="flex gap-2">
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:bg-white/10 p-0"><ChevronLeft className="w-3 h-3" /></Button>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:bg-white/10 p-0"><ChevronRight className="w-3 h-3" /></Button>
                      </div>
                   </div>
-                  <h2 className="text-5xl font-black uppercase tracking-tighter">Mai <span className="text-secondary text-2xl align-top">24</span></h2>
+                  <h2 className="text-6xl font-black uppercase tracking-tighter flex items-start">
+                    MAI <span className="text-[#ef4444] text-2xl font-black ml-1 mt-1">24</span>
+                  </h2>
                </CardHeader>
-               <CardContent className="p-8">
-                  <div className="grid grid-cols-7 gap-2 text-center">
+               <CardContent className="p-8 pt-10">
+                  <div className="grid grid-cols-7 gap-y-6 text-center mb-8">
                     {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, idx) => (
-                      <span key={`${day}-${idx}`} className="text-[10px] font-black uppercase text-slate-400 py-2">{day}</span>
+                      <span key={`${day}-${idx}`} className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{day}</span>
                     ))}
                     {Array.from({ length: 31 }).map((_, i) => {
                       const day = i + 1;
                       const isSelected = day === 24;
                       const hasEvents = [15, 18, 22, 24, 25, 28].includes(day);
-                      
+
                       return (
-                        <button 
-                          key={day} 
-                          className={cn(
-                            "h-10 w-full rounded-lg text-sm font-black transition-all relative flex items-center justify-center",
-                            isSelected ? "bg-primary text-white shadow-lg scale-110" : "hover:bg-slate-100 text-slate-700",
-                            !isSelected && hasEvents && "text-primary"
+                        <div key={day} className="flex flex-col items-center justify-center relative">
+                          <button
+                            className={cn(
+                              "h-10 w-10 rounded-xl text-sm font-black transition-all flex items-center justify-center",
+                              isSelected
+                                ? "bg-[#1e293b] text-white shadow-xl shadow-slate-200"
+                                : "hover:bg-slate-50 text-[#1e293b]"
+                            )}
+                          >
+                            {day}
+                          </button>
+                          {hasEvents && (
+                            <div className={cn(
+                              "absolute -bottom-1 w-1 h-1 rounded-full",
+                              isSelected ? "bg-white/40" : "bg-red-500"
+                            )} />
                           )}
-                        >
-                          {day}
-                          {hasEvents && !isSelected && <div className="absolute bottom-1.5 w-1 h-1 bg-secondary rounded-full" />}
-                        </button>
+                        </div>
                       );
                     })}
                   </div>
-                  
-                  <div className="mt-12 space-y-6">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 pb-3">Statut par département</h3>
-                    <div className="space-y-4">
+
+                  <div className="mt-16 space-y-8">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 pb-4">STATUT PAR DÉPARTEMENT</h3>
+                    <div className="space-y-6">
                       {[
-                        { label: 'Cabinet', count: 4, color: 'bg-slate-900' },
-                        { label: 'SAMS / Santé', count: 2, color: 'bg-emerald-600' },
-                        { label: 'Sécurité Publique', count: 7, color: 'bg-blue-600' },
-                        { label: 'Justice', count: 3, color: 'bg-red-700' }
+                        { label: 'CABINET', color: 'bg-slate-900' },
+                        { label: 'SAMS / SANTÉ', color: 'bg-emerald-600' },
+                        { label: 'SÉCURITÉ PUBLIQUE', color: 'bg-blue-600' },
+                        { label: 'JUSTICE', color: 'bg-red-700' }
                       ].map((item, idx) => (
-                        <div key={idx} className="flex items-center justify-between">
-                           <div className="flex items-center gap-3">
-                              <div className={cn("w-2 h-2 rounded-full", item.color)} />
-                              <span className="text-xs font-bold text-slate-600 uppercase tracking-tight">{item.label}</span>
+                        <div key={idx} className="flex items-center justify-between group">
+                           <div className="flex items-center gap-4">
+                              <div className={cn("w-2.5 h-2.5 rounded-full shadow-sm", item.color)} />
+                              <span className="text-[11px] font-black text-slate-700 uppercase tracking-wider group-hover:text-primary transition-colors">{item.label}</span>
                            </div>
-                           <Badge variant="secondary" className="bg-slate-100 text-[10px] font-black">{item.count}</Badge>
+                           <div className="w-10 h-5 bg-slate-50 rounded-full border border-slate-100 flex items-center px-1 opacity-50">
+                              <div className="w-3 h-3 bg-white rounded-full shadow-sm" />
+                           </div>
                         </div>
                       ))}
                     </div>
