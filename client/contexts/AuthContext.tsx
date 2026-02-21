@@ -9,7 +9,8 @@ export type Role =
   | 'secretaire_sante'
   | 'secretaire_justice'
   | 'secretaire_securite_interieure'
-  | 'secretaire_tresor_commerce';
+  | 'secretaire_tresor_commerce'
+  | 'admin';
 
 export type ServiceID =
   | 'CABINET'
@@ -117,6 +118,14 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     'communication:view', 'communication:post',
     'planning:view', 'planning:create', 'planning:edit',
     'directory:view', 'audit:reports_export'
+  ],
+  'admin': [
+    'intranet:view', 'dashboard:view', 'documents:view', 'documents:create', 'documents:edit', 'documents:delete', 'documents:submit_review', 'documents:approve_service', 'documents:approve_state', 'documents:sign', 'documents:publish', 'documents:archive',
+    'dossiers:view', 'dossiers:create', 'dossiers:edit', 'dossiers:close', 'dossiers:assign_members', 'dossiers:confidential_access',
+    'communication:view', 'communication:post', 'communication:announcements_post',
+    'planning:view', 'planning:create', 'planning:edit',
+    'directory:view', 'admin:users_manage', 'admin:roles_manage',
+    'audit:logs_view', 'audit:reports_export'
   ]
 };
 
@@ -210,6 +219,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           name: 'Franklin Clinton',
           service_name: 'Trésor & Commerce',
           grade: 'Secrétaire au Trésor'
+        },
+        'admin': {
+          role: 'admin',
+          service_id: 'CABINET',
+          name: 'Administrateur Système',
+          service_name: 'Services Techniques',
+          grade: 'Administrateur Global'
         }
       };
 
@@ -242,7 +258,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const canAccessService = (serviceId: ServiceID): boolean => {
     if (!user) return false;
-    if (user.role === 'gouverneur') return true;
+    if (user.role === 'gouverneur' || user.role === 'admin') return true;
     if (user.role === 'vice_gouverneur' && serviceId === 'CABINET') return true;
     return user.service_id === serviceId;
   };

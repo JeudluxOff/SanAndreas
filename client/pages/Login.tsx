@@ -121,11 +121,12 @@ const Login = () => {
                   <div className="text-xs text-slate-600 space-y-3">
                     <p className="font-bold text-slate-900 uppercase border-b border-slate-200 pb-1 text-[10px] tracking-widest">Identifiants de Test (Mots de passe : admin)</p>
                     <div className="grid grid-cols-2 gap-2">
+                      <p><code className="bg-slate-200 px-1 py-0.5 rounded text-blue-700">admin</code> (Accès Total)</p>
                       <p><code className="bg-slate-200 px-1 py-0.5 rounded">governor</code> (Gov.)</p>
                       <p><code className="bg-slate-200 px-1 py-0.5 rounded">lt_governor</code> (Lt.)</p>
                       <p><code className="bg-slate-200 px-1 py-0.5 rounded">sec_etat</code> (Admin)</p>
                       <p><code className="bg-slate-200 px-1 py-0.5 rounded">sec_securite</code> (Sécu.)</p>
-                      <p><code className="bg-slate-200 px-1 py-0.5 rounded">press</code> (Presse)</p>
+                      <p><code className="bg-slate-200 px-1 py-0.5 rounded">press</code> (Presse.)</p>
                       <p><code className="bg-slate-200 px-1 py-0.5 rounded">sec_justice</code> (Just.)</p>
                       <p><code className="bg-slate-200 px-1 py-0.5 rounded">sec_sante</code> (Santé)</p>
                       <p><code className="bg-slate-200 px-1 py-0.5 rounded">sec_tresor</code> (Éco.)</p>
