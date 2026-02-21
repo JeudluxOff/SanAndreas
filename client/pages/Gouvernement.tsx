@@ -39,10 +39,10 @@ const cabinetMembers = [
     icon: <MessageSquare className="w-5 h-5" />
   },
   {
-    role: "Secrétaire à la Santé",
+    role: "Secrétaire à la Santé et Service Humain",
     name: "Dr. Julian Frost",
     image: "/placeholder.svg",
-    description: "Superviseur des services SAMS et des programmes de santé publique à travers l'État.",
+    description: "Superviseur des services SAMS, des programmes de santé publique et de l'assistance sociale à travers l'État.",
     icon: <HeartPulse className="w-5 h-5" />
   }
 ];
@@ -163,7 +163,7 @@ export default function Gouvernement() {
                   <div className="w-full p-4 bg-white border-2 border-primary/20 text-primary text-center rounded font-black uppercase text-xs shadow-sm">Cabinet Exécutif</div>
                   <div className="grid grid-cols-2 gap-4 w-full pt-4">
                     <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Agences de Sécurité</div>
-                    <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Services Sociaux</div>
+                    <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Santé & Services Humains</div>
                     <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Département Justice</div>
                     <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Service de Presse</div>
                   </div>
