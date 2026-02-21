@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useRef, useEffect } from "react";
-import { format, addDays, subDays, isSameDay } from "date-fns";
+import { format, addDays, subDays, isSameDay, startOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 
 const MOCK_EVENTS = [
@@ -75,7 +75,12 @@ export default function Calendar() {
   const startDate = subDays(new Date(), 15);
   const scrollDates = Array.from({ length: 45 }, (_, i) => addDays(startDate, i));
 
-  const filteredEvents = MOCK_EVENTS.filter(event => isSameDay(event.date, selectedDate));
+  // Generate a range of dates for the timeline (e.g., 7 days starting from selectedDate or today)
+  const timelineDates = Array.from({ length: 7 }, (_, i) => addDays(selectedDate, i));
+
+  const getEventsForDate = (date: Date) => {
+    return MOCK_EVENTS.filter(event => isSameDay(event.date, date));
+  };
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollerRef.current) {
@@ -134,14 +139,30 @@ export default function Calendar() {
             <Card className="shadow-xl border-none overflow-hidden rounded-3xl">
                <CardHeader className="bg-[#0f172a] text-white pb-10 pt-8 px-8">
                   <div className="flex items-center justify-between mb-6">
-                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">MAI 2024</span>
+                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                       {format(selectedDate, 'MMMM yyyy', { locale: fr })}
+                     </span>
                      <div className="flex gap-2">
-                        <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:bg-white/10 p-0"><ChevronLeft className="w-3 h-3" /></Button>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:bg-white/10 p-0"><ChevronRight className="w-3 h-3" /></Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setSelectedDate(subDays(selectedDate, 1))}
+                          className="h-6 w-6 text-white hover:bg-white/10 p-0"
+                        >
+                          <ChevronLeft className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setSelectedDate(addDays(selectedDate, 1))}
+                          className="h-6 w-6 text-white hover:bg-white/10 p-0"
+                        >
+                          <ChevronRight className="w-3 h-3" />
+                        </Button>
                      </div>
                   </div>
                   <h2 className="text-6xl font-black uppercase tracking-tighter flex items-start">
-                    MAI <span className="text-[#ef4444] text-2xl font-black ml-1 mt-1">24</span>
+                    {format(selectedDate, 'MMM', { locale: fr })} <span className="text-[#ef4444] text-2xl font-black ml-1 mt-1">{format(selectedDate, 'd')}</span>
                   </h2>
                </CardHeader>
                <CardContent className="p-8 pt-10">
@@ -151,12 +172,14 @@ export default function Calendar() {
                     ))}
                     {Array.from({ length: 31 }).map((_, i) => {
                       const day = i + 1;
-                      const isSelected = day === 24;
-                      const hasEvents = [15, 18, 22, 24, 25, 28].includes(day);
+                      // Logic for current month display
+                      const isSelected = isSameDay(addDays(startOfMonth(selectedDate), i), selectedDate);
+                      const hasEvents = MOCK_EVENTS.some(e => isSameDay(e.date, addDays(startOfMonth(selectedDate), i)));
 
                       return (
                         <div key={day} className="flex flex-col items-center justify-center relative">
                           <button
+                            onClick={() => setSelectedDate(addDays(startOfMonth(selectedDate), i))}
                             className={cn(
                               "h-10 w-10 rounded-xl text-sm font-black transition-all flex items-center justify-center",
                               isSelected
@@ -302,12 +325,10 @@ export default function Calendar() {
                </div>
             </div>
 
-            <div className="flex items-center justify-between mb-2 px-2">
+            <div className="flex items-center justify-between mb-6 px-2">
                <div className="space-y-1">
-                  <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-tight">Timeline du Jour</h2>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                    {format(selectedDate, 'EEEE d MMMM yyyy', { locale: fr })}
-                  </p>
+                  <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-tight">Planning de la Semaine</h2>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest italic">Défilement continu des événements</p>
                </div>
                <div className="flex gap-2">
                   <Button
@@ -317,77 +338,115 @@ export default function Calendar() {
                       const today = new Date();
                       setSelectedDate(today);
                     }}
-                    className="font-bold border-slate-200 text-slate-500 uppercase tracking-widest text-[10px] hover:bg-primary hover:text-white hover:border-primary transition-all"
+                    className="font-bold border-slate-200 text-slate-500 uppercase tracking-widest text-[10px] hover:bg-primary hover:text-white hover:border-primary transition-all px-4"
                   >
-                    Aujourd'hui
+                    Revenir à Aujourd'hui
                   </Button>
-                  <Button variant="outline" size="icon" className="h-9 w-9 border-slate-200"><Filter className="w-4 h-4 text-slate-400" /></Button>
                </div>
             </div>
 
-            <div className="space-y-6 relative">
-              <div className="absolute left-12 top-0 bottom-0 w-px bg-slate-200 hidden md:block" />
+            <div className="space-y-12 relative pb-20">
+              <div className="absolute left-[52px] top-0 bottom-0 w-px bg-slate-200 hidden md:block" />
 
-              {filteredEvents.length > 0 ? filteredEvents.map((event) => (
-                <div key={event.id} className="group relative flex flex-col md:flex-row gap-6 md:gap-12 items-start animate-in fade-in slide-in-from-bottom-4 duration-500">
-                   <div className="w-24 flex-shrink-0 text-right pt-4 hidden md:block">
-                      <span className="block text-xs font-black text-slate-900 uppercase tracking-tighter">{event.time.split(' - ')[0]}</span>
-                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">{event.time.split(' - ')[1]}</span>
-                   </div>
-                   
-                   <div className="hidden md:block absolute left-[45px] top-5 w-4 h-4 rounded-full border-4 border-white bg-slate-200 group-hover:bg-primary group-hover:scale-125 transition-all z-10" />
-                   
-                   <Card className="flex-grow shadow-lg border-none hover:shadow-2xl transition-all hover:-translate-y-1 group-hover:border-l-4 group-hover:border-primary">
-                      <CardContent className="p-6">
-                        <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-                          <div className="space-y-4">
-                            <div className="flex flex-wrap items-center gap-2">
-                               <Badge className={cn("text-white font-black tracking-widest uppercase text-[9px]", getServiceColor(event.service))}>
-                                  {event.service}
-                               </Badge>
-                               <Badge variant="outline" className={cn(
-                                 "font-black tracking-widest uppercase text-[9px]",
-                                 event.type === 'critical' ? 'border-red-500 text-red-600' :
-                                 event.type === 'official' ? 'border-blue-500 text-blue-600' :
-                                 'border-slate-300 text-slate-500'
-                               )}>
-                                  {event.type}
-                               </Badge>
-                            </div>
-                            
-                            <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter leading-tight">{event.title}</h3>
-                            
-                            <div className="flex flex-wrap items-center gap-6">
-                               <div className="flex items-center gap-2 text-slate-500 text-xs font-bold uppercase tracking-tight">
-                                  <MapPin className="w-3 h-3 text-primary" /> {event.location}
-                               </div>
-                               <div className="flex items-center gap-2 text-slate-500 text-xs font-bold uppercase tracking-tight">
-                                  <Users className="w-3 h-3 text-primary" /> {event.participants} Participants
-                               </div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex flex-col items-end gap-4">
-                             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400"><MoreVertical className="w-4 h-4" /></Button>
-                             <div className="flex -space-x-2">
-                                {[1, 2, 3].map(i => (
-                                  <div key={i} className="h-8 w-8 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[10px] font-black text-slate-500">
-                                     P{i}
+              {timelineDates.map((date, dateIdx) => {
+                const dayEvents = getEventsForDate(date);
+                const isToday = isSameDay(date, new Date());
+
+                return (
+                  <div key={dateIdx} className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    {/* Sticky Date Header */}
+                    <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-sm py-4 -mx-2 px-2 flex items-center gap-4">
+                       <div className={cn(
+                         "flex flex-col items-center justify-center w-12 h-12 rounded-2xl shadow-sm border-2",
+                         isToday ? "bg-primary border-primary text-white" : "bg-slate-100 border-transparent text-slate-900"
+                       )}>
+                          <span className="text-[10px] font-black uppercase tracking-tighter leading-none mb-1">
+                            {format(date, 'EEE', { locale: fr })}
+                          </span>
+                          <span className="text-xl font-black leading-none">{format(date, 'd')}</span>
+                       </div>
+                       <div>
+                          <h3 className="text-lg font-black uppercase tracking-tighter text-slate-900">
+                            {format(date, 'EEEE d MMMM', { locale: fr })}
+                          </h3>
+                          {dayEvents.length > 0 ? (
+                            <p className="text-[9px] font-bold text-primary uppercase tracking-widest">{dayEvents.length} Événement(s) planifié(s)</p>
+                          ) : (
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Aucune réunion prévue</p>
+                          )}
+                       </div>
+                    </div>
+
+                    <div className="space-y-6">
+                      {dayEvents.length > 0 ? dayEvents.map((event) => (
+                        <div key={event.id} className="group relative flex flex-col md:flex-row gap-6 md:gap-12 items-start pl-4 md:pl-0">
+                           <div className="w-24 flex-shrink-0 text-right pt-4 hidden md:block">
+                              <span className="block text-xs font-black text-slate-900 uppercase tracking-tighter">{event.time.split(' - ')[0]}</span>
+                              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">{event.time.split(' - ')[1]}</span>
+                           </div>
+
+                           <div className={cn(
+                             "hidden md:block absolute left-[45px] top-5 w-4 h-4 rounded-full border-4 border-white transition-all z-10 shadow-sm",
+                             isToday ? "bg-primary scale-110" : "bg-slate-200 group-hover:bg-primary"
+                           )} />
+
+                           <Card className="flex-grow shadow-md border-none hover:shadow-xl transition-all hover:-translate-y-1 group-hover:border-l-4 group-hover:border-primary overflow-hidden">
+                              <CardContent className="p-0">
+                                <div className="flex">
+                                  <div className={cn("w-2 flex-shrink-0", getServiceColor(event.service))} />
+                                  <div className="p-6 flex flex-col md:flex-row justify-between items-start gap-4 flex-grow">
+                                    <div className="space-y-4">
+                                      <div className="flex flex-wrap items-center gap-2">
+                                         <Badge className={cn("text-white font-black tracking-widest uppercase text-[9px]", getServiceColor(event.service))}>
+                                            {event.service}
+                                         </Badge>
+                                         <Badge variant="outline" className={cn(
+                                           "font-black tracking-widest uppercase text-[9px]",
+                                           event.type === 'critical' ? 'border-red-500 text-red-600 animate-pulse' :
+                                           event.type === 'official' ? 'border-blue-500 text-blue-600' :
+                                           'border-slate-300 text-slate-500'
+                                         )}>
+                                            {event.type}
+                                         </Badge>
+                                      </div>
+
+                                      <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter leading-tight">{event.title}</h3>
+
+                                      <div className="flex flex-wrap items-center gap-6">
+                                         <div className="flex items-center gap-2 text-slate-500 text-xs font-bold uppercase tracking-tight">
+                                            <MapPin className="w-3 h-3 text-primary" /> {event.location}
+                                         </div>
+                                         <div className="flex items-center gap-2 text-slate-500 text-xs font-bold uppercase tracking-tight">
+                                            <Users className="w-3 h-3 text-primary" /> {event.participants} Participants
+                                         </div>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex flex-col items-end gap-4">
+                                       <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400"><MoreVertical className="w-4 h-4" /></Button>
+                                       <div className="flex -space-x-2">
+                                          {[1, 2, 3].map(i => (
+                                            <div key={i} className="h-8 w-8 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[10px] font-black text-slate-500 shadow-sm">
+                                               P{i}
+                                            </div>
+                                          ))}
+                                       </div>
+                                    </div>
                                   </div>
-                                ))}
-                             </div>
-                          </div>
+                                </div>
+                              </CardContent>
+                           </Card>
                         </div>
-                      </CardContent>
-                   </Card>
-                </div>
-              )) : (
-                <div className="flex flex-col items-center justify-center p-20 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-                  <CalendarDays className="w-12 h-12 text-slate-300 mb-4" />
-                  <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Aucun événement prévu pour cette date</p>
-                  <p className="text-slate-400 text-[10px] mt-2 italic font-medium">Profitez-en pour planifier une nouvelle réunion</p>
-                </div>
-              )}
+                      )) : (
+                        <div className="flex items-center gap-6 pl-[52px] opacity-40">
+                          <div className="w-4 h-px bg-slate-300" />
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Aucun événement à cette heure</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
             
             {/* Quick Actions / Notices */}
