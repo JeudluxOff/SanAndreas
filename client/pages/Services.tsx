@@ -1,0 +1,342 @@
+import { Layout } from "@/components/Layout";
+import { 
+  Building2, 
+  ShieldCheck, 
+  HeartPulse, 
+  MapPin, 
+  Info, 
+  ChevronRight, 
+  Phone, 
+  Clock, 
+  ExternalLink 
+} from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+interface Location {
+  id: string;
+  name: string;
+  type: 'police' | 'hospital';
+  description: string;
+  coords: { top: string; left: string };
+  address: string;
+  phone: string;
+}
+
+const locations: Location[] = [
+  {
+    id: 'lspd-mission-row',
+    name: "LSPD - Mission Row",
+    type: 'police',
+    description: "Quartier général de la police de Los Santos. Centre de commandement principal.",
+    coords: { top: '68%', left: '52%' },
+    address: "Mission Row, Los Santos",
+    phone: "911-LSPD-01"
+  },
+  {
+    id: 'lspd-vespucci',
+    name: "LSPD - Vespucci",
+    type: 'police',
+    description: "Poste de police desservant les quartiers de Vespucci et Del Perro.",
+    coords: { top: '72%', left: '42%' },
+    address: "Vespucci Boulevard, Los Santos",
+    phone: "911-LSPD-02"
+  },
+  {
+    id: 'bcso-sandy-shores',
+    name: "BCSO - Sandy Shores",
+    type: 'police',
+    description: "Bureau du shérif du comté de Blaine. Responsable de la sécurité rurale.",
+    coords: { top: '38%', left: '65%' },
+    address: "Alhambra Drive, Sandy Shores",
+    phone: "911-BCSO-01"
+  },
+  {
+    id: 'bcso-paleto-bay',
+    name: "BCSO - Paleto Bay",
+    type: 'police',
+    description: "Poste avancé du shérif situé à l'extrémité nord de l'État.",
+    coords: { top: '12%', left: '45%' },
+    address: "Duluoz Avenue, Paleto Bay",
+    phone: "911-BCSO-02"
+  },
+  {
+    id: 'ems-central',
+    name: "Central Los Santos Medical Center",
+    type: 'hospital',
+    description: "Hôpital principal de l'État, spécialisé dans les urgences chirurgicales.",
+    coords: { top: '74%', left: '55%' },
+    address: "Capital Boulevard, Los Santos",
+    phone: "911-EMS-01"
+  },
+  {
+    id: 'ems-mount-zonah',
+    name: "Mount Zonah Medical Center",
+    type: 'hospital',
+    description: "Centre médical de renommée mondiale, leader en recherche et soins spécialisés.",
+    coords: { top: '58%', left: '45%' },
+    address: "Dorset Drive, Rockford Hills",
+    phone: "911-EMS-02"
+  },
+  {
+    id: 'ems-pillbox',
+    name: "Pillbox Hill Medical Center",
+    type: 'hospital',
+    description: "Hôpital de proximité au cœur du centre-ville, ouvert 24h/24.",
+    coords: { top: '64%', left: '50%' },
+    address: "Elgin Avenue, Los Santos",
+    phone: "911-EMS-03"
+  },
+  {
+    id: 'ems-sandy-shores',
+    name: "Sandy Shores Medical Center",
+    type: 'hospital',
+    description: "Seul centre de soins disponible dans la région du désert de Grand Senora.",
+    coords: { top: '35%', left: '60%' },
+    address: "Panorama Drive, Sandy Shores",
+    phone: "911-EMS-04"
+  }
+];
+
+export default function Services() {
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [filter, setFilter] = useState<'all' | 'police' | 'hospital'>('all');
+
+  const filteredLocations = locations.filter(loc => 
+    filter === 'all' || loc.type === filter
+  );
+
+  return (
+    <Layout>
+      <div className="bg-primary/5 py-16 border-b border-slate-200">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl space-y-4">
+            <h1 className="text-4xl md:text-6xl font-black text-primary uppercase tracking-tighter">Services & Infrastructures</h1>
+            <p className="text-xl text-slate-600 font-medium">
+              Consultez la carte interactive de l'État pour localiser les services de secours et de sécurité publique à proximité.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col lg:flex-row gap-12">
+            
+            {/* Control Panel */}
+            <div className="w-full lg:w-1/3 space-y-8 order-2 lg:order-1">
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 space-y-6">
+                <h3 className="text-xl font-black text-primary uppercase tracking-tight flex items-center gap-2">
+                  <Info className="w-5 h-5 text-secondary" />
+                  Filtres de recherche
+                </h3>
+                <div className="grid grid-cols-1 gap-3">
+                  <Button 
+                    variant={filter === 'all' ? 'default' : 'outline'}
+                    className="justify-start h-12"
+                    onClick={() => setFilter('all')}
+                  >
+                    Toutes les infrastructures
+                  </Button>
+                  <Button 
+                    variant={filter === 'police' ? 'default' : 'outline'}
+                    className={cn(
+                      "justify-start h-12 border-2",
+                      filter === 'police' ? "bg-primary border-primary" : "border-primary/20 text-primary"
+                    )}
+                    onClick={() => setFilter('police')}
+                  >
+                    <ShieldCheck className="mr-2 w-5 h-5" /> Postes de Police
+                  </Button>
+                  <Button 
+                    variant={filter === 'hospital' ? 'default' : 'outline'}
+                    className={cn(
+                      "justify-start h-12 border-2",
+                      filter === 'hospital' ? "bg-secondary border-secondary" : "border-secondary/20 text-secondary"
+                    )}
+                    onClick={() => setFilter('hospital')}
+                  >
+                    <HeartPulse className="mr-2 w-5 h-5" /> Hôpitaux & EMS
+                  </Button>
+                </div>
+              </div>
+
+              {selectedLocation ? (
+                <div className="bg-white p-8 rounded-lg shadow-xl border-t-4 border-secondary animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                      {selectedLocation.type === 'police' ? 
+                        <ShieldCheck className="w-8 h-8 text-primary" /> : 
+                        <HeartPulse className="w-8 h-8 text-secondary" />
+                      }
+                      <h3 className="text-2xl font-black text-primary uppercase tracking-tight leading-none">
+                        {selectedLocation.name}
+                      </h3>
+                    </div>
+                    <p className="text-slate-600 font-medium leading-relaxed">
+                      {selectedLocation.description}
+                    </p>
+                    <div className="space-y-4 pt-4 border-t border-slate-100">
+                      <div className="flex items-start gap-3 text-sm">
+                        <MapPin className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                        <span className="font-bold text-slate-700">{selectedLocation.address}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <Phone className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                        <span className="font-bold text-slate-700">{selectedLocation.phone}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <Clock className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                        <span className="font-bold text-green-600 uppercase tracking-widest text-[10px]">Ouvert 24h/24 - 7j/7</span>
+                      </div>
+                    </div>
+                    <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 uppercase">
+                      Itinéraire GPS
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-slate-100 p-8 rounded-lg border-2 border-dashed border-slate-300 text-center space-y-4">
+                  <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto">
+                    <MapPin className="w-8 h-8 text-slate-400" />
+                  </div>
+                  <h4 className="text-lg font-black text-slate-400 uppercase tracking-tighter">Sélectionnez un point</h4>
+                  <p className="text-slate-400 text-sm font-medium">
+                    Cliquez sur une icône sur la carte pour voir les détails du bâtiment public.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Map Area */}
+            <div className="w-full lg:w-2/3 order-1 lg:order-2">
+              <div className="relative aspect-[3/4] md:aspect-square bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border-4 border-white ring-1 ring-slate-200 group">
+                {/* Simulated Map Background */}
+                <div className="absolute inset-0 opacity-40 transition-opacity group-hover:opacity-60 duration-700">
+                  <img 
+                    src="/placeholder.svg" 
+                    alt="San Andreas Map Background" 
+                    className="w-full h-full object-cover grayscale brightness-50"
+                  />
+                </div>
+                
+                {/* Map Grid / Topographic lines simulation */}
+                <div className="absolute inset-0 pointer-events-none opacity-10">
+                  <div className="w-full h-full" style={{ 
+                    backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', 
+                    backgroundSize: '40px 40px' 
+                  }} />
+                </div>
+
+                {/* Markers Overlay */}
+                <div className="absolute inset-0 p-8 md:p-12">
+                  <div className="relative w-full h-full">
+                    {filteredLocations.map((loc) => (
+                      <button
+                        key={loc.id}
+                        className={cn(
+                          "absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-125 z-10",
+                          selectedLocation?.id === loc.id ? "scale-125 z-20" : "z-10"
+                        )}
+                        style={{ top: loc.coords.top, left: loc.coords.left }}
+                        onClick={() => setSelectedLocation(loc)}
+                      >
+                        <div className={cn(
+                          "relative p-2.5 rounded-full shadow-lg border-2 border-white animate-pulse-slow",
+                          loc.type === 'police' ? "bg-primary text-white" : "bg-secondary text-white",
+                          selectedLocation?.id === loc.id && "animate-none ring-4 ring-white/30"
+                        )}>
+                          {loc.type === 'police' ? 
+                            <ShieldCheck className="w-5 h-5 md:w-6 md:h-6" /> : 
+                            <HeartPulse className="w-5 h-5 md:w-6 md:h-6" />
+                          }
+                          
+                          {/* Label on Hover / Selected */}
+                          {(selectedLocation?.id === loc.id) && (
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 whitespace-nowrap bg-slate-900 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest shadow-xl">
+                              {loc.name}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Radar Effect for Selected */}
+                        {selectedLocation?.id === loc.id && (
+                          <div className={cn(
+                            "absolute inset-0 rounded-full animate-ping opacity-50",
+                            loc.type === 'police' ? "bg-primary" : "bg-secondary"
+                          )} />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Map Legend */}
+                <div className="absolute bottom-6 left-6 bg-slate-900/80 backdrop-blur-md p-4 rounded border border-white/10 flex gap-6 z-30">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-primary rounded-full" />
+                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">LSPD / BCSO</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-secondary rounded-full" />
+                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">Hôpitaux / EMS</span>
+                  </div>
+                </div>
+                
+                {/* Watermark */}
+                <div className="absolute top-6 right-6 flex flex-col items-end opacity-40">
+                  <span className="text-xl font-black text-white uppercase tracking-tighter">SAN ANDREAS</span>
+                  <span className="text-[10px] font-bold text-white uppercase tracking-[0.4em]">MAP SYSTEM v4.2</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* Quick Services Section */}
+      <section className="py-24 bg-white border-t border-slate-200">
+        <div className="container mx-auto px-4">
+          <div className="mb-16 space-y-4 text-center">
+            <h2 className="text-4xl font-black text-primary uppercase tracking-tighter">Services aux Citoyens</h2>
+            <div className="w-24 h-2 bg-secondary mx-auto" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { 
+                title: "Licences & Permis", 
+                icon: <Building2 className="w-10 h-10 text-primary" />,
+                desc: "Demandes de permis de port d'arme, licences d'entreprise et permis de construire."
+              },
+              { 
+                title: "Rapports d'Incidents", 
+                icon: <ShieldCheck className="w-10 h-10 text-primary" />,
+                desc: "Déposez une plainte en ligne ou signalez un véhicule volé directement aux services compétents."
+              },
+              { 
+                title: "Recrutement", 
+                icon: <Users className="w-10 h-10 text-primary" />,
+                desc: "Rejoignez les rangs du LSPD, BCSO ou EMS. Postulez dès aujourd'hui pour servir votre État."
+              }
+            ].map((service, idx) => (
+              <div key={idx} className="p-10 bg-slate-50 border border-slate-200 rounded-lg hover:bg-white hover:shadow-xl hover:border-primary/20 transition-all group">
+                <div className="mb-6">{service.icon}</div>
+                <h3 className="text-2xl font-black text-primary uppercase tracking-tight mb-4">{service.title}</h3>
+                <p className="text-slate-600 font-medium leading-relaxed mb-8">{service.desc}</p>
+                <Link to="#" className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-xs group-hover:text-secondary transition-colors">
+                  Accéder au formulaire <ChevronRight className="w-4 h-4" />
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </Layout>
+  );
+}
+
+// Add these custom animations to global.css or tailwind.config.ts if needed, 
+// but for now let's assume standard shadcn-like animations are enough or we add them here via style tag if strictly necessary.

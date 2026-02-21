@@ -3,6 +3,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Placeholder from "./pages/Placeholder";
 import Gouvernement from "./pages/Gouvernement";
+import Services from "./pages/Services";
 
 const App = () => (
   <BrowserRouter>
@@ -13,7 +14,7 @@ const App = () => (
       <Route path="/justice" element={<Placeholder />} />
       <Route path="/economie" element={<Placeholder />} />
       <Route path="/sante" element={<Placeholder />} />
-      <Route path="/services" element={<Placeholder />} />
+      <Route path="/services" element={<Services />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
