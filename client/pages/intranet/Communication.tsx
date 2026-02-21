@@ -20,7 +20,8 @@ import {
   Filter,
   FileText,
   Volume2,
-  ChevronLeft
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
 import { Link } from "react-router-dom";
