@@ -18,7 +18,15 @@ const cabinetMembers = [
     icon: <UserCheck className="w-5 h-5" />
   },
   {
-    role: "Procureur Général",
+    role: (
+      <>
+        Secretaire d'etat
+        <br />
+        general
+        <br />
+        <br />
+      </>
+    ),
     name: "Arthur Vance",
     image: "/placeholder.svg",
     description: "Plus haut responsable juridique de l'État, supervisant le Département de la Justice (DOJ).",
