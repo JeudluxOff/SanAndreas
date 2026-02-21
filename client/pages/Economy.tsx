@@ -3,6 +3,7 @@ import { TrendingUp, Landmark, Briefcase, ShoppingCart, DollarSign, PieChart, Ar
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const economyStats = [
   { label: "PIB de l'État", value: "$4.2B", trend: "+2.4%", status: "up" },

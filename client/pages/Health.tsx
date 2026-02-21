@@ -3,6 +3,7 @@ import { HeartPulse, Stethoscope, Briefcase, Pill, Ambulance, Microscope, ArrowR
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const healthStats = [
   { label: "Médecins Actifs", value: "245", trend: "+12", status: "up" },

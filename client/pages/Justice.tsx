@@ -3,6 +3,7 @@ import { Gavel, Scale, FileText, Landmark, GraduationCap, Users, Search, ArrowRi
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const justiceDepts = [
   {

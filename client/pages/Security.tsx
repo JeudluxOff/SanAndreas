@@ -3,6 +3,7 @@ import { Shield, ShieldAlert, Target, ShieldCheck, Siren, MapPin, Phone, Eye, Ar
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const securityAgencies = [
   {
