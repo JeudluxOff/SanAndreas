@@ -1,5 +1,5 @@
 import { Layout } from "@/components/Layout";
-import { Users, UserCheck, Shield, Scale, TrendingUp, HeartPulse, MessageSquare } from "lucide-react";
+import { Users, UserCheck, Shield, Scale, TrendingUp, HeartPulse, MessageSquare, Gavel, ShieldAlert, Landmark, Construction } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const cabinetMembers = [
@@ -44,6 +44,34 @@ const cabinetMembers = [
     image: "/placeholder.svg",
     description: "Superviseur des services SAMS, des programmes de santé publique et de l'assistance sociale à travers l'État.",
     icon: <HeartPulse className="w-5 h-5" />
+  },
+  {
+    role: "Secrétaire à la Justice",
+    name: "Thomas 'Tommy' Vercetti",
+    image: "/placeholder.svg",
+    description: "Responsable de l'application des lois, de la poursuite des crimes et de la protection des droits civils.",
+    icon: <Gavel className="w-5 h-5" />
+  },
+  {
+    role: "Secrétaire à la Sécurité Intérieure",
+    name: "Jackson 'Jax' Teller",
+    image: "/placeholder.svg",
+    description: "Coordination de la lutte contre le terrorisme, de la cybersécurité et de la gestion des catastrophes majeures.",
+    icon: <ShieldAlert className="w-5 h-5" />
+  },
+  {
+    role: "Secrétaire au Trésor et au Commerce",
+    name: "Franklin Clinton",
+    image: "/placeholder.svg",
+    description: "Gestion des politiques économiques, du commerce international et du développement des entreprises locales.",
+    icon: <Landmark className="w-5 h-5" />
+  },
+  {
+    role: "Secrétaire au Travail",
+    name: "Lamar Davis",
+    image: "/placeholder.svg",
+    description: "Protection des droits des travailleurs, promotion de l'emploi et régulation du marché du travail.",
+    icon: <Construction className="w-5 h-5" />
   }
 ];
 
@@ -165,6 +193,9 @@ export default function Gouvernement() {
                     <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Agences de Sécurité</div>
                     <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Santé & Services Humains</div>
                     <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Département Justice</div>
+                    <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Sécurité Intérieure</div>
+                    <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Trésor & Commerce</div>
+                    <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Département du Travail</div>
                     <div className="p-3 bg-slate-50 border border-slate-200 text-center rounded font-bold uppercase text-[9px] text-slate-500">Service de Presse</div>
                   </div>
                 </div>
