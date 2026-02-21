@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/componen
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Layout } from "@/components/Layout";
+import { cn } from "@/lib/utils";
 
 const Login = () => {
   const [username, setUsername] = useState("");
