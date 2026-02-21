@@ -53,9 +53,9 @@ const Navigation = () => {
             </a>
           ))}
           <div className="h-6 w-px bg-white/10 mx-4" />
-          <Link to="/intranet">
-            <Button variant="ghost" className="text-[11px] font-black text-[#c1a461] uppercase tracking-[0.2em] hover:bg-[#c1a461]/10 gap-2">
-              <Lock className="w-3 h-3" /> Intranet
+          <Link to="/cabinet/login">
+            <Button variant="ghost" className="text-[11px] font-black text-[#c1a461] uppercase tracking-[0.2em] hover:bg-[#c1a461]/10 gap-2 border border-[#c1a461]/20 px-6">
+              <Lock className="w-3 h-3" /> Accès Avocats
             </Button>
           </Link>
           <Link to="/cabinet/portal">
@@ -86,7 +86,7 @@ const Navigation = () => {
               </a>
             ))}
             <hr className="border-white/5" />
-            <Link to="/intranet" className="text-[11px] font-black text-[#c1a461] uppercase tracking-[0.2em]">Intranet</Link>
+            <Link to="/cabinet/login" className="text-[11px] font-black text-[#c1a461] uppercase tracking-[0.2em]">Accès Avocats</Link>
             <Link to="/cabinet/portal">
               <Button className="w-full bg-[#c1a461] text-white font-black uppercase text-[11px] tracking-[0.2em] h-12">Portail Client</Button>
             </Link>
@@ -213,42 +213,90 @@ const Expertise = () => {
 
 const Team = () => {
   const team = [
-    { name: "Julian Harrington", role: "Associé Fondateur", bio: "Spécialiste en droit pénal des affaires, ancien procureur fédéral reconnu pour sa ténacité.", seed: "Julian" },
-    { name: "Victoria Cole", role: "Associée Fondatrice", bio: "Experte en contentieux civil complexe et arbitrage international. Maîtresse de la stratégie.", seed: "Victoria" },
-    { name: "Marcus Vane", role: "Avocat Senior", bio: "Défense criminelle d'élite. Connu pour ses acquittements dans des dossiers sensibles.", seed: "Marcus" }
+    {
+      name: "Julian Harrington",
+      role: "Associé Fondateur",
+      specialty: "Droit Pénal des Affaires",
+      bio: "Spécialiste reconnu pour sa ténacité dans les dossiers fédéraux complexes. Ancien procureur de Los Santos.",
+      seed: "Julian"
+    },
+    {
+      name: "Victoria Cole",
+      role: "Associée Fondatrice",
+      specialty: "Arbitrage International",
+      bio: "Maîtresse de la stratégie juridique et du contentieux civil complexe. Conseil auprès des grandes institutions.",
+      seed: "Victoria"
+    },
+    {
+      name: "Marcus Vane",
+      role: "Avocat Senior",
+      specialty: "Défense Criminelle",
+      bio: "Expert en protection des libertés individuelles. Connu pour ses acquittements dans des affaires médiatisées.",
+      seed: "Marcus"
+    },
+    {
+      name: "Elena Rossi",
+      role: "Avocate Senior",
+      specialty: "Droit des Sociétés",
+      bio: "Spécialiste des fusions-acquisitions et de la restructuration d'entreprises à fort enjeu stratégique.",
+      seed: "Elena"
+    }
   ];
 
   return (
-    <section id="équipe" className="py-32 bg-[#0a0f18] text-white">
-      <div className="container mx-auto px-6">
-        <div className="text-center space-y-6 mb-24">
-          <span className="text-[10px] font-black text-[#c1a461] uppercase tracking-[0.5em]">Les Architectes de votre Défense</span>
-          <h2 className="text-6xl font-black uppercase tracking-tighter">Notre Élite</h2>
-          <div className="w-24 h-2 bg-[#c1a461] mx-auto" />
+    <section id="équipe" className="py-32 bg-[#0a0f18] text-white overflow-hidden relative">
+      <div className="absolute top-0 right-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-20 pointer-events-none" />
+
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-24">
+          <div className="space-y-6">
+            <span className="text-[10px] font-black text-[#c1a461] uppercase tracking-[0.5em]">L'Excellence à votre Service</span>
+            <h2 className="text-6xl md:text-7xl font-black uppercase tracking-tighter leading-none">
+              Nos <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#c1a461] to-[#927843]">Associés</span>
+            </h2>
+          </div>
+          <div className="max-w-md">
+            <p className="text-sm text-white/40 font-medium uppercase tracking-widest leading-relaxed">
+              Une équipe d'élite composée des meilleurs juristes de San Andreas, dédiée à la protection de vos intérêts les plus critiques.
+            </p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {team.map((member, idx) => (
-            <div key={idx} className="group space-y-8 text-center md:text-left">
-              <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-slate-900 border border-white/5">
-                <img 
-                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.seed}&backgroundColor=0a0f18`} 
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110" 
-                  alt={member.name} 
+            <div key={idx} className="group space-y-10">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-[40px] bg-slate-900 border border-white/5 transition-all duration-700 group-hover:rounded-[20px] group-hover:shadow-2xl group-hover:shadow-[#c1a461]/10">
+                <img
+                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.seed}&backgroundColor=0a0f18`}
+                  className="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 group-hover:scale-110"
+                  alt={member.name}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f18] to-transparent opacity-60" />
-              </div>
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <h3 className="text-2xl font-black uppercase tracking-tight">{member.name}</h3>
-                  <p className="text-[10px] font-black text-[#c1a461] uppercase tracking-[0.3em]">{member.role}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f18] via-transparent to-transparent opacity-80" />
+
+                <div className="absolute bottom-8 left-8 right-8 space-y-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                  <Badge className="bg-[#c1a461] text-white font-black uppercase text-[8px] tracking-widest px-3 py-1">
+                    {member.role}
+                  </Badge>
+                  <h3 className="text-xl font-black uppercase tracking-tight">{member.name}</h3>
                 </div>
-                <p className="text-sm text-white/60 font-medium leading-relaxed">
-                  {member.bio}
-                </p>
-                <div className="flex justify-center md:justify-start gap-4">
-                  <Mail className="w-4 h-4 text-white/20 hover:text-white transition-colors cursor-pointer" />
-                  <Phone className="w-4 h-4 text-white/20 hover:text-white transition-colors cursor-pointer" />
+              </div>
+
+              <div className="px-4 space-y-6">
+                <div className="space-y-2">
+                  <p className="text-[10px] font-black text-[#c1a461] uppercase tracking-[0.3em]">{member.specialty}</p>
+                  <p className="text-sm text-white/60 font-medium leading-relaxed italic">
+                    "{member.bio}"
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-6 pt-2 border-t border-white/5">
+                  <div className="flex gap-4">
+                    <Mail className="w-4 h-4 text-white/20 hover:text-[#c1a461] transition-colors cursor-pointer" />
+                    <Phone className="w-4 h-4 text-white/20 hover:text-[#c1a461] transition-colors cursor-pointer" />
+                  </div>
+                  <Button variant="link" className="p-0 text-[10px] font-black uppercase tracking-widest text-[#c1a461] group-hover:gap-3 transition-all ml-auto">
+                    Consulter Bio <ChevronRight className="w-3 h-3" />
+                  </Button>
                 </div>
               </div>
             </div>

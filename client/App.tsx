@@ -6,6 +6,7 @@ import LegalDossiers from "./pages/cabinet/Dossiers";
 import LegalPortal from "./pages/cabinet/Portal";
 import LegalBilling from "./pages/cabinet/Billing";
 import LegalAudit from "./pages/cabinet/Audit";
+import CabinetLogin from "./pages/cabinet/Login";
 import NotFound from "./pages/NotFound";
 import Placeholder from "./pages/Placeholder";
 import Governance from "./pages/Gouvernement";
@@ -41,6 +42,7 @@ const AppRoutes = () => (
     {/* Public Routes */}
     <Route path="/" element={<Index />} />
     <Route path="/cabinet" element={<Cabinet />} />
+    <Route path="/cabinet/login" element={<CabinetLogin />} />
     <Route path="/cabinet/portal" element={
       <ProtectedRoute>
         <LegalPortal />
