@@ -233,11 +233,17 @@ const Workspace = () => {
   const [isDocumentModalOpen, setIsDocumentModalOpen] = React.useState(false);
   const [isDossierModalOpen, setIsDossierModalOpen] = React.useState(false);
   const [editingDoc, setEditingDoc] = React.useState<any>(null);
+  const [editingDossier, setEditingDossier] = React.useState<any>(null);
+  const [editingTask, setEditingTask] = React.useState<any>(null);
 
   // Form states
   const [docTitle, setDocTitle] = React.useState("");
   const [docType, setDocType] = React.useState("PDF");
   const [dossierTitle, setDossierTitle] = React.useState("");
+  const [taskTitle, setTaskTitle] = React.useState("");
+  const [taskPriority, setTaskPriority] = React.useState("medium");
+  const [taskDue, setTaskDue] = React.useState("");
+  const [isTaskModalOpen, setIsTaskModalOpen] = React.useState(false);
 
   const upperServiceId = serviceId?.toUpperCase() as ServiceID;
 
@@ -259,8 +265,6 @@ const Workspace = () => {
       </IntranetLayout>
     );
   }
-
-  const currentWorkspace = allWorkspaces[serviceId?.toLowerCase() || ''] || allWorkspaces.cabinet;
 
   const handleCreateDocument = () => {
     if (!docTitle) return;
@@ -305,6 +309,17 @@ const Workspace = () => {
     logAction(`Modification du document : ${docTitle}`);
   };
 
+  const handleDeleteDocument = (docId: string) => {
+    setAllWorkspaces(prev => ({
+      ...prev,
+      [serviceId?.toLowerCase() || '']: {
+        ...currentWorkspace,
+        documents: currentWorkspace.documents.filter((doc: any) => doc.id !== docId)
+      }
+    }));
+    logAction(`Suppression du document ID : ${docId}`);
+  };
+
   const handleCreateDossier = () => {
     if (!dossierTitle) return;
 
@@ -326,6 +341,119 @@ const Workspace = () => {
     setDossierTitle("");
     setIsDossierModalOpen(false);
     logAction(`Création du dossier : ${dossierTitle}`);
+  };
+
+  const handleUpdateDossier = () => {
+    if (!dossierTitle || !editingDossier) return;
+
+    setAllWorkspaces(prev => ({
+      ...prev,
+      [serviceId?.toLowerCase() || '']: {
+        ...currentWorkspace,
+        dossiers: currentWorkspace.dossiers.map((dos: any) =>
+          dos.id === editingDossier.id ? { ...dos, title: dossierTitle } : dos
+        )
+      }
+    }));
+
+    setDossierTitle("");
+    setEditingDossier(null);
+    setIsDossierModalOpen(false);
+    logAction(`Modification du dossier : ${dossierTitle}`);
+  };
+
+  const handleDeleteDossier = (dosId: string) => {
+    setAllWorkspaces(prev => ({
+      ...prev,
+      [serviceId?.toLowerCase() || '']: {
+        ...currentWorkspace,
+        dossiers: currentWorkspace.dossiers.filter((dos: any) => dos.id !== dosId)
+      }
+    }));
+    logAction(`Suppression du dossier ID : ${dosId}`);
+  };
+
+  const handleCreateTask = () => {
+    if (!taskTitle) return;
+
+    const newTask = {
+      id: tasks.length + 1,
+      title: taskTitle,
+      status: "pending",
+      priority: taskPriority,
+      due: taskDue || "À définir"
+    };
+
+    const updatedTasks = [newTask, ...tasks];
+    setTasks(updatedTasks);
+
+    setAllWorkspaces(prev => ({
+      ...prev,
+      [serviceId?.toLowerCase() || '']: {
+        ...currentWorkspace,
+        tasks: updatedTasks
+      }
+    }));
+
+    setTaskTitle("");
+    setTaskDue("");
+    setTaskPriority("medium");
+    setIsTaskModalOpen(false);
+    logAction(`Création de la tâche : ${taskTitle}`);
+  };
+
+  const handleUpdateTask = () => {
+    if (!taskTitle || !editingTask) return;
+
+    const updatedTasks = tasks.map((t: any) =>
+      t.id === editingTask.id ? { ...t, title: taskTitle, priority: taskPriority, due: taskDue || t.due } : t
+    );
+    setTasks(updatedTasks);
+
+    setAllWorkspaces(prev => ({
+      ...prev,
+      [serviceId?.toLowerCase() || '']: {
+        ...currentWorkspace,
+        tasks: updatedTasks
+      }
+    }));
+
+    setTaskTitle("");
+    setTaskDue("");
+    setEditingTask(null);
+    setIsTaskModalOpen(false);
+    logAction(`Modification de la tâche : ${taskTitle}`);
+  };
+
+  const handleDeleteTask = (taskId: number) => {
+    const updatedTasks = tasks.filter((t: any) => t.id !== taskId);
+    setTasks(updatedTasks);
+    setAllWorkspaces(prev => ({
+      ...prev,
+      [serviceId?.toLowerCase() || '']: {
+        ...currentWorkspace,
+        tasks: updatedTasks
+      }
+    }));
+    logAction(`Suppression de la tâche ID : ${taskId}`);
+  };
+
+  const handleToggleTaskStatus = (taskId: number) => {
+    const updatedTasks = tasks.map((t: any) => {
+      if (t.id === taskId) {
+        const nextStatus = t.status === 'completed' ? 'pending' : (t.status === 'pending' ? 'in_progress' : 'completed');
+        return { ...t, status: nextStatus };
+      }
+      return t;
+    });
+    setTasks(updatedTasks);
+    setAllWorkspaces(prev => ({
+      ...prev,
+      [serviceId?.toLowerCase() || '']: {
+        ...currentWorkspace,
+        tasks: updatedTasks
+      }
+    }));
   };
 
   const handleArchiveDocument = (docId: string) => {
@@ -359,6 +487,20 @@ const Workspace = () => {
     setDocTitle(doc.title);
     setDocType(doc.type);
     setIsDocumentModalOpen(true);
+  };
+
+  const openEditDossier = (dos: any) => {
+    setEditingDossier(dos);
+    setDossierTitle(dos.title);
+    setIsDossierModalOpen(true);
+  };
+
+  const openEditTask = (task: any) => {
+    setEditingTask(task);
+    setTaskTitle(task.title);
+    setTaskPriority(task.priority);
+    setTaskDue(task.due);
+    setIsTaskModalOpen(true);
   };
 
   const visibleDocuments = (currentWorkspace.documents || []).filter((d: any) => !d.archived);
@@ -600,7 +742,7 @@ const Workspace = () => {
                               <DropdownMenuContent align="end" className="w-40 uppercase font-bold text-[10px]">
                                 <DropdownMenuItem onClick={() => openEditDoc(doc)} className="gap-2"><Edit className="w-3 h-3" /> Modifier</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleArchiveDocument(doc.id)} className="gap-2"><Archive className="w-3 h-3" /> Archiver</DropdownMenuItem>
-                                <DropdownMenuItem className="gap-2 text-red-600"><Trash2 className="w-3 h-3" /> Supprimer</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDeleteDocument(doc.id)} className="gap-2 text-red-600"><Trash2 className="w-3 h-3" /> Supprimer</DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 group-hover:text-primary"><Download className="w-4 h-4" /></Button>
@@ -625,7 +767,7 @@ const Workspace = () => {
                       <CardDescription className={cn("text-[10px] font-bold uppercase", emergencyMode && "text-red-800")}>Suivi des dossiers de niveau {currentWorkspace.name}</CardDescription>
                     </div>
                     <Button
-                      onClick={() => { setDossierTitle(""); setIsDossierModalOpen(true); }}
+                      onClick={() => { setEditingDossier(null); setDossierTitle(""); setIsDossierModalOpen(true); }}
                       size="sm" className={cn("bg-primary font-bold uppercase text-[10px] px-4", emergencyMode && "bg-red-600")}
                     >
                       Nouveau Dossier
@@ -656,8 +798,9 @@ const Workspace = () => {
                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 hover:text-primary"><MoreVertical className="w-4 h-4" /></Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-40 uppercase font-bold text-[10px]">
+                                <DropdownMenuItem onClick={() => openEditDossier(dos)} className="gap-2"><Edit className="w-3 h-3" /> Modifier</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleArchiveDossier(dos.id)} className="gap-2"><Archive className="w-3 h-3" /> Archiver</DropdownMenuItem>
-                                <DropdownMenuItem className="gap-2 text-red-600"><Trash2 className="w-3 h-3" /> Supprimer</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDeleteDossier(dos.id)} className="gap-2 text-red-600"><Trash2 className="w-3 h-3" /> Supprimer</DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 group-hover:text-primary"><ChevronRight className="w-4 h-4" /></Button>
@@ -680,20 +823,24 @@ const Workspace = () => {
                       <CardTitle className={cn("text-xs font-black uppercase tracking-widest", emergencyMode && "text-red-400")}>Gestion des Tâches Opérationnelles</CardTitle>
                       <CardDescription className={cn("text-[10px] font-bold uppercase", emergencyMode && "text-red-800")}>Attribution et suivi des missions du service</CardDescription>
                     </div>
-                    <Button size="sm" className={cn("bg-primary font-bold uppercase text-[10px] px-4", emergencyMode && "bg-red-600")}>Ajouter une tâche</Button>
+                    <Button onClick={() => { setEditingTask(null); setTaskTitle(""); setTaskDue(""); setTaskPriority("medium"); setIsTaskModalOpen(true); }} size="sm" className={cn("bg-primary font-bold uppercase text-[10px] px-4", emergencyMode && "bg-red-600")}>Ajouter une tâche</Button>
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="divide-y divide-slate-100">
                       {tasks.length > 0 ? tasks.map((task: any) => (
                         <div key={task.id} className="p-4 flex items-center justify-between group hover:bg-slate-50/50 transition-colors">
                           <div className="flex items-center gap-4">
-                            <div className={cn(
-                              "w-2 h-10 rounded-full",
-                              task.status === 'completed' ? 'bg-emerald-500' :
-                              task.status === 'in_progress' ? 'bg-blue-500' : 'bg-slate-300'
-                            )} />
+                            <button
+                              onClick={() => handleToggleTaskStatus(task.id)}
+                              className={cn(
+                                "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all",
+                                task.status === 'completed' ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 hover:border-primary'
+                              )}
+                            >
+                              {task.status === 'completed' && <Plus className="w-4 h-4 rotate-45" style={{ transform: 'rotate(45deg) scale(0.8)' }} />}
+                            </button>
                             <div className="space-y-1">
-                              <p className={cn("text-sm font-black uppercase tracking-tight", emergencyMode ? "text-white" : "text-slate-900")}>{task.title}</p>
+                              <p className={cn("text-sm font-black uppercase tracking-tight", emergencyMode ? "text-white" : "text-slate-900", task.status === 'completed' && "line-through opacity-50")}>{task.title}</p>
                               <div className="flex items-center gap-2">
                                 <Badge className={cn("text-[8px] font-black uppercase tracking-widest", getTaskPriorityColor(task.priority))}>
                                   {task.priority}
@@ -703,7 +850,15 @@ const Workspace = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="sm" className="font-bold text-[10px] uppercase tracking-widest text-slate-400">Modifier</Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 hover:text-primary"><MoreVertical className="w-4 h-4" /></Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-40 uppercase font-bold text-[10px]">
+                                <DropdownMenuItem onClick={() => openEditTask(task)} className="gap-2"><Edit className="w-3 h-3" /> Modifier</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDeleteTask(task.id)} className="gap-2 text-red-600"><Trash2 className="w-3 h-3" /> Supprimer</DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                             <Badge variant="outline" className={cn(
                               "text-[10px] font-black uppercase tracking-widest",
                               task.status === 'completed' ? 'text-emerald-500 border-emerald-500' :
@@ -966,9 +1121,9 @@ const Workspace = () => {
       <Dialog open={isDossierModalOpen} onOpenChange={setIsDossierModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="uppercase font-black tracking-tight">Ouvrir un Nouveau Dossier</DialogTitle>
+            <DialogTitle className="uppercase font-black tracking-tight">{editingDossier ? "Modifier le Dossier" : "Ouvrir un Nouveau Dossier"}</DialogTitle>
             <DialogDescription className="text-xs font-bold uppercase italic">
-              Créez un suivi opérationnel pour une nouvelle affaire ou mission.
+              {editingDossier ? "Mettez à jour les informations du dossier." : "Créez un suivi opérationnel pour une nouvelle affaire ou mission."}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -984,8 +1139,63 @@ const Workspace = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleCreateDossier} className="font-black uppercase tracking-widest text-[10px] w-full py-6 bg-emerald-600 hover:bg-emerald-700">
-              Ouvrir le dossier
+            <Button onClick={editingDossier ? handleUpdateDossier : handleCreateDossier} className="font-black uppercase tracking-widest text-[10px] w-full py-6 bg-emerald-600 hover:bg-emerald-700">
+              {editingDossier ? "Mettre à jour" : "Ouvrir le dossier"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Task Modal */}
+      <Dialog open={isTaskModalOpen} onOpenChange={setIsTaskModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="uppercase font-black tracking-tight">{editingTask ? "Modifier la Tâche" : "Nouvelle Tâche Opérationnelle"}</DialogTitle>
+            <DialogDescription className="text-xs font-bold uppercase italic">
+              Définissez les objectifs et l'échéance de la mission.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="task-title" className="text-[10px] font-black uppercase tracking-widest">Intitulé de la tâche</Label>
+              <Input
+                id="task-title"
+                value={taskTitle}
+                onChange={(e) => setTaskTitle(e.target.value)}
+                placeholder="Ex: Sécurisation périmètre Mairie"
+                className="font-bold uppercase text-xs"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="task-priority" className="text-[10px] font-black uppercase tracking-widest">Priorité</Label>
+                <Select value={taskPriority} onValueChange={setTaskPriority}>
+                  <SelectTrigger className="font-bold uppercase text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="font-bold uppercase text-[10px]">
+                    <SelectItem value="low">Basse</SelectItem>
+                    <SelectItem value="medium">Moyenne</SelectItem>
+                    <SelectItem value="high">Haute</SelectItem>
+                    <SelectItem value="critical">CRITIQUE</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="task-due" className="text-[10px] font-black uppercase tracking-widest">Échéance</Label>
+                <Input
+                  id="task-due"
+                  value={taskDue}
+                  onChange={(e) => setTaskDue(e.target.value)}
+                  placeholder="Ex: 20:00"
+                  className="font-bold uppercase text-xs"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={editingTask ? handleUpdateTask : handleCreateTask} className="font-black uppercase tracking-widest text-[10px] w-full py-6">
+              {editingTask ? "Mettre à jour" : "Assigner la tâche"}
             </Button>
           </DialogFooter>
         </DialogContent>
