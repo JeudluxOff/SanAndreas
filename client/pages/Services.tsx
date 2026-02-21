@@ -35,7 +35,7 @@ const locations: Location[] = [
     name: "Palais du Gouverneur",
     type: 'government',
     description: "Le centre du pouvoir exécutif de l'État de San Andreas. Bureaux du Gouverneur et du Cabinet.",
-    coords: { top: '75%', left: '50.5%' },
+    coords: { top: '78.2%', left: '52.3%' },
     address: "Capital Boulevard, Los Santos",
     phone: "555-GOV-01"
   },
@@ -44,7 +44,7 @@ const locations: Location[] = [
     name: "Department of Justice (DOJ)",
     type: 'government',
     description: "Siège de l'autorité judiciaire. Cour supérieure et bureaux du Procureur Général.",
-    coords: { top: '77%', left: '51.5%' },
+    coords: { top: '79.1%', left: '50.2%' },
     address: "Rockford Hills, Los Santos",
     phone: "555-DOJ-02"
   },
@@ -53,7 +53,7 @@ const locations: Location[] = [
     name: "LSPD - Mission Row",
     type: 'police',
     description: "Quartier général de la police de Los Santos. Centre de commandement principal.",
-    coords: { top: '81%', left: '52%' },
+    coords: { top: '79.5%', left: '52.8%' },
     address: "Mission Row, Los Santos",
     phone: "911-LSPD-01"
   },
@@ -62,7 +62,7 @@ const locations: Location[] = [
     name: "LSPD - Vespucci",
     type: 'police',
     description: "Poste de police desservant les quartiers de Vespucci et Del Perro.",
-    coords: { top: '85%', left: '41%' },
+    coords: { top: '82.5%', left: '40.5%' },
     address: "Vespucci Boulevard, Los Santos",
     phone: "911-LSPD-02"
   },
@@ -71,7 +71,7 @@ const locations: Location[] = [
     name: "BCSO - Sandy Shores",
     type: 'police',
     description: "Bureau du shérif du comté de Blaine. Responsable de la sécurité rurale.",
-    coords: { top: '35%', left: '68%' },
+    coords: { top: '35.5%', left: '68.0%' },
     address: "Alhambra Drive, Sandy Shores",
     phone: "911-BCSO-01"
   },
@@ -80,7 +80,7 @@ const locations: Location[] = [
     name: "BCSO - Paleto Bay",
     type: 'police',
     description: "Poste avancé du shérif situé à l'extrémité nord de l'État.",
-    coords: { top: '10%', left: '53%' },
+    coords: { top: '8.0%', left: '50.5%' },
     address: "Duluoz Avenue, Paleto Bay",
     phone: "911-BCSO-02"
   },
@@ -89,7 +89,7 @@ const locations: Location[] = [
     name: "Central Los Santos Medical Center",
     type: 'hospital',
     description: "Hôpital principal de l'État, spécialisé dans les urgences chirurgicales.",
-    coords: { top: '88%', left: '54%' },
+    coords: { top: '86.5%', left: '53.0%' },
     address: "Capital Boulevard, Los Santos",
     phone: "911-EMS-01"
   },
@@ -98,7 +98,7 @@ const locations: Location[] = [
     name: "Mount Zonah Medical Center",
     type: 'hospital',
     description: "Centre médical de renommée mondiale, leader en recherche et soins spécialisés.",
-    coords: { top: '78%', left: '44%' },
+    coords: { top: '74.5%', left: '43.5%' },
     address: "Dorset Drive, Rockford Hills",
     phone: "911-EMS-02"
   },
@@ -107,7 +107,7 @@ const locations: Location[] = [
     name: "Pillbox Hill Medical Center",
     type: 'hospital',
     description: "Hôpital de proximité au cœur du centre-ville, ouvert 24h/24.",
-    coords: { top: '82%', left: '50%' },
+    coords: { top: '78.5%', left: '50.5%' },
     address: "Elgin Avenue, Los Santos",
     phone: "911-EMS-03"
   },
@@ -116,7 +116,7 @@ const locations: Location[] = [
     name: "Sandy Shores Medical Center",
     type: 'hospital',
     description: "Seul centre de soins disponible dans la région du désert de Grand Senora.",
-    coords: { top: '36%', left: '64%' },
+    coords: { top: '36.5%', left: '64.0%' },
     address: "Panorama Drive, Sandy Shores",
     phone: "911-EMS-04"
   }
