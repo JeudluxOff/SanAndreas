@@ -27,7 +27,7 @@ import { Link } from "react-router-dom";
 interface Location {
   id: string;
   name: string;
-  type: 'police' | 'hospital' | 'government';
+  type: 'police' | 'sheriff' | 'hospital' | 'government';
   description: string;
   coords: { top: string; left: string };
   address: string;
@@ -74,7 +74,7 @@ const locations: Location[] = [
   {
     id: 'lssd-sandy-shores',
     name: "LSSD - Sandy Shores",
-    type: 'police',
+    type: 'sheriff',
     description: "Bureau du shérif du comté de Blaine. Responsable de la sécurité rurale.",
     coords: { top: '35.975%', left: '65.458%' },
     address: "Alhambra Drive, Sandy Shores",
@@ -83,7 +83,7 @@ const locations: Location[] = [
   {
     id: 'lssd-paleto-bay',
     name: "LSSD - Paleto Bay",
-    type: 'police',
+    type: 'sheriff',
     description: "Poste avancé du shérif situé à l'extrémité nord de l'État.",
     coords: { top: '16.575%', left: '46.333%' },
     address: "Duluoz Avenue, Paleto Bay",
@@ -139,9 +139,11 @@ export default function Services() {
   const [isEditMode, setIsEditMode] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
-  const filteredLocations = dynamicLocations.filter(loc =>
-    filter === 'all' || loc.type === filter
-  );
+  const filteredLocations = dynamicLocations.filter(loc => {
+    if (filter === 'all') return true;
+    if (filter === 'police') return loc.type === 'police' || loc.type === 'sheriff';
+    return loc.type === filter;
+  });
 
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.5, 4));
   const handleZoomOut = () => {
@@ -317,14 +319,14 @@ export default function Services() {
                   Filtres de recherche
                 </h3>
                 <div className="grid grid-cols-1 gap-3">
-                  <Button 
+                  <Button
                     variant={filter === 'all' ? 'default' : 'outline'}
                     className="justify-start h-12"
                     onClick={() => setFilter('all')}
                   >
                     Toutes les infrastructures
                   </Button>
-                  <Button 
+                  <Button
                     variant={filter === 'police' ? 'default' : 'outline'}
                     className={cn(
                       "justify-start h-12 border-2",
@@ -332,7 +334,7 @@ export default function Services() {
                     )}
                     onClick={() => setFilter('police')}
                   >
-                    <ShieldCheck className="mr-2 w-5 h-5" /> Postes de Police
+                    <ShieldCheck className="mr-2 w-5 h-5" /> Postes LSPD / LSSD
                   </Button>
                   <Button
                     variant={filter === 'hospital' ? 'default' : 'outline'}
@@ -399,6 +401,8 @@ export default function Services() {
                     <div className="flex items-center gap-3">
                       {selectedLocation.type === 'police' ?
                         <ShieldCheck className="w-8 h-8 text-primary" /> :
+                        selectedLocation.type === 'sheriff' ?
+                        <Shield className="w-8 h-8 text-emerald-700" /> :
                         selectedLocation.type === 'hospital' ?
                         <HeartPulse className="w-8 h-8 text-secondary" /> :
                         <Building2 className="w-8 h-8 text-slate-700" />
@@ -549,12 +553,15 @@ export default function Services() {
                           <div className={cn(
                             "relative p-2.5 rounded-full shadow-lg border-2 border-white animate-pulse-slow",
                             loc.type === 'police' ? "bg-primary text-white" :
+                            loc.type === 'sheriff' ? "bg-emerald-700 text-white" :
                             loc.type === 'hospital' ? "bg-secondary text-white" :
                             "bg-slate-700 text-white",
                             selectedLocation?.id === loc.id && "animate-none ring-4 ring-white/30"
                           )}>
                             {loc.type === 'police' ?
                               <ShieldCheck className="w-5 h-5 md:w-6 md:h-6" /> :
+                              loc.type === 'sheriff' ?
+                              <Shield className="w-5 h-5 md:w-6 md:h-6" /> :
                               loc.type === 'hospital' ?
                               <HeartPulse className="w-5 h-5 md:w-6 md:h-6" /> :
                               <Building2 className="w-5 h-5 md:w-6 md:h-6" />
@@ -573,6 +580,7 @@ export default function Services() {
                           <div className={cn(
                             "absolute inset-0 rounded-full animate-ping opacity-50",
                             loc.type === 'police' ? "bg-primary" :
+                            loc.type === 'sheriff' ? "bg-emerald-700" :
                             loc.type === 'hospital' ? "bg-secondary" :
                             "bg-slate-700"
                           )} />
@@ -615,15 +623,19 @@ export default function Services() {
                 <div className="absolute bottom-6 left-6 bg-slate-900/90 backdrop-blur-md p-4 rounded border border-white/20 flex gap-6 z-30 shadow-2xl">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-primary rounded-full shadow-[0_0_8px_rgba(30,58,138,0.8)]" />
-                    <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">LSPD / LSSD</span>
+                    <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">LSPD</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-emerald-700 rounded-full shadow-[0_0_8px_rgba(4,120,87,0.8)]" />
+                    <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">LSSD</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-secondary rounded-full shadow-[0_0_8px_rgba(200,16,46,0.8)]" />
-                    <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">Hôpitaux / SAMS</span>
+                    <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">SAMS</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-slate-700 rounded-full shadow-[0_0_8px_rgba(51,65,85,0.8)]" />
-                    <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">Gouv. / DOJ</span>
+                    <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">Gouv.</span>
                   </div>
                 </div>
                 
