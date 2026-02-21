@@ -129,7 +129,10 @@ const locations: Location[] = [
 ];
 
 export default function Services() {
-  const [dynamicLocations, setDynamicLocations] = useState<Location[]>(locations);
+  const [dynamicLocations, setDynamicLocations] = useState<Location[]>(() => {
+    const saved = localStorage.getItem('sa-map-locations');
+    return saved ? JSON.parse(saved) : locations;
+  });
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [filter, setFilter] = useState<'all' | 'police' | 'hospital' | 'government'>('all');
   const [zoom, setZoom] = useState(1);
@@ -295,6 +298,17 @@ export default function Services() {
     toast.success("Coordonnées copiées dans le presse-papier !");
   };
 
+  const handleSavePositions = () => {
+    localStorage.setItem('sa-map-locations', JSON.stringify(dynamicLocations));
+    toast.success("Positions sauvegardées localement !");
+  };
+
+  const handleResetPositions = () => {
+    localStorage.removeItem('sa-map-locations');
+    setDynamicLocations(locations);
+    toast.info("Positions réinitialisées aux valeurs par défaut.");
+  };
+
   return (
     <Layout>
       <div className="bg-primary/5 py-16 border-b border-slate-200">
@@ -379,14 +393,32 @@ export default function Services() {
                     {isEditMode ? "Quitter l'édition" : "Activer l'édition"}
                   </Button>
                   {isEditMode && (
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start h-10 text-xs font-bold uppercase tracking-widest text-white border-white/20 hover:bg-white/5"
-                      onClick={copyToClipboard}
-                    >
-                      <Copy className="mr-2 w-4 h-4" />
-                      Copier les positions
-                    </Button>
+                    <>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start h-10 text-xs font-bold uppercase tracking-widest text-white border-white/20 hover:bg-white/5"
+                        onClick={handleSavePositions}
+                      >
+                        <Save className="mr-2 w-4 h-4 text-green-500" />
+                        Sauvegarder les positions
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start h-10 text-xs font-bold uppercase tracking-widest text-white border-white/20 hover:bg-white/5"
+                        onClick={copyToClipboard}
+                      >
+                        <Copy className="mr-2 w-4 h-4" />
+                        Copier les positions
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start h-10 text-xs font-bold uppercase tracking-widest text-red-400 border-white/10 hover:bg-red-500/10 hover:border-red-500/20"
+                        onClick={handleResetPositions}
+                      >
+                        <RotateCcw className="mr-2 w-4 h-4" />
+                        Réinitialiser par défaut
+                      </Button>
+                    </>
                   )}
                 </div>
                 {isEditMode && (
