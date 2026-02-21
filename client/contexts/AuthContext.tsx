@@ -56,6 +56,8 @@ interface AuthContextType {
   canAccessService: (serviceId: ServiceID) => boolean;
   logAction: (action: string, metadata?: any) => void;
   updateStatus: (status: UserStatus) => void;
+  emergencyMode: boolean;
+  toggleEmergencyMode: () => void;
 }
 
 const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
@@ -138,9 +140,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [emergencyMode, setEmergencyMode] = useState(false);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('sa_gov_user');
+    const savedEmergency = localStorage.getItem('sa_gov_emergency_mode');
+
+    if (savedEmergency === 'true') {
+      setEmergencyMode(true);
+    }
     if (savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser) as User;
@@ -303,8 +311,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logAction('Mise à jour statut', { status });
   };
 
+  const toggleEmergencyMode = () => {
+    const newMode = !emergencyMode;
+    setEmergencyMode(newMode);
+    localStorage.setItem('sa_gov_emergency_mode', String(newMode));
+    logAction(newMode ? 'Activation Protocole Urgence' : 'Désactivation Protocole Urgence');
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading, hasPermission, canAccessService, logAction, updateStatus }}>
+    <AuthContext.Provider value={{
+      user, login, logout, isLoading, hasPermission, canAccessService,
+      logAction, updateStatus, emergencyMode, toggleEmergencyMode
+    }}>
       {children}
     </AuthContext.Provider>
   );

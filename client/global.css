@@ -118,3 +118,24 @@
     white-space: pre;
   }
 }
+
+@layer utilities {
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+
+  @keyframes emergency-pulse {
+    0% { opacity: 0.1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 0.1; }
+  }
+
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+
+  .animate-emergency-pulse {
+    animation: emergency-pulse 2s ease-in-out infinite;
+  }
+}

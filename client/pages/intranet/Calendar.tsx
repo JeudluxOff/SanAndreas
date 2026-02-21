@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Calendar as CalendarIcon, Clock, MapPin, Users, ChevronLeft, ChevronRight, 
-  Plus, MoreVertical, Filter, Search, Shield, Bell, CheckCircle2, AlertTriangle, Info
+  Calendar as CalendarIcon, Clock, MapPin, Users, ChevronLeft, ChevronRight,
+  Plus, MoreVertical, Filter, Search, Shield, Bell, CheckCircle2, AlertTriangle, Info, ShieldAlert
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -54,7 +54,7 @@ const events = [
 ];
 
 export default function Calendar() {
-  const { user, hasPermission } = useAuth();
+  const { user, hasPermission, emergencyMode, toggleEmergencyMode } = useAuth();
   const [selectedDate, setSelectedDate] = useState('24 Mai 2024');
 
   const getServiceColor = (serviceId: string) => {
@@ -154,18 +154,37 @@ export default function Calendar() {
                </CardContent>
             </Card>
             
-            <Card className="border-none shadow-xl bg-secondary text-white rounded-3xl overflow-hidden p-8 space-y-6">
+            <Card className={cn(
+               "border-none shadow-xl rounded-3xl overflow-hidden p-8 space-y-6 transition-all duration-500",
+               emergencyMode ? "bg-red-600 animate-pulse scale-105 shadow-[0_0_30px_rgba(220,38,38,0.5)]" : "bg-secondary"
+            )}>
                <div className="p-3 bg-white/20 rounded-2xl w-fit">
-                  <Shield className="w-8 h-8 text-white" />
+                  {emergencyMode ? (
+                    <ShieldAlert className="w-8 h-8 text-white animate-bounce" />
+                  ) : (
+                    <Shield className="w-8 h-8 text-white" />
+                  )}
                </div>
                <div className="space-y-2">
-                  <h3 className="text-xl font-black uppercase tracking-tighter">Réunions de Crise</h3>
+                  <h3 className="text-xl font-black uppercase tracking-tighter text-white">
+                    {emergencyMode ? "PROTOCOLE D'URGENCE ACTIF" : "Réunions de Crise"}
+                  </h3>
                   <p className="text-white/70 text-sm font-medium leading-relaxed uppercase tracking-tight">
-                     En cas d'alerte rouge, toutes les réunions non-essentielles sont suspendues automatiquement.
+                     {emergencyMode
+                       ? "Alerte de niveau 1 déclenchée. Tous les services doivent se rapporter immédiatement à leur poste."
+                       : "En cas d'alerte rouge, toutes les réunions non-essentielles sont suspendues automatiquement."}
                   </p>
                </div>
-               <Button className="w-full bg-white text-secondary hover:bg-slate-100 font-black uppercase tracking-widest py-6 h-auto">
-                  Protocole d'urgence
+               <Button
+                 onClick={toggleEmergencyMode}
+                 className={cn(
+                   "w-full font-black uppercase tracking-widest py-6 h-auto transition-all",
+                   emergencyMode
+                    ? "bg-white text-red-600 hover:bg-slate-100"
+                    : "bg-white text-secondary hover:bg-slate-100"
+                 )}
+               >
+                  {emergencyMode ? "Désactiver le Protocole" : "Protocole d'urgence"}
                </Button>
             </Card>
           </div>

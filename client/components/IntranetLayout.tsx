@@ -19,7 +19,8 @@ import {
   ChevronRight,
   User,
   Activity,
-  Briefcase
+  Briefcase,
+  ShieldAlert
 } from 'lucide-react';
 import { useAuth, Role, Permission, ServiceID, UserStatus } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -67,7 +68,7 @@ const workspaceServices: { id: ServiceID, label: string, color: string }[] = [
 
 export function IntranetLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { user, logout, hasPermission, canAccessService, updateStatus } = useAuth();
+  const { user, logout, hasPermission, canAccessService, updateStatus, emergencyMode, toggleEmergencyMode } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -101,23 +102,41 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex overflow-hidden font-sans">
+    <div className={cn(
+      "min-h-screen flex overflow-hidden font-sans transition-all duration-500",
+      emergencyMode ? "bg-red-950/20" : "bg-slate-100"
+    )}>
+      {/* Emergency Mode Overlay/Border */}
+      {emergencyMode && (
+        <div className="fixed inset-0 pointer-events-none z-[100] border-[12px] border-red-600 animate-emergency-pulse pointer-events-none" />
+      )}
+
       {/* Sidebar */}
-      <aside 
+      <aside
         className={cn(
-          "bg-slate-900 text-slate-300 transition-all duration-300 flex flex-col z-50",
+          "text-slate-300 transition-all duration-300 flex flex-col z-50",
+          emergencyMode ? "bg-red-950 border-r border-red-900" : "bg-slate-900",
           sidebarOpen ? "w-64" : "w-20"
         )}
       >
-        <div className="h-16 flex items-center px-4 bg-slate-950 border-b border-slate-800">
+        <div className={cn(
+          "h-16 flex items-center px-4 border-b",
+          emergencyMode ? "bg-red-900 border-red-800 shadow-[0_4px_12px_rgba(220,38,38,0.2)]" : "bg-slate-950 border-slate-800"
+        )}>
           <Link to="/intranet" className="flex items-center gap-3 overflow-hidden">
-            <div className="bg-primary p-1.5 rounded-md flex-shrink-0">
+            <div className={cn(
+              "p-1.5 rounded-md flex-shrink-0 shadow-lg",
+              emergencyMode ? "bg-red-600 animate-pulse" : "bg-primary"
+            )}>
               <Shield className="w-6 h-6 text-white" />
             </div>
             {sidebarOpen && (
               <div className="flex flex-col whitespace-nowrap">
                 <span className="font-bold text-white uppercase text-xs tracking-tighter">SAN ANDREAS</span>
-                <span className="text-[10px] uppercase font-semibold text-slate-500 tracking-widest">GOUVERNEMENT</span>
+                <span className={cn(
+                  "text-[10px] uppercase font-semibold tracking-widest",
+                  emergencyMode ? "text-red-400" : "text-slate-500"
+                )}>GOUVERNEMENT</span>
               </div>
             )}
           </Link>
@@ -133,9 +152,9 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
                   to={item.path}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-md transition-all group",
-                    isActive 
-                      ? "bg-primary text-white shadow-md font-bold" 
-                      : "hover:bg-slate-800 hover:text-white"
+                    isActive
+                      ? (emergencyMode ? "bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.5)] font-bold" : "bg-primary text-white shadow-md font-bold")
+                      : (emergencyMode ? "hover:bg-red-900/50 hover:text-white" : "hover:bg-slate-800 hover:text-white")
                   )}
                 >
                   <div className={cn("flex-shrink-0", isActive ? "text-white" : "text-slate-400 group-hover:text-white")}>
@@ -156,13 +175,21 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
 
           {sidebarOpen && visibleWorkspaces.length > 0 && (
             <div className="mt-8 px-3">
-              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Espaces de Services</div>
+              <div className={cn(
+                "text-[10px] font-bold uppercase tracking-widest mb-4",
+                emergencyMode ? "text-red-400" : "text-slate-500"
+              )}>Espaces de Services</div>
               <div className="space-y-1">
                 {visibleWorkspaces.map(ws => (
                   <Link
                     key={ws.id}
                     to={`/intranet/workspace/${ws.id.toLowerCase()}`}
-                    className="flex items-center gap-3 px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-all"
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-all",
+                      emergencyMode
+                        ? "text-red-300 hover:text-white hover:bg-red-900/40"
+                        : "text-slate-400 hover:text-white hover:bg-slate-800"
+                    )}
                   >
                     <div className={cn("w-2 h-2 rounded-full", ws.color)} />
                     {ws.label}
@@ -173,7 +200,15 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
           )}
         </ScrollArea>
 
-        <div className="mt-auto p-4 border-t border-slate-800 space-y-4">
+        <div className={cn(
+          "mt-auto p-4 border-t space-y-4",
+          emergencyMode ? "border-red-900 bg-red-950/50" : "border-slate-800"
+        )}>
+          {emergencyMode && sidebarOpen && (
+            <div className="mb-4 p-2 bg-red-600/20 border border-red-600/30 rounded-lg text-center animate-pulse">
+               <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">PROTOCOLE URGENCE ACTIF</span>
+            </div>
+          )}
           <div className={cn("flex items-center gap-3 overflow-hidden", sidebarOpen ? "px-2" : "justify-center")}>
             <div className="relative flex-shrink-0">
               <Avatar className="w-10 h-10 border-2 border-slate-800 shadow-lg">
@@ -229,27 +264,48 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-grow flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-grow flex flex-col min-w-0 overflow-hidden relative">
+        {/* Emergency Alert Bar */}
+        {emergencyMode && (
+          <div className="h-10 bg-red-600 flex items-center justify-center gap-8 overflow-hidden whitespace-nowrap z-[60] shadow-lg">
+             {Array.from({ length: 10 }).map((_, i) => (
+               <div key={i} className="flex items-center gap-4 animate-marquee">
+                 <ShieldAlert className="w-4 h-4 text-white" />
+                 <span className="text-white font-black uppercase text-[11px] tracking-[0.2em]">ALERTE ROUGE - PROTOCOLE D'URGENCE ACTIF - ÉVACUATION DES CANAUX NON-SÉCURISÉS</span>
+               </div>
+             ))}
+          </div>
+        )}
+
         {/* Header */}
-        <header className="h-16 flex items-center justify-between px-6 bg-white border-b border-slate-200 shadow-sm z-40">
+        <header className={cn(
+          "h-16 flex items-center justify-between px-6 border-b shadow-sm z-40 transition-colors",
+          emergencyMode ? "bg-red-900 border-red-800 text-white" : "bg-white border-slate-200"
+        )}>
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="text-slate-600 lg:flex"
+              className={cn(
+                "lg:flex",
+                emergencyMode ? "text-red-200 hover:text-white hover:bg-red-800" : "text-slate-600"
+              )}
             >
               {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
 
-            <div className="h-6 w-px bg-slate-200 mx-1 hidden md:block" />
+            <div className={cn("h-6 w-px mx-1 hidden md:block", emergencyMode ? "bg-red-800" : "bg-slate-200")} />
 
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => navigate(-1)}
-                className="text-slate-400 hover:text-primary h-9 w-9"
+                className={cn(
+                  "h-9 w-9",
+                  emergencyMode ? "text-red-300 hover:text-white hover:bg-red-800" : "text-slate-400 hover:text-primary"
+                )}
                 title="Retour"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -258,7 +314,10 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-slate-400 hover:text-primary h-9 w-9"
+                  className={cn(
+                    "h-9 w-9",
+                    emergencyMode ? "text-red-300 hover:text-white hover:bg-red-800" : "text-slate-400 hover:text-primary"
+                  )}
                   title="Accueil Public"
                 >
                   <Home className="w-5 h-5" />
@@ -266,10 +325,16 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
               </Link>
             </div>
 
-            <div className="hidden md:flex items-center gap-2 text-sm text-slate-500 font-medium ml-2">
+            <div className={cn(
+              "hidden md:flex items-center gap-2 text-sm font-medium ml-2",
+              emergencyMode ? "text-red-400" : "text-slate-500"
+            )}>
               <span>Intranet</span>
-              <ChevronRight className="w-4 h-4 text-slate-300" />
-              <span className="text-slate-900 font-bold capitalize">
+              <ChevronRight className={cn("w-4 h-4", emergencyMode ? "text-red-800" : "text-slate-300")} />
+              <span className={cn(
+                "font-bold capitalize",
+                emergencyMode ? "text-white" : "text-slate-900"
+              )}>
                 {location.pathname === '/intranet' ? 'Tableau de Bord' : location.pathname.split('/').pop()?.replace('-', ' ')}
               </span>
             </div>
@@ -277,33 +342,50 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-3 md:gap-6">
             <div className="hidden lg:flex relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-              <input 
-                type="text" 
+              <Search className={cn("absolute left-3 top-2.5 h-4 w-4", emergencyMode ? "text-red-400" : "text-slate-400")} />
+              <input
+                type="text"
                 placeholder="Rechercher document, dossier..."
-                className="pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-64 md:w-80"
+                className={cn(
+                  "pl-10 pr-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 w-64 md:w-80 transition-colors",
+                  emergencyMode
+                    ? "bg-red-950 border-red-800 text-white placeholder-red-700 focus:ring-red-500/20 focus:border-red-600"
+                    : "bg-slate-50 border-slate-200 focus:ring-primary/20 focus:border-primary"
+                )}
               />
             </div>
-            
+
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="relative text-slate-600">
+              <Button variant="ghost" size="icon" className={cn(
+                "relative",
+                emergencyMode ? "text-red-200 hover:text-white hover:bg-red-800" : "text-slate-600"
+              )}>
                 <Bell className="w-5 h-5" />
                 <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
               </Button>
-              <div className="h-8 w-px bg-slate-200 mx-1 hidden sm:block" />
+              <div className={cn("h-8 w-px mx-1 hidden sm:block", emergencyMode ? "bg-red-800" : "bg-slate-200")} />
               <div className="hidden sm:flex flex-col text-right">
-                <span className="text-xs font-bold text-slate-900 leading-none">{user.service_name}</span>
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter mt-1">Secteur: {user.role.replace(/_/g, ' ')}</span>
+                <span className={cn("text-xs font-bold leading-none", emergencyMode ? "text-white" : "text-slate-900")}>{user.service_name}</span>
+                <span className={cn(
+                  "text-[10px] font-bold uppercase tracking-tighter mt-1",
+                  emergencyMode ? "text-red-400" : "text-slate-500"
+                )}>Secteur: {user.role.replace(/_/g, ' ')}</span>
               </div>
-              <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 font-bold ml-2">
-                LIVE
+              <Badge variant="outline" className={cn(
+                "font-bold ml-2 transition-colors",
+                emergencyMode ? "bg-red-600 text-white border-none animate-pulse" : "bg-primary/5 text-primary border-primary/20"
+              )}>
+                {emergencyMode ? "URGENCE" : "LIVE"}
               </Badge>
             </div>
           </div>
         </header>
 
         {/* Content Area */}
-        <main className="flex-grow overflow-auto bg-slate-100 p-6 md:p-8">
+        <main className={cn(
+          "flex-grow overflow-auto p-6 md:p-8 transition-colors",
+          emergencyMode ? "bg-red-950/10" : "bg-slate-100"
+        )}>
           <div className="max-w-[1600px] mx-auto">
             {children}
           </div>

@@ -32,7 +32,7 @@ import { cn } from "@/lib/utils";
 import { UserStatus } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
-  const { user, hasPermission, logAction, updateStatus } = useAuth();
+  const { user, hasPermission, logAction, updateStatus, emergencyMode } = useAuth();
 
   if (!user) return null;
 
@@ -92,6 +92,29 @@ const Dashboard = () => {
   return (
     <IntranetLayout>
       <div className="space-y-8">
+        {/* Emergency Mode Alert */}
+        {emergencyMode && (
+          <Card className="bg-red-600 border-none shadow-2xl animate-pulse overflow-hidden relative">
+            <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.1)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.1)_50%,rgba(255,255,255,0.1)_75%,transparent_75%,transparent)] bg-[length:40px_40px] opacity-20" />
+            <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+              <div className="flex items-center gap-6">
+                <div className="p-4 bg-white/20 rounded-2xl shadow-inner">
+                  <ShieldAlert className="w-10 h-10 text-white animate-bounce" />
+                </div>
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-black text-white uppercase tracking-tighter">PROTOCOLE D'URGENCE ACTIVÉ</h2>
+                  <p className="text-red-100 font-bold uppercase tracking-widest text-[10px]">Alerte Gouvernementale de Niveau 1 - Restriction des Accès Non-Essentiels</p>
+                </div>
+              </div>
+              <Link to="/intranet/communication">
+                <Button className="bg-white text-red-600 hover:bg-slate-100 font-black uppercase tracking-widest px-8 py-6 h-auto shadow-lg">
+                  Rejoindre le canal de crise
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Welcome Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
