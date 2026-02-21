@@ -30,7 +30,12 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
+import { useAuth, Permission, ServiceID } from "@/contexts/AuthContext";
+
 const DossierDetail = () => {
+  const { user, hasPermission, logAction, canAccessService } = useAuth();
+  const { id } = useParams<{ id: string }>();
+
   // Mock data for a single dossier
   const dossier = {
     id: "SA-2024-0142",
@@ -39,14 +44,17 @@ const DossierDetail = () => {
     priority: "Haute",
     creationDate: "12 Avril 2024",
     deadline: "30 Juin 2024",
-    service: "Urbanisme & Développement",
+    service_id: "CABINET" as ServiceID,
+    service_name: "Cabinet du Gouverneur",
     owner: "Arthur Vance",
+    is_confidential: true,
     description: "Révision complète du plan d'urbanisme pour la zone sud de Los Santos, incluant la revitalisation des quais et l'amélioration des infrastructures de transport en commun. Ce dossier nécessite une coordination avec les services de Sécurité Publique pour les nouveaux accès d'urgence.",
     progress: 65,
+    acl: ['sec_etat', 'sec_securite'],
     participants: [
-      { name: "Arthur Vance", role: "Gouverneur", role_slug: "gouverneur" },
-      { name: "Lamar Davis", role: "Secrétaire au Travail", role_slug: "secretaire_travail" },
-      { name: "Jackson Teller", role: "Secrétaire Sécurité", role_slug: "secretaire_securite" }
+      { id: 'governor', name: "Arthur Vance", role: "Gouverneur" },
+      { id: 'press', name: "Lamar Davis", role: "Press Secretary" },
+      { id: 'sec_securite', name: "Jackson Teller", role: "Secrétaire Sécurité" }
     ],
     documents: [
       { id: "DEC-24-0042", title: "Décret d'Urbanisme Préliminaire", status: "Signé", date: "15 Mai 2024" },
@@ -60,6 +68,35 @@ const DossierDetail = () => {
       { date: "15 Mai, 16:45", user: "Arthur Vance", action: "Signature du Décret d'Urbanisme", type: "sign" },
       { date: "12 Avril, 08:00", user: "System", action: "Création du dossier", type: "system" }
     ]
+  };
+
+  const canView = user?.role === 'gouverneur' ||
+                  dossier.service_id === user?.service_id ||
+                  dossier.participants.some(p => p.id === user?.id) ||
+                  (user?.id && dossier.acl.includes(user.id));
+
+  if (!canView) {
+    return (
+      <IntranetLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
+          <div className="p-6 bg-red-50 text-red-600 rounded-full border-4 border-red-100 shadow-xl animate-pulse">
+            <AlertCircle className="w-16 h-16" />
+          </div>
+          <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Accès Refusé</h1>
+          <p className="text-slate-500 max-w-md font-medium italic">
+            Vous n'avez pas les permissions nécessaires pour consulter ce dossier confidentiel.
+            Toute tentative d'accès non autorisée est enregistrée dans les registres d'audit de l'État.
+          </p>
+          <Button onClick={() => { logAction('Tentative accès dossier non autorisé', { dossier_id: dossier.id }); window.history.back(); }} className="bg-slate-900 text-white font-bold uppercase tracking-widest px-8">
+            Retourner
+          </Button>
+        </div>
+      </IntranetLayout>
+    );
+  }
+
+  const handleDossierAction = (action: string) => {
+    logAction(`${action} sur le dossier: ${dossier.id}`);
   };
 
   return (
@@ -92,9 +129,11 @@ const DossierDetail = () => {
             <Button variant="outline" className="font-bold gap-2">
               <Download className="w-4 h-4" /> Export PDF
             </Button>
-            <Button className="bg-[#1B365D] font-bold gap-2">
-              <Settings className="w-4 h-4" /> Gérer Dossier
-            </Button>
+            {hasPermission('dossiers:edit') && (
+              <Button className="bg-[#1B365D] font-bold gap-2">
+                <Settings className="w-4 h-4" /> Gérer Dossier
+              </Button>
+            )}
           </div>
         </div>
 
@@ -113,7 +152,7 @@ const DossierDetail = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
                   <div className="space-y-1">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Service Responsable</span>
-                    <p className="text-sm font-black text-slate-900 uppercase">{dossier.service}</p>
+                    <p className="text-sm font-black text-slate-900 uppercase">{dossier.service_name}</p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date de Création</span>
@@ -200,9 +239,11 @@ const DossierDetail = () => {
                     ))}
                   </div>
                   <div className="p-4 bg-slate-50 border-t border-slate-100">
-                    <Button variant="outline" className="w-full border-dashed border-2 border-slate-200 font-bold uppercase text-[10px] tracking-widest hover:border-primary hover:text-primary hover:bg-white transition-all">
-                      <Plus className="w-4 h-4 mr-2" /> Attacher un document existant
-                    </Button>
+                    {hasPermission('documents:create') && (
+                      <Button variant="outline" className="w-full border-dashed border-2 border-slate-200 font-bold uppercase text-[10px] tracking-widest hover:border-primary hover:text-primary hover:bg-white transition-all">
+                        <Plus className="w-4 h-4 mr-2" /> Attacher un document existant
+                      </Button>
+                    )}
                   </div>
                 </Card>
               </TabsContent>
@@ -254,9 +295,11 @@ const DossierDetail = () => {
                   ))}
                 </div>
                 <div className="p-4 bg-slate-50 border-t border-slate-100">
-                  <Button variant="outline" className="w-full text-[10px] font-black uppercase tracking-widest border-slate-200 bg-white">
-                    <Plus className="w-3 h-3 mr-2" /> Ajouter un participant
-                  </Button>
+                  {hasPermission('dossiers:assign_members') && (
+                    <Button variant="outline" className="w-full text-[10px] font-black uppercase tracking-widest border-slate-200 bg-white">
+                      <Plus className="w-3 h-3 mr-2" /> Ajouter un participant
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -307,18 +350,22 @@ const DossierDetail = () => {
             <div className="p-6 bg-slate-900 rounded-xl text-white shadow-xl space-y-4">
               <h4 className="text-sm font-black uppercase tracking-widest border-b border-white/10 pb-2">Actions Rapides</h4>
               <div className="grid grid-cols-2 gap-2">
-                <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 font-bold uppercase text-[9px] h-9">
-                  <CheckCircle2 className="w-3 h-3 mr-2" /> Valider Étape
-                </Button>
-                <Button size="sm" className="bg-amber-600 hover:bg-amber-700 font-bold uppercase text-[9px] h-9">
+                {hasPermission('documents:approve_service') && (
+                  <Button size="sm" onClick={() => handleDossierAction('Validation Étape')} className="bg-emerald-600 hover:bg-emerald-700 font-bold uppercase text-[9px] h-9">
+                    <CheckCircle2 className="w-3 h-3 mr-2" /> Valider Étape
+                  </Button>
+                )}
+                <Button size="sm" onClick={() => handleDossierAction('Rappel Urgence')} className="bg-amber-600 hover:bg-amber-700 font-bold uppercase text-[9px] h-9">
                   <AlertCircle className="w-3 h-3 mr-2" /> Rappel Urgence
                 </Button>
-                <Button variant="outline" size="sm" className="bg-transparent border-white/20 hover:bg-white/10 font-bold uppercase text-[9px] h-9">
+                <Button variant="outline" size="sm" onClick={() => handleDossierAction('Partage')} className="bg-transparent border-white/20 hover:bg-white/10 font-bold uppercase text-[9px] h-9">
                   <Share2 className="w-3 h-3 mr-2" /> Partager
                 </Button>
-                <Button variant="outline" size="sm" className="bg-transparent border-red-900/50 text-red-400 hover:bg-red-900/20 font-bold uppercase text-[9px] h-9">
-                  <Trash2 className="w-3 h-3 mr-2" /> Archiver
-                </Button>
+                {hasPermission('dossiers:close') && (
+                  <Button variant="outline" size="sm" onClick={() => handleDossierAction('Archivage Dossier')} className="bg-transparent border-red-900/50 text-red-400 hover:bg-red-900/20 font-bold uppercase text-[9px] h-9">
+                    <Trash2 className="w-3 h-3 mr-2" /> Archiver
+                  </Button>
+                )}
               </div>
             </div>
           </div>

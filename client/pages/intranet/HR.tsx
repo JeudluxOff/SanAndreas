@@ -51,9 +51,14 @@ const employees = [
 ];
 
 const HR = () => {
-  const { user } = useAuth();
-  const isAdmin = user?.role === 'gouverneur' || user?.role === 'vice_gouverneur';
+  const { user, hasPermission, logAction } = useAuth();
+  const canManageUsers = hasPermission('admin:users_manage');
+  const canManageRoles = hasPermission('admin:roles_manage');
   const [searchTerm, setSearchTerm] = useState("");
+
+  const handleAdminAction = (action: string, target?: string) => {
+    logAction(`${action}${target ? ' sur ' + target : ''}`);
+  };
 
   const filteredEmployees = employees.filter(emp => 
     emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -78,12 +83,12 @@ const HR = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {isAdmin && (
-              <Button className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold gap-2">
+            {canManageUsers && (
+              <Button className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold gap-2" onClick={() => handleAdminAction('Ouverture formulaire ajout employé')}>
                 <UserPlus className="w-4 h-4" /> Ajouter un Employé
               </Button>
             )}
-            <Button variant="outline" className="border-slate-300 font-bold gap-2">
+            <Button variant="outline" className="border-slate-300 font-bold gap-2" onClick={() => handleAdminAction('Export annuaire')}>
               <Printer className="w-4 h-4" /> Imprimer Annuaire
             </Button>
           </div>
@@ -242,13 +247,13 @@ const HR = () => {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary" title="Historique">
                             <History className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary" title="Fiche complète">
                             <ArrowRight className="w-4 h-4" />
                           </Button>
-                          {isAdmin && (
+                          {(canManageUsers || canManageRoles) && (
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400">
@@ -258,19 +263,27 @@ const HR = () => {
                               <DropdownMenuContent align="end" className="w-48 font-bold text-xs uppercase tracking-tighter">
                                 <DropdownMenuLabel>Gestion Agent</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem className="flex items-center gap-2">
-                                  <UserCog className="w-4 h-4" /> Modifier Rôle
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="flex items-center gap-2">
-                                  <ShieldCheck className="w-4 h-4" /> Permissions RBAC
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="flex items-center gap-2">
+                                {canManageRoles && (
+                                  <>
+                                    <DropdownMenuItem className="flex items-center gap-2" onClick={() => handleAdminAction('Modification rôle', emp.name)}>
+                                      <UserCog className="w-4 h-4" /> Modifier Rôle
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="flex items-center gap-2" onClick={() => handleAdminAction('Audit permissions', emp.name)}>
+                                      <ShieldCheck className="w-4 h-4" /> Permissions RBAC
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+                                <DropdownMenuItem className="flex items-center gap-2" onClick={() => handleAdminAction('Consultation logs', emp.name)}>
                                   <Activity className="w-4 h-4" /> Logs Activité
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="flex items-center gap-2 text-red-600">
-                                  <Trash2 className="w-4 h-4" /> Retirer Accès
-                                </DropdownMenuItem>
+                                {canManageUsers && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="flex items-center gap-2 text-red-600" onClick={() => handleAdminAction('Révocation accès', emp.name)}>
+                                      <Trash2 className="w-4 h-4" /> Retirer Accès
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           )}
@@ -292,7 +305,9 @@ const HR = () => {
                 <ShieldCheck className="w-4 h-4" />
                 Matrice des Rôles (RBAC)
               </CardTitle>
-              <Button variant="ghost" size="sm" className="bg-white/10 text-white hover:bg-white/20 font-bold text-[9px]">Gérer Rôles</Button>
+              {canManageRoles && (
+                <Button variant="ghost" size="sm" className="bg-white/10 text-white hover:bg-white/20 font-bold text-[9px]" onClick={() => handleAdminAction('Gestion globale des rôles')}>Gérer Rôles</Button>
+              )}
             </CardHeader>
             <CardContent className="pt-6">
               <div className="space-y-4">

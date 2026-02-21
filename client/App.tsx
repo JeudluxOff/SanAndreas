@@ -7,9 +7,11 @@ import Services from "./pages/Services";
 import Login from "./pages/Login";
 import Dashboard from "./pages/intranet/Dashboard";
 import Documents from "./pages/intranet/Documents";
+import Dossiers from "./pages/intranet/Dossiers";
 import DossierDetail from "./pages/intranet/DossierDetail";
 import Workspace from "./pages/intranet/Workspace";
 import HR from "./pages/intranet/HR";
+import AuditLogs from "./pages/intranet/AuditLogs";
 import Communication from "./pages/intranet/Communication";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
@@ -42,12 +44,12 @@ const AppRoutes = () => (
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/documents" element={<Documents />} />
-            <Route path="/dossiers" element={<Placeholder title="Gestion des Dossiers" />} />
+            <Route path="/dossiers" element={<Dossiers />} />
             <Route path="/dossiers/:id" element={<DossierDetail />} />
             <Route path="/workspace/:serviceId" element={<Workspace />} />
             <Route path="/workspaces" element={<Placeholder title="Espaces de Travail" />} />
             <Route path="/calendar" element={<Placeholder title="Planning & Réunions" />} />
-            <Route path="/logs" element={<Placeholder title="Audit & Logs" />} />
+            <Route path="/logs" element={<AuditLogs />} />
             <Route path="/hr" element={<HR />} />
             <Route path="/communication" element={<Communication />} />
             <Route path="*" element={<NotFound />} />

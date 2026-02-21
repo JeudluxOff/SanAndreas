@@ -21,7 +21,7 @@ import {
   Activity,
   Briefcase
 } from 'lucide-react';
-import { useAuth, Role } from '@/contexts/AuthContext';
+import { useAuth, Role, Permission, ServiceID } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
@@ -40,30 +40,45 @@ interface SidebarItem {
   label: string;
   path: string;
   icon: React.ReactNode;
-  roles?: Role[];
+  permission?: Permission;
 }
 
 const sidebarItems: SidebarItem[] = [
-  { label: 'Tableau de Bord', path: '/intranet', icon: <LayoutDashboard className="w-5 h-5" /> },
-  { label: 'Bibliothèque Documents', path: '/intranet/documents', icon: <FileText className="w-5 h-5" /> },
-  { label: 'Gestion des Dossiers', path: '/intranet/dossiers', icon: <FolderOpen className="w-5 h-5" /> },
-  { label: 'Communication Interne', path: '/intranet/communication', icon: <MessageSquare className="w-5 h-5" /> },
-  { label: 'Planning & Réunions', path: '/intranet/calendar', icon: <Calendar className="w-5 h-5" /> },
-  { label: 'Espaces de Travail', path: '/intranet/workspaces', icon: <Briefcase className="w-5 h-5" /> },
-  { label: 'Annuaire & RH', path: '/intranet/hr', icon: <Users className="w-5 h-5" />, roles: ['gouverneur', 'vice_gouverneur', 'directeur'] },
-  { label: 'Audit & Logs', path: '/intranet/logs', icon: <Activity className="w-5 h-5" />, roles: ['gouverneur', 'auditeur'] },
+  { label: 'Tableau de Bord', path: '/intranet', icon: <LayoutDashboard className="w-5 h-5" />, permission: 'dashboard:view' },
+  { label: 'Bibliothèque Documents', path: '/intranet/documents', icon: <FileText className="w-5 h-5" />, permission: 'documents:view' },
+  { label: 'Gestion des Dossiers', path: '/intranet/dossiers', icon: <FolderOpen className="w-5 h-5" />, permission: 'dossiers:view' },
+  { label: 'Communication Interne', path: '/intranet/communication', icon: <MessageSquare className="w-5 h-5" />, permission: 'communication:view' },
+  { label: 'Planning & Réunions', path: '/intranet/calendar', icon: <Calendar className="w-5 h-5" />, permission: 'planning:view' },
+  { label: 'Espaces de Travail', path: '/intranet/workspaces', icon: <Briefcase className="w-5 h-5" />, permission: 'intranet:view' },
+  { label: 'Annuaire & RH', path: '/intranet/hr', icon: <Users className="w-5 h-5" />, permission: 'directory:view' },
+  { label: 'Audit & Logs', path: '/intranet/logs', icon: <Activity className="w-5 h-5" />, permission: 'audit:logs_view' },
+];
+
+const workspaceServices: { id: ServiceID, label: string, color: string }[] = [
+  { id: 'CABINET', label: 'Cabinet', color: 'bg-blue-500' },
+  { id: 'SECURITE_PUBLIQUE', label: 'Sécurité Publique', color: 'bg-emerald-500' },
+  { id: 'JUSTICE', label: 'Justice', color: 'bg-amber-500' },
+  { id: 'SANTE_HUMAINS', label: 'Santé & Humains', color: 'bg-red-500' },
+  { id: 'SECURITE_INTERIEURE', label: 'Sécurité Intérieure', color: 'bg-slate-500' },
+  { id: 'TRESOR_COMMERCE', label: 'Trésor & Commerce', color: 'bg-blue-700' },
+  { id: 'COMMUNICATION', label: 'Bureau de Presse', color: 'bg-purple-500' },
+  { id: 'ADMINISTRATION_GENERALE', label: 'Administration', color: 'bg-slate-700' },
 ];
 
 export function IntranetLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { user, logout } = useAuth();
+  const { user, logout, hasPermission, canAccessService } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
   if (!user) return null;
 
-  const filteredSidebarItems = sidebarItems.filter(item => 
-    !item.roles || item.roles.includes(user.role)
+  const filteredSidebarItems = sidebarItems.filter(item =>
+    !item.permission || hasPermission(item.permission)
+  );
+
+  const visibleWorkspaces = workspaceServices.filter(ws =>
+    canAccessService(ws.id)
   );
 
   const handleLogout = () => {
@@ -125,22 +140,20 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          {sidebarOpen && (
+          {sidebarOpen && visibleWorkspaces.length > 0 && (
             <div className="mt-8 px-3">
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Espaces de Services</div>
               <div className="space-y-1">
-                <Link to="/intranet/workspace/cabinet" className="flex items-center gap-3 px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-all">
-                  <div className="w-2 h-2 rounded-full bg-blue-500" />
-                  Cabinet
-                </Link>
-                <Link to="/intranet/workspace/securite" className="flex items-center gap-3 px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-all">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                  Sécurité Publique
-                </Link>
-                <Link to="/intranet/workspace/justice" className="flex items-center gap-3 px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-all">
-                  <div className="w-2 h-2 rounded-full bg-amber-500" />
-                  Justice
-                </Link>
+                {visibleWorkspaces.map(ws => (
+                  <Link
+                    key={ws.id}
+                    to={`/intranet/workspace/${ws.id.toLowerCase()}`}
+                    className="flex items-center gap-3 px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-all"
+                  >
+                    <div className={cn("w-2 h-2 rounded-full", ws.color)} />
+                    {ws.label}
+                  </Link>
+                ))}
               </div>
             </div>
           )}
@@ -236,8 +249,8 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
               </Button>
               <div className="h-8 w-px bg-slate-200 mx-1 hidden sm:block" />
               <div className="hidden sm:flex flex-col text-right">
-                <span className="text-xs font-bold text-slate-900 leading-none">{user.service}</span>
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter mt-1">Secteur: {user.role.replace('_', ' ')}</span>
+                <span className="text-xs font-bold text-slate-900 leading-none">{user.service_name}</span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter mt-1">Secteur: {user.role.replace(/_/g, ' ')}</span>
               </div>
               <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 font-bold ml-2">
                 LIVE

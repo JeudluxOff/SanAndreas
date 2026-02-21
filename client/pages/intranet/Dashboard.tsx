@@ -30,23 +30,36 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, hasPermission, logAction } = useAuth();
 
   if (!user) return null;
 
   const notifications = [
-    { id: 1, type: 'validation', text: 'Décret #SA-2024-042 en attente de signature', time: 'il y a 2h', priority: 'high' },
-    { id: 2, type: 'assignment', text: 'Nouveau dossier judiciaire assigné #JD-8941', time: 'il y a 5h', priority: 'medium' },
-    { id: 3, type: 'meeting', text: 'Réunion de cabinet demain à 09:00', time: 'il y a 1j', priority: 'low' },
-    { id: 4, type: 'system', text: 'Mise à jour des protocoles de sécurité', time: 'il y a 2j', priority: 'medium' },
+    { id: 1, type: 'validation', text: 'Décret #SA-2024-042 en attente de signature', time: 'il y a 2h', priority: 'high', service_id: 'CABINET' },
+    { id: 2, type: 'assignment', text: 'Nouveau dossier judiciaire assigné #JD-8941', time: 'il y a 5h', priority: 'medium', service_id: 'JUSTICE' },
+    { id: 3, type: 'meeting', text: 'Réunion de cabinet demain à 09:00', time: 'il y a 1j', priority: 'low', service_id: 'CABINET' },
+    { id: 4, type: 'system', text: 'Mise à jour des protocoles de sécurité', time: 'il y a 2j', priority: 'medium', service_id: 'SECURITE_PUBLIQUE' },
   ];
 
   const recentFiles = [
-    { id: 'SA-2024-0142', title: 'Plan d\'Urbanisme Los Santos', status: 'En cours', service: 'Urbanisme', date: '20 Mai 2024' },
-    { id: 'JD-2024-0894', title: 'Procédure Vercetti vs État', status: 'À valider', service: 'Justice', date: '18 Mai 2024' },
-    { id: 'SEC-2024-0012', title: 'Rapport Sécurité Hebdomadaire', status: 'Archivé', service: 'LSPD', date: '15 Mai 2024' },
-    { id: 'ECO-2024-0556', title: 'Subvention Entreprise #88', status: 'Publié', service: 'Économie', date: '12 Mai 2024' },
+    { id: 'SA-2024-0142', title: 'Plan d\'Urbanisme Los Santos', status: 'En cours', service: 'Urbanisme', date: '20 Mai 2024', service_id: 'CABINET', acl: [] },
+    { id: 'JD-2024-0894', title: 'Procédure Vercetti vs État', status: 'À valider', service: 'Justice', date: '18 Mai 2024', service_id: 'JUSTICE', acl: ['sec_securite'] },
+    { id: 'SEC-2024-0012', title: 'Rapport Sécurité Hebdomadaire', status: 'Archivé', service: 'LSPD', date: '15 Mai 2024', service_id: 'SECURITE_PUBLIQUE', acl: [] },
+    { id: 'ECO-2024-0556', title: 'Subvention Entreprise #88', status: 'Publié', service: 'Économie', date: '12 Mai 2024', service_id: 'TRESOR_COMMERCE', acl: [] },
   ];
+
+  const filteredFiles = recentFiles.filter(file => {
+    const isGovernor = user?.role === 'gouverneur';
+    const isOwner = file.service_id === user?.service_id;
+    const inACL = user?.id && file.acl.includes(user.id);
+    return isGovernor || isOwner || inACL;
+  });
+
+  const filteredNotifications = notifications.filter(n => {
+    const isGovernor = user?.role === 'gouverneur';
+    const isSameService = n.service_id === user?.service_id;
+    return isGovernor || isSameService;
+  });
 
   const announcements = [
     { id: 1, title: 'Note de Service #24-05', text: 'Nouvelles consignes pour la rédaction des décrets officiels.', date: 'Hier' },
@@ -78,11 +91,13 @@ const Dashboard = () => {
                 Quitter l'espace
               </Button>
             </Link>
-            <Button className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold rounded shadow-lg flex items-center gap-2 h-10 px-4 uppercase text-[10px] tracking-widest">
-              <PlusCircle className="w-4 h-4" />
-              Nouveau Dossier
-            </Button>
-            <Button variant="outline" className="border-slate-300 font-bold flex items-center gap-2">
+            {hasPermission('dossiers:create') && (
+              <Button className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold rounded shadow-lg flex items-center gap-2 h-10 px-4 uppercase text-[10px] tracking-widest" onClick={() => logAction('Création nouveau dossier (interface)')}>
+                <PlusCircle className="w-4 h-4" />
+                Nouveau Dossier
+              </Button>
+            )}
+            <Button variant="outline" className="border-slate-300 font-bold flex items-center gap-2 h-10 px-4 uppercase text-[10px] tracking-widest" onClick={() => logAction('Consultation journal activité')}>
               <Clock className="w-4 h-4" />
               Journal d'activité
             </Button>
@@ -218,7 +233,7 @@ const Dashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {recentFiles.map((file) => (
+                      {filteredFiles.map((file) => (
                         <tr key={file.id} className="hover:bg-slate-50/80 transition-colors group">
                           <td className="px-6 py-4 font-mono text-xs font-bold text-primary">{file.id}</td>
                           <td className="px-6 py-4">
@@ -242,9 +257,11 @@ const Dashboard = () => {
                             </Badge>
                           </td>
                           <td className="px-6 py-4 text-right">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 group-hover:text-primary transition-colors">
-                              <ArrowRight className="w-4 h-4" />
-                            </Button>
+                            <Link to={`/intranet/dossiers/${file.id}`}>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 group-hover:text-primary transition-colors">
+                                <ArrowRight className="w-4 h-4" />
+                              </Button>
+                            </Link>
                           </td>
                         </tr>
                       ))}
@@ -291,14 +308,14 @@ const Dashboard = () => {
                     Notifications
                   </CardTitle>
                   <Badge variant="outline" className="bg-white font-bold border-slate-200">
-                    {notifications.length}
+                    {filteredNotifications.length}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
                 <ScrollArea className="h-[320px]">
                   <div className="divide-y divide-slate-100">
-                    {notifications.map((notif) => (
+                    {filteredNotifications.map((notif) => (
                       <div key={notif.id} className="p-4 hover:bg-slate-50 transition-colors flex gap-4 items-start relative overflow-hidden group">
                         {notif.priority === 'high' && <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500" />}
                         <div className={cn(

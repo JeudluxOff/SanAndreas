@@ -118,10 +118,18 @@ const Login = () => {
               <div className="mt-8 p-4 bg-slate-50 border border-slate-200 rounded-lg">
                 <div className="flex gap-3">
                   <Info className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                  <div className="text-xs text-slate-600 space-y-2">
-                    <p className="font-bold text-slate-900 uppercase">Information de Connexion (Demo)</p>
-                    <p>Utilisez <code className="bg-slate-200 px-1 py-0.5 rounded">governor</code> / <code className="bg-slate-200 px-1 py-0.5 rounded">admin</code> pour tester l'accès Gouverneur.</p>
-                    <p>Utilisez <code className="bg-slate-200 px-1 py-0.5 rounded">securite</code> / <code className="bg-slate-200 px-1 py-0.5 rounded">admin</code> pour tester l'accès Sécurité.</p>
+                  <div className="text-xs text-slate-600 space-y-3">
+                    <p className="font-bold text-slate-900 uppercase border-b border-slate-200 pb-1 text-[10px] tracking-widest">Identifiants de Test (Mots de passe : admin)</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <p><code className="bg-slate-200 px-1 py-0.5 rounded">governor</code> (Gov.)</p>
+                      <p><code className="bg-slate-200 px-1 py-0.5 rounded">lt_governor</code> (Lt.)</p>
+                      <p><code className="bg-slate-200 px-1 py-0.5 rounded">sec_etat</code> (Admin)</p>
+                      <p><code className="bg-slate-200 px-1 py-0.5 rounded">sec_securite</code> (Sécu.)</p>
+                      <p><code className="bg-slate-200 px-1 py-0.5 rounded">press</code> (Presse)</p>
+                      <p><code className="bg-slate-200 px-1 py-0.5 rounded">sec_justice</code> (Just.)</p>
+                      <p><code className="bg-slate-200 px-1 py-0.5 rounded">sec_sante</code> (Santé)</p>
+                      <p><code className="bg-slate-200 px-1 py-0.5 rounded">sec_tresor</code> (Éco.)</p>
+                    </div>
                   </div>
                 </div>
               </div>

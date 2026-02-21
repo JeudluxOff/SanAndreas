@@ -19,7 +19,9 @@ import {
   Eye,
   Edit3,
   Trash2,
-  ArrowUpDown
+  ArrowUpDown,
+  ShieldCheck,
+  FileClock
 } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
 import { Link } from "react-router-dom";
@@ -44,26 +46,41 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
+import { useAuth, Permission, ServiceID } from "@/contexts/AuthContext";
+
 const documents = [
-  { id: 'DEC-24-0042', title: 'Décret sur la régulation des commerces', type: 'Décret', status: 'Signé', author: 'Arthur Vance', date: '22 Mai 2024', service: 'Cabinet' },
-  { id: 'ARR-24-1102', title: 'Arrêté préfectoral zone de sécurité', type: 'Arrêté', status: 'En relecture', author: 'Jackson Teller', date: '21 Mai 2024', service: 'Sécurité' },
-  { id: 'RAP-24-0892', title: 'Rapport trimestriel économique Q1', type: 'Rapport', status: 'Brouillon', author: 'Elena Rodriguez', date: '19 Mai 2024', service: 'Économie' },
-  { id: 'MAN-24-0012', title: 'Mandat d\'arrêt #SA-99', type: 'Mandat', status: 'Exécuté', author: 'Thomas Vercetti', date: '15 Mai 2024', service: 'Justice' },
-  { id: 'LIC-24-0556', title: 'Licence commerciale #884', type: 'Licence', status: 'Publié', author: 'Lamar Davis', date: '12 Mai 2024', service: 'Commerce' },
-  { id: 'DOS-24-0142', title: 'Dossier Judiciaire Vercetti', type: 'Dossier', status: 'Archivé', author: 'System', date: '10 Mai 2024', service: 'Justice' },
-  { id: 'DEC-24-0041', title: 'Décret sur les subventions SAMS', type: 'Décret', status: 'Signé', author: 'Arthur Vance', date: '08 Mai 2024', service: 'Cabinet' },
-  { id: 'COM-24-0001', title: 'Note de service RH #01', type: 'RH', status: 'Publié', author: 'Lamar Davis', date: '05 Mai 2024', service: 'RH' },
+  { id: 'DEC-24-0042', title: 'Décret sur la régulation des commerces', type: 'Décret', status: 'Signé', author: 'Arthur Vance', date: '22 Mai 2024', service_id: 'CABINET', service_name: 'Cabinet', acl: [] },
+  { id: 'ARR-24-1102', title: 'Arrêté préfectoral zone de sécurité', type: 'Arrêté', status: 'En relecture', author: 'Jackson Teller', date: '21 Mai 2024', service_id: 'SECURITE_PUBLIQUE', service_name: 'Sécurité', acl: [] },
+  { id: 'RAP-24-0892', title: 'Rapport trimestriel économique Q1', type: 'Rapport', status: 'Brouillon', author: 'Elena Rodriguez', date: '19 Mai 2024', service_id: 'TRESOR_COMMERCE', service_name: 'Économie', acl: ['sec_etat'] },
+  { id: 'MAN-24-0012', title: 'Mandat d\'arrêt #SA-99', type: 'Mandat', status: 'Exécuté', author: 'Thomas Vercetti', date: '15 Mai 2024', service_id: 'JUSTICE', service_name: 'Justice', acl: ['sec_securite'] },
+  { id: 'LIC-24-0556', title: 'Licence commerciale #884', type: 'Licence', status: 'Publié', author: 'Lamar Davis', date: '12 Mai 2024', service_id: 'TRESOR_COMMERCE', service_name: 'Commerce', acl: [] },
+  { id: 'DOS-24-0142', title: 'Dossier Judiciaire Vercetti', type: 'Dossier', status: 'Archivé', author: 'System', date: '10 Mai 2024', service_id: 'JUSTICE', service_name: 'Justice', acl: [] },
+  { id: 'DEC-24-0041', title: 'Décret sur les subventions SAMS', type: 'Décret', status: 'Signé', author: 'Arthur Vance', date: '08 Mai 2024', service_id: 'CABINET', service_name: 'Cabinet', acl: [] },
+  { id: 'COM-24-0001', title: 'Note de service RH #01', type: 'RH', status: 'Publié', author: 'Lamar Davis', date: '05 Mai 2024', service_id: 'ADMINISTRATION_GENERALE', service_name: 'RH', acl: [] },
 ];
 
 const Documents = () => {
+  const { user, hasPermission, logAction } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
 
-  const filteredDocs = documents.filter(doc => 
-    (doc.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-     doc.id.toLowerCase().includes(searchTerm.toLowerCase())) &&
-    (filterType === "all" || doc.type === filterType)
-  );
+  const filteredDocs = documents.filter(doc => {
+    const matchesSearch = (doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          doc.id.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesType = (filterType === "all" || doc.type === filterType);
+
+    // RBAC Visibility Rules
+    const isGovernor = user?.role === 'gouverneur';
+    const isOwner = doc.service_id === user?.service_id;
+    const inACL = user?.id && doc.acl.includes(user.id);
+
+    return matchesSearch && matchesType && (isGovernor || isOwner || inACL);
+  });
+
+  const handleAction = (action: string, docTitle: string) => {
+    logAction(`${action} sur le document: ${docTitle}`);
+    // In a real app, this would trigger an API call to update doc status
+  };
 
   return (
     <IntranetLayout>
@@ -82,10 +99,12 @@ const Documents = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Nouveau Document
-            </Button>
+            {hasPermission('documents:create') && (
+              <Button className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Nouveau Document
+              </Button>
+            )}
             <Button variant="outline" className="border-slate-300 font-bold flex items-center gap-2">
               <Printer className="w-4 h-4" />
               Imprimer Liste
@@ -176,7 +195,7 @@ const Documents = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-xs font-bold text-slate-700">{doc.service}</span>
+                          <span className="text-xs font-bold text-slate-700">{doc.service_name}</span>
                           <span className="text-[10px] font-medium text-slate-500">{doc.author}</span>
                         </div>
                       </td>
@@ -195,34 +214,70 @@ const Documents = () => {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-primary">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-primary" title="Voir">
                             <Eye className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-primary">
-                            <Edit3 className="w-4 h-4" />
-                          </Button>
+                          {hasPermission('documents:edit') && (doc.service_id === user?.service_id || user?.role === 'gouverneur') && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-primary" title="Modifier">
+                              <Edit3 className="w-4 h-4" />
+                            </Button>
+                          )}
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500">
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48 font-bold text-xs uppercase tracking-tighter">
-                              <DropdownMenuLabel>Options Document</DropdownMenuLabel>
+                            <DropdownMenuContent align="end" className="w-56 font-bold text-xs uppercase tracking-tighter">
+                              <DropdownMenuLabel>Actions Gouvernementales</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+
+                              {doc.status === 'Brouillon' && hasPermission('documents:submit_review') && (
+                                <DropdownMenuItem className="flex items-center gap-2 text-blue-600" onClick={() => handleAction('Soumission relecture', doc.title)}>
+                                  <FileClock className="w-4 h-4" /> Soumettre relecture
+                                </DropdownMenuItem>
+                              )}
+
+                              {doc.status === 'En relecture' && hasPermission('documents:approve_service') && doc.service_id === user?.service_id && (
+                                <DropdownMenuItem className="flex items-center gap-2 text-emerald-600" onClick={() => handleAction('Validation Service', doc.title)}>
+                                  <FileCheck className="w-4 h-4" /> Valider (Service)
+                                </DropdownMenuItem>
+                              )}
+
+                              {hasPermission('documents:approve_state') && (
+                                <DropdownMenuItem className="flex items-center gap-2 text-amber-600" onClick={() => handleAction('Approbation État', doc.title)}>
+                                  <ShieldCheck className="w-4 h-4" /> Approuver (État)
+                                </DropdownMenuItem>
+                              )}
+
+                              {hasPermission('documents:sign') && (
+                                <DropdownMenuItem className="flex items-center gap-2 text-primary font-black" onClick={() => handleAction('Signature officielle', doc.title)}>
+                                  <Edit3 className="w-4 h-4" /> Signer le Document
+                                </DropdownMenuItem>
+                              )}
+
+                              {hasPermission('documents:publish') && (
+                                <DropdownMenuItem className="flex items-center gap-2 text-indigo-600" onClick={() => handleAction('Publication', doc.title)}>
+                                  <Share2 className="w-4 h-4" /> Publier
+                                </DropdownMenuItem>
+                              )}
+
                               <DropdownMenuSeparator />
                               <DropdownMenuItem className="flex items-center gap-2">
                                 <Download className="w-4 h-4" /> Télécharger PDF
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="flex items-center gap-2">
-                                <Share2 className="w-4 h-4" /> Partager Interne
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="flex items-center gap-2">
-                                <Printer className="w-4 h-4" /> Imprimer
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="flex items-center gap-2 text-red-600">
-                                <Trash2 className="w-4 h-4" /> Supprimer
-                              </DropdownMenuItem>
+
+                              {hasPermission('documents:archive') && (
+                                <DropdownMenuItem className="flex items-center gap-2 text-slate-500" onClick={() => handleAction('Archivage', doc.title)}>
+                                  <FileLock2 className="w-4 h-4" /> Archiver
+                                </DropdownMenuItem>
+                              )}
+
+                              {hasPermission('documents:delete') && (
+                                <DropdownMenuItem className="flex items-center gap-2 text-red-600" onClick={() => handleAction('Suppression', doc.title)}>
+                                  <Trash2 className="w-4 h-4" /> Supprimer
+                                </DropdownMenuItem>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>

@@ -35,35 +35,50 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 
-const channels = [
-  { id: 'general', name: 'annonces-officielles', type: 'announcement', icon: <Volume2 className="w-4 h-4" /> },
-  { id: 'cabinet', name: 'cabinet-gouverneur', type: 'channel', icon: <Hash className="w-4 h-4" /> },
-  { id: 'securite', name: 'securite-publique', type: 'channel', icon: <Hash className="w-4 h-4" /> },
-  { id: 'justice', name: 'justice-parquet', type: 'channel', icon: <Hash className="w-4 h-4" /> },
+const allChannels = [
+  { id: 'general', name: 'annonces-officielles', type: 'announcement', icon: <Volume2 className="w-4 h-4" />, service_id: 'CABINET' as ServiceID },
+  { id: 'cabinet', name: 'cabinet-gouverneur', type: 'channel', icon: <Hash className="w-4 h-4" />, service_id: 'CABINET' as ServiceID },
+  { id: 'securite', name: 'securite-publique', type: 'channel', icon: <Hash className="w-4 h-4" />, service_id: 'SECURITE_PUBLIQUE' as ServiceID },
+  { id: 'justice', name: 'justice-parquet', type: 'channel', icon: <Hash className="w-4 h-4" />, service_id: 'JUSTICE' as ServiceID },
+  { id: 'sante', name: 'sante-services', type: 'channel', icon: <Hash className="w-4 h-4" />, service_id: 'SANTE_HUMAINS' as ServiceID },
+  { id: 'tresor', name: 'tresor-commerce', type: 'channel', icon: <Hash className="w-4 h-4" />, service_id: 'TRESOR_COMMERCE' as ServiceID },
+  { id: 'admin', name: 'administration-coordination', type: 'channel', icon: <Hash className="w-4 h-4" />, service_id: 'ADMINISTRATION_GENERALE' as ServiceID },
 ];
 
 const directMessages = [
-  { id: 'arthur', name: 'Arthur Vance', role: 'Gouverneur', status: 'online' },
-  { id: 'elena', name: 'Elena Rodriguez', role: 'Press Secretary', status: 'online' },
-  { id: 'jackson', name: 'Jackson Teller', role: 'Secrétaire Sécurité', status: 'offline' },
-  { id: 'thomas', name: 'Thomas Vercetti', role: 'Secrétaire Justice', status: 'online' },
+  { id: 'governor', name: 'Arthur Vance', role: 'Gouverneur', status: 'online' },
+  { id: 'lt_governor', name: 'Elena Rodriguez', role: 'Lt-Gouverneur', status: 'online' },
+  { id: 'sec_securite', name: 'Jackson Teller', role: 'Secrétaire Sécurité', status: 'offline' },
+  { id: 'sec_justice', name: 'Thomas Vercetti', role: 'Secrétaire Justice', status: 'online' },
 ];
 
 const messages = [
   { id: 1, user: 'Arthur Vance', role: 'Gouverneur', text: 'Bonjour à tous, une réunion de cabinet est prévue à 14h00 pour discuter du plan d\'urbanisme.', time: '09:15', isMe: false },
-  { id: 2, user: 'Elena Rodriguez', role: 'PR', text: 'Bien reçu, je prépare le communiqué de presse préliminaire.', time: '09:20', isMe: false },
-  { id: 3, user: 'Jackson Teller', role: 'Sécurité', text: 'Je serai présent avec le rapport de sécurité de la zone sud.', time: '09:25', isMe: false },
+  { id: 2, user: 'Elena Rodriguez', role: 'Lt-Gouv', text: 'Bien reçu, je prépare le communiqué de presse préliminaire.', time: '09:20', isMe: false },
+  { id: 3, user: 'James Marshall', role: 'Sec. État', text: 'Coordination administrative en cours avec tous les services.', time: '09:25', isMe: false },
   { id: 4, user: 'Moi', role: 'Secrétaire', text: 'J\'ai mis à jour les dossiers correspondants sur l\'intranet.', time: '09:30', isMe: true },
 ];
 
 const Communication = () => {
-  const { user } = useAuth();
-  const [activeChannel, setActiveChannel] = useState(channels[0]);
+  const { user, canAccessService, hasPermission, logAction } = useAuth();
+
+  const visibleChannels = allChannels.filter(channel =>
+    channel.id === 'general' || canAccessService(channel.service_id)
+  );
+
+  const [activeChannel, setActiveChannel] = useState(visibleChannels[0]);
   const [message, setMessage] = useState("");
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
+
+    if (activeChannel.type === 'announcement' && !hasPermission('communication:announcements_post')) {
+      alert("Vous n'avez pas l'autorisation de poster dans le salon des annonces officielles.");
+      return;
+    }
+
+    logAction('Envoi de message', { channel: activeChannel.name });
     // Mock sending message
     setMessage("");
   };
@@ -96,20 +111,20 @@ const Communication = () => {
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Salons Officiels</span>
                   <Plus className="w-3 h-3 text-slate-400 hover:text-primary cursor-pointer" />
                 </div>
-                {channels.map((channel) => (
+                {visibleChannels.map((channel) => (
                   <button
                     key={channel.id}
                     onClick={() => setActiveChannel(channel)}
                     className={cn(
                       "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all group",
-                      activeChannel.id === channel.id 
-                        ? "bg-primary text-white font-bold shadow-md" 
+                      activeChannel?.id === channel.id
+                        ? "bg-primary text-white font-bold shadow-md"
                         : "text-slate-600 hover:bg-white hover:text-primary hover:shadow-sm"
                     )}
                   >
                     <div className={cn(
                       "p-1.5 rounded-md",
-                      activeChannel.id === channel.id ? "bg-white/20" : "bg-slate-200 group-hover:bg-primary/10"
+                      activeChannel?.id === channel.id ? "bg-white/20" : "bg-slate-200 group-hover:bg-primary/10"
                     )}>
                       {channel.icon}
                     </div>
@@ -180,11 +195,11 @@ const Communication = () => {
                 </Button>
               </Link>
               <div className="bg-primary/10 p-2 rounded-lg text-primary">
-                {activeChannel.icon}
+                {activeChannel?.icon}
               </div>
               <div>
-                <h3 className="text-sm font-black uppercase tracking-tight text-slate-900">#{activeChannel.name}</h3>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Salon {activeChannel.type === 'announcement' ? 'd\'annonces officielles' : 'de discussion interne'}</p>
+                <h3 className="text-sm font-black uppercase tracking-tight text-slate-900">#{activeChannel?.name}</h3>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Salon {activeChannel?.type === 'announcement' ? 'd\'annonces officielles' : 'de discussion interne'}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -210,7 +225,7 @@ const Communication = () => {
                   <MessageSquare className="w-12 h-12" />
                 </div>
                 <div>
-                  <h4 className="text-lg font-black uppercase tracking-tight text-slate-900">Bienvenue dans #{activeChannel.name}</h4>
+                  <h4 className="text-lg font-black uppercase tracking-tight text-slate-900">Bienvenue dans #{activeChannel?.name}</h4>
                   <p className="text-sm text-slate-500 max-w-md italic">C'est le début de l'historique de ce salon. Les communications ici sont archivées et soumises aux protocoles de sécurité de l'État.</p>
                 </div>
                 <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
@@ -259,8 +274,8 @@ const Communication = () => {
           {/* Chat Input */}
           <footer className="p-6 bg-white border-t border-slate-200">
             <form onSubmit={handleSendMessage} className="relative bg-slate-50 border border-slate-200 rounded-2xl p-2 shadow-inner focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
-              <textarea 
-                placeholder={`Message dans #${activeChannel.name}...`}
+              <textarea
+                placeholder={`Message dans #${activeChannel?.name}...`}
                 className="w-full bg-transparent border-none focus:outline-none focus:ring-0 p-3 text-sm font-medium min-h-[60px] resize-none"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
@@ -310,12 +325,12 @@ const Communication = () => {
           <div className="p-6 space-y-8">
             <div className="space-y-4 text-center">
               <div className="mx-auto p-4 bg-primary/10 rounded-2xl text-primary w-fit">
-                {activeChannel.icon}
+                {activeChannel?.icon}
               </div>
               <div>
-                <h4 className="text-sm font-black uppercase tracking-tight text-slate-900">À propos de #{activeChannel.name}</h4>
+                <h4 className="text-sm font-black uppercase tracking-tight text-slate-900">À propos de #{activeChannel?.name}</h4>
                 <p className="text-[11px] text-slate-500 italic mt-1 leading-relaxed">
-                  Salon utilisé pour les communications relatives au {activeChannel.id === 'general' ? 'Gouvernement entier' : 'service ' + activeChannel.name}.
+                  Salon utilisé pour les communications relatives au {activeChannel?.id === 'general' ? 'Gouvernement entier' : 'service ' + activeChannel?.name}.
                 </p>
               </div>
             </div>

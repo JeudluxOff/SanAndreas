@@ -17,7 +17,8 @@ import {
   Gavel,
   ShieldAlert,
   Download,
-  Printer
+  Printer,
+  Lock
 } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -27,11 +28,35 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
+import { useAuth, ServiceID, Permission } from "@/contexts/AuthContext";
+
 const Workspace = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
+  const { user, canAccessService, hasPermission, logAction } = useAuth();
+
+  const upperServiceId = serviceId?.toUpperCase() as ServiceID;
+
+  if (!canAccessService(upperServiceId)) {
+    return (
+      <IntranetLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
+          <div className="p-6 bg-amber-50 text-amber-600 rounded-full border-4 border-amber-100 shadow-xl">
+            <ShieldAlert className="w-16 h-16" />
+          </div>
+          <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Accès Restreint</h1>
+          <p className="text-slate-500 max-w-md font-medium italic">
+            Vous n'êtes pas assigné à cet espace de service. L'accès est réservé aux membres du service et à l'Exécutif.
+          </p>
+          <Button onClick={() => window.history.back()} className="bg-slate-900 text-white font-bold uppercase tracking-widest px-8">
+            Retourner
+          </Button>
+        </div>
+      </IntranetLayout>
+    );
+  }
 
   // Mock data for workspaces
-  const workspaces = {
+  const workspaces: Record<string, any> = {
     cabinet: {
       name: "Cabinet du Gouverneur",
       icon: <ShieldCheck className="w-8 h-8" />,
@@ -42,11 +67,10 @@ const Workspace = () => {
       procedures: ["Rédaction d'un décret", "Protocole de signature", "Liaison inter-agences"],
       staff: [
         { name: "Arthur Vance", role: "Gouverneur", role_short: "Gov" },
-        { name: "Elena Rodriguez", role: "Press Secretary", role_short: "PR" },
-        { name: "Julian Frost", role: "Secrétaire Santé", role_short: "Santé" }
+        { name: "Elena Rodriguez", role: "Lieutenant-Gouverneur", role_short: "Lt-Gov" }
       ]
     },
-    securite: {
+    securite_publique: {
       name: "Sécurité Publique (LSPD/LSSD)",
       icon: <ShieldAlert className="w-8 h-8" />,
       color: "bg-emerald-700",
@@ -55,8 +79,7 @@ const Workspace = () => {
       description: "Coordination des forces de l'ordre, gestion des budgets de sécurité et élaboration des plans de réponse aux urgences.",
       procedures: ["Rapport d'incident", "Demande de renforts", "Protocole d'intervention"],
       staff: [
-        { name: "Jackson Teller", role: "Secrétaire Sécurité", role_short: "Sec" },
-        { name: "Tommy Vercetti", role: "Secrétaire Justice", role_short: "Jus" }
+        { name: "Jackson Teller", role: "Secrétaire Sécurité", role_short: "Sec" }
       ]
     },
     justice: {
@@ -71,8 +94,32 @@ const Workspace = () => {
         { name: "Thomas Vercetti", role: "Secrétaire Justice", role_short: "Sec" }
       ]
     },
-    economie: {
-      name: "Économie & Commerce",
+    sante_humains: {
+      name: "Santé & Services Humains",
+      icon: <HeartPulse className="w-8 h-8" />,
+      color: "bg-red-600",
+      members: 42,
+      activeDossiers: 30,
+      description: "Gestion de la santé publique, des services sociaux et des protocoles d'urgence médicale (SAMS).",
+      procedures: ["Aide sociale", "Licence médicale", "Rapport épidémiologique"],
+      staff: [
+        { name: "Julian Frost", role: "Secrétaire Santé", role_short: "Sec" }
+      ]
+    },
+    securite_interieure: {
+      name: "Sécurité Intérieure",
+      icon: <Lock className="w-8 h-8" />,
+      color: "bg-slate-700",
+      members: 15,
+      activeDossiers: 12,
+      description: "Contre-espionnage, protection des infrastructures critiques et gestion des menaces intérieures.",
+      procedures: ["Habilitation Secret-Défense", "Surveillance zone", "Note de renseignement"],
+      staff: [
+        { name: "Sarah Connor", role: "Secrétaire S.I.", role_short: "Sec" }
+      ]
+    },
+    tresor_commerce: {
+      name: "Trésor & Commerce",
       icon: <TrendingUp className="w-8 h-8" />,
       color: "bg-blue-600",
       members: 18,
@@ -82,10 +129,38 @@ const Workspace = () => {
       staff: [
         { name: "Franklin Clinton", role: "Secrétaire Trésor", role_short: "Sec" }
       ]
+    },
+    communication: {
+      name: "Bureau de la Communication",
+      icon: <MessageSquare className="w-8 h-8" />,
+      color: "bg-purple-600",
+      members: 8,
+      activeDossiers: 5,
+      description: "Gestion de l'image du gouvernement, relations presse et diffusion des communiqués officiels.",
+      procedures: ["Communiqué de presse", "Briefing média", "Journal Officiel"],
+      staff: [
+        { name: "Lamar Davis", role: "Press Secretary", role_short: "Press" }
+      ]
+    },
+    administration_generale: {
+      name: "Administration Générale",
+      icon: <Briefcase className="w-8 h-8" />,
+      color: "bg-slate-800",
+      members: 30,
+      activeDossiers: 20,
+      description: "Coordination inter-services, gestion des ressources humaines et logistique gouvernementale.",
+      procedures: ["Formulaire embauche", "Demande matériel", "Ordre de mission"],
+      staff: [
+        { name: "James Marshall", role: "Secrétaire d'État", role_short: "Sec" }
+      ]
     }
   };
 
-  const currentWorkspace = workspaces[serviceId as keyof typeof workspaces] || workspaces.cabinet;
+  const currentWorkspace = workspaces[serviceId?.toLowerCase() || ''] || workspaces.cabinet;
+
+  const handleAction = (action: string) => {
+    logAction(`${action} dans le service: ${currentWorkspace.name}`);
+  };
 
   return (
     <IntranetLayout>
