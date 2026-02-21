@@ -90,40 +90,40 @@ const locations: Location[] = [
     phone: "911-BCSO-02"
   },
   {
-    id: 'ems-central',
+    id: 'sams-central',
     name: "Central Los Santos Medical Center",
     type: 'hospital',
     description: "Hôpital principal de l'État, spécialisé dans les urgences chirurgicales.",
     coords: { top: '71.533%', left: '52.483%' },
     address: "Capital Boulevard, Los Santos",
-    phone: "911-EMS-01"
+    phone: "911-SAMS-01"
   },
   {
-    id: 'ems-mount-zonah',
+    id: 'sams-mount-zonah',
     name: "Mount Zonah Medical Center",
     type: 'hospital',
     description: "Centre médical de renommée mondiale, leader en recherche et soins spécialisés.",
     coords: { top: '69.500%', left: '46.258%' },
     address: "Dorset Drive, Rockford Hills",
-    phone: "911-EMS-02"
+    phone: "911-SAMS-02"
   },
   {
-    id: 'ems-pillbox',
+    id: 'sams-pillbox',
     name: "Pillbox Hill Medical Center",
     type: 'hospital',
     description: "Hôpital de proximité au cœur du centre-ville, ouvert 24h/24.",
     coords: { top: '78.608%', left: '52.558%' },
     address: "Elgin Avenue, Los Santos",
-    phone: "911-EMS-03"
+    phone: "911-SAMS-03"
   },
   {
-    id: 'ems-sandy-shores',
+    id: 'sams-sandy-shores',
     name: "Sandy Shores Medical Center",
     type: 'hospital',
     description: "Seul centre de soins disponible dans la région du désert de Grand Senora.",
     coords: { top: '36.025%', left: '65.325%' },
     address: "Panorama Drive, Sandy Shores",
-    phone: "911-EMS-04"
+    phone: "911-SAMS-04"
   }
 ];
 
@@ -228,7 +228,7 @@ export default function Services() {
     }
   };
 
-  const handleMarkerTouchStart = (e: React.TouchEvent, loc: Location) => {
+  const onMarkerTouchStart = (e: React.TouchEvent, loc: Location) => {
     if (isEditMode) {
       e.stopPropagation();
       setIsDraggingMarker(loc.id);
@@ -240,18 +240,18 @@ export default function Services() {
     if (isDraggingMap || isDraggingMarker) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
-      window.addEventListener('touchmove', handleTouchMove as any);
+      window.addEventListener('touchmove', onMapTouchMove as any);
       window.addEventListener('touchend', handleMouseUp);
     }
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('touchmove', handleTouchMove as any);
+      window.removeEventListener('touchmove', onMapTouchMove as any);
       window.removeEventListener('touchend', handleMouseUp);
     };
   }, [isDraggingMap, isDraggingMarker, zoom, offset, dragStart]);
 
-  const handleTouchMove = (e: TouchEvent) => {
+  const onMapTouchMove = (e: TouchEvent) => {
     if (isEditMode && isDraggingMarker && mapRef.current) {
       const rect = mapRef.current.getBoundingClientRect();
       const touch = e.touches[0];
@@ -312,7 +312,7 @@ export default function Services() {
             {/* Control Panel */}
             <div className="w-full lg:w-1/3 space-y-8 order-2 lg:order-1">
               <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 space-y-6">
-                <h3 className="text-xl font-black text-primary uppercase tracking-tight flex items-center gap-2">
+                <h3 className="text-xl font-black text-primary uppercase tracking-tight flex itsams-center gap-2">
                   <Info className="w-5 h-5 text-secondary" />
                   Filtres de recherche
                 </h3>
@@ -342,7 +342,7 @@ export default function Services() {
                     )}
                     onClick={() => setFilter('hospital')}
                   >
-                    <HeartPulse className="mr-2 w-5 h-5" /> Hôpitaux & EMS
+                    <HeartPulse className="mr-2 w-5 h-5" /> Hôpitaux & SAMS
                   </Button>
                   <Button
                     variant={filter === 'government' ? 'default' : 'outline'}
@@ -359,7 +359,7 @@ export default function Services() {
 
               {/* Admin Tools */}
               <div className="bg-slate-900 p-6 rounded-lg shadow-xl border border-white/10 space-y-4">
-                <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
+                <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] flex itsams-center gap-2">
                   <Edit2 className="w-4 h-4 text-secondary" />
                   Outils d'Administration
                 </h3>
@@ -396,7 +396,7 @@ export default function Services() {
               {selectedLocation ? (
                 <div className="bg-white p-8 rounded-lg shadow-xl border-t-4 border-secondary animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <div className="space-y-6">
-                    <div className="flex items-center gap-3">
+                    <div className="flex itsams-center gap-3">
                       {selectedLocation.type === 'police' ?
                         <ShieldCheck className="w-8 h-8 text-primary" /> :
                         selectedLocation.type === 'hospital' ?
@@ -418,15 +418,15 @@ export default function Services() {
                           <p>Left: {selectedLocation.coords.left}</p>
                         </div>
                       )}
-                      <div className="flex items-start gap-3 text-sm">
+                      <div className="flex itsams-start gap-3 text-sm">
                         <MapPin className="w-5 h-5 text-slate-400 flex-shrink-0" />
                         <span className="font-bold text-slate-700">{selectedLocation.address}</span>
                       </div>
-                      <div className="flex items-center gap-3 text-sm">
+                      <div className="flex itsams-center gap-3 text-sm">
                         <Phone className="w-5 h-5 text-slate-400 flex-shrink-0" />
                         <span className="font-bold text-slate-700">{selectedLocation.phone}</span>
                       </div>
-                      <div className="flex items-center gap-3 text-sm">
+                      <div className="flex itsams-center gap-3 text-sm">
                         <Clock className="w-5 h-5 text-slate-400 flex-shrink-0" />
                         <span className="font-bold text-green-600 uppercase tracking-widest text-[10px]">Ouvert 24h/24 - 7j/7</span>
                       </div>
@@ -438,7 +438,7 @@ export default function Services() {
                 </div>
               ) : (
                 <div className="bg-slate-100 p-8 rounded-lg border-2 border-dashed border-slate-300 text-center space-y-4">
-                  <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto">
+                  <div className="w-16 h-16 bg-slate-200 rounded-full flex itsams-center justify-center mx-auto">
                     <MapPin className="w-8 h-8 text-slate-400" />
                   </div>
                   <h4 className="text-lg font-black text-slate-400 uppercase tracking-tighter">Sélectionnez un point</h4>
@@ -462,7 +462,7 @@ export default function Services() {
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
                 onTouchStart={onMapTouchStart}
-                onTouchMove={handleTouchMove}
+                onTouchMove={onMapTouchMove}
                 onTouchEnd={handleMouseUp}
               >
                 {/* Tactical Scanlines Effect Overlay */}
@@ -538,7 +538,7 @@ export default function Services() {
                               setSelectedLocation(loc);
                             }
                           }}
-                          onTouchStart={(e) => handleMarkerTouchStart(e, loc)}
+                          onTouchStart={(e) => onMarkerTouchStart(e, loc)}
                           onClick={(e) => {
                             if (!isEditMode) {
                               e.stopPropagation();
@@ -613,22 +613,22 @@ export default function Services() {
 
                 {/* Map Legend */}
                 <div className="absolute bottom-6 left-6 bg-slate-900/90 backdrop-blur-md p-4 rounded border border-white/20 flex gap-6 z-30 shadow-2xl">
-                  <div className="flex items-center gap-2">
+                  <div className="flex itsams-center gap-2">
                     <div className="w-3 h-3 bg-primary rounded-full shadow-[0_0_8px_rgba(30,58,138,0.8)]" />
                     <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">LSPD / BCSO</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex itsams-center gap-2">
                     <div className="w-3 h-3 bg-secondary rounded-full shadow-[0_0_8px_rgba(200,16,46,0.8)]" />
-                    <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">Hôpitaux / EMS</span>
+                    <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">Hôpitaux / SAMS</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex itsams-center gap-2">
                     <div className="w-3 h-3 bg-slate-700 rounded-full shadow-[0_0_8px_rgba(51,65,85,0.8)]" />
                     <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">Gouv. / DOJ</span>
                   </div>
                 </div>
                 
                 {/* Watermark */}
-                <div className="absolute top-6 right-6 flex flex-col items-end opacity-60">
+                <div className="absolute top-6 right-6 flex flex-col itsams-end opacity-60">
                   <span className="text-xl font-black text-white uppercase tracking-tighter drop-shadow-lg font-mono">SAN ANDREAS</span>
                   <span className="text-[10px] font-bold text-white uppercase tracking-[0.4em] drop-shadow-md font-mono">MAP SYSTEM v4.2</span>
                 </div>
@@ -662,14 +662,14 @@ export default function Services() {
               {
                 title: "Recrutement",
                 icon: <UsersIcon className="w-10 h-10 text-primary" />,
-                desc: "Rejoignez les rangs du LSPD, BCSO ou EMS. Postulez dès aujourd'hui pour servir votre État."
+                desc: "Rejoignez les rangs du LSPD, BCSO ou SAMS. Postulez dès aujourd'hui pour servir votre État."
               }
             ].map((service, idx) => (
               <div key={idx} className="p-10 bg-slate-50 border border-slate-200 rounded-lg hover:bg-white hover:shadow-xl hover:border-primary/20 transition-all group">
                 <div className="mb-6">{service.icon}</div>
                 <h3 className="text-2xl font-black text-primary uppercase tracking-tight mb-4">{service.title}</h3>
                 <p className="text-slate-600 font-medium leading-relaxed mb-8">{service.desc}</p>
-                <Link to="#" className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-xs group-hover:text-secondary transition-colors">
+                <Link to="#" className="flex itsams-center gap-2 text-primary font-bold uppercase tracking-widest text-xs group-hover:text-secondary transition-colors">
                   Accéder au formulaire <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>

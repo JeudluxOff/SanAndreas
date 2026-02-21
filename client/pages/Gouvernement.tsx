@@ -50,7 +50,7 @@ const cabinetMembers = [
     role: "Secrétaire à la Santé",
     name: "Dr. Julian Frost",
     image: "/placeholder.svg",
-    description: "Superviseur des services EMS et des programmes de santé publique à travers l'État.",
+    description: "Superviseur des services SAMS et des programmes de santé publique à travers l'État.",
     icon: <HeartPulse className="w-5 h-5" />
   }
 ];

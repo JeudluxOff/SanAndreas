@@ -34,7 +34,7 @@ const priorities = [
   },
   {
     title: "Santé & Services",
-    description: "Amélioration des infrastructures EMS et accès facilité aux soins pour tous les citoyens.",
+    description: "Amélioration des infrastructures SAMS et accès facilité aux soins pour tous les citoyens.",
     icon: <HeartPulse className="w-8 h-8 text-secondary" />,
     link: "/sante"
   }
@@ -272,7 +272,7 @@ export default function Index() {
             {[
               { label: "LSPD", icon: <ShieldCheck className="w-6 h-6" /> },
               { label: "BCSO", icon: <ShieldCheck className="w-6 h-6" /> },
-              { label: "EMS", icon: <HeartPulse className="w-6 h-6" /> },
+              { label: "SAMS", icon: <HeartPulse className="w-6 h-6" /> },
               { label: "DOJ", icon: <Gavel className="w-6 h-6" /> },
               { label: "IAA", icon: <ShieldCheck className="w-6 h-6" /> },
               { label: "FIB", icon: <ShieldCheck className="w-6 h-6" /> },
