@@ -108,8 +108,8 @@ export default function Calendar() {
                </CardHeader>
                <CardContent className="p-8">
                   <div className="grid grid-cols-7 gap-2 text-center">
-                    {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(day => (
-                      <span key={day} className="text-[10px] font-black uppercase text-slate-400 py-2">{day}</span>
+                    {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, idx) => (
+                      <span key={`${day}-${idx}`} className="text-[10px] font-black uppercase text-slate-400 py-2">{day}</span>
                     ))}
                     {Array.from({ length: 31 }).map((_, i) => {
                       const day = i + 1;
