@@ -1,17 +1,20 @@
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { 
-  ShieldCheck, 
-  Gavel, 
-  TrendingUp, 
-  HeartPulse, 
-  ChevronRight, 
-  MessageSquare, 
+import {
+  ShieldCheck,
+  Gavel,
+  TrendingUp,
+  HeartPulse,
+  ChevronRight,
+  MessageSquare,
   Calendar,
   FileText,
-  AlertCircle
+  AlertCircle,
+  ShieldAlert
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
 
 const priorities = [
   {
@@ -62,51 +65,83 @@ const news = [
 ];
 
 export default function Index() {
+  const { emergencyMode } = useAuth();
+
   return (
     <Layout>
       {/* Hero Section */}
       <section className="relative h-[600px] md:h-[700px] overflow-hidden">
-        <div className="absolute inset-0 bg-primary/80 z-10" />
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/placeholder.svg')" }} // Imagine a majestic view of Los Santos Capitol
+        <div className={cn(
+          "absolute inset-0 z-10 transition-colors duration-1000",
+          emergencyMode ? "bg-red-950/80" : "bg-primary/80"
+        )} />
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-1000"
+          style={{
+            backgroundImage: "url('/placeholder.svg')",
+            transform: emergencyMode ? 'scale(1.1)' : 'scale(1)'
+          }}
         />
         <div className="container mx-auto px-4 h-full relative z-20 flex items-center">
           <div className="max-w-3xl space-y-6">
-            <div className="inline-block px-4 py-1 bg-secondary text-white text-xs font-black uppercase tracking-[0.2em] animate-fade-in">
-              Portail Officiel du Gouvernement
+            <div className={cn(
+              "inline-block px-4 py-1 text-white text-xs font-black uppercase tracking-[0.2em] animate-fade-in transition-colors",
+              emergencyMode ? "bg-red-600 animate-pulse" : "bg-secondary"
+            )}>
+              {emergencyMode ? "ALERTE NATIONALE CRITIQUE" : "Portail Officiel du Gouvernement"}
             </div>
             <h1 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] drop-shadow-2xl">
-              Gouverner avec <br /> <span className="text-secondary">Intégrité</span> & Vision
+              {emergencyMode ? (
+                <>SÉCURITÉ & <br /> <span className="text-red-500">SURVIE</span></>
+              ) : (
+                <>Gouverner avec <br /> <span className="text-secondary">Intégrité</span> & Vision</>
+              )}
             </h1>
-            <p className="text-xl md:text-2xl text-slate-100 font-medium leading-relaxed max-w-2xl border-l-4 border-secondary pl-6">
-              "Notre mission est de bâtir un San Andreas plus sûr, plus prospère et plus juste pour chaque citoyen, de Paleto Bay à South Central."
+            <p className={cn(
+              "text-xl md:text-2xl font-medium leading-relaxed max-w-2xl border-l-4 pl-6 transition-all",
+              emergencyMode ? "text-red-200 border-red-600 italic" : "text-slate-100 border-secondary"
+            )}>
+              {emergencyMode
+                ? "Le Protocole d'Urgence National est actif. Restez à l'écoute des fréquences gouvernementales et conformez-vous aux ordres de mobilisation."
+                : "\"Notre mission est de bâtir un San Andreas plus sûr, plus prospère et plus juste pour chaque citoyen, de Paleto Bay à South Central.\""}
             </p>
             <div className="pt-8 flex flex-wrap gap-4">
-              <Link to="/gouvernement">
-                <Button className="bg-secondary hover:bg-secondary/90 text-white font-bold px-8 py-6 h-auto text-lg rounded-sm shadow-xl transition-all hover:translate-y-[-2px]">
-                  Message du Gouverneur
+              <Link to={emergencyMode ? "/securite" : "/gouvernement"}>
+                <Button className={cn(
+                  "font-bold px-8 py-6 h-auto text-lg rounded-sm shadow-xl transition-all hover:translate-y-[-2px]",
+                  emergencyMode ? "bg-red-600 hover:bg-red-700 text-white" : "bg-secondary hover:bg-secondary/90 text-white"
+                )}>
+                  {emergencyMode ? "DIRECTIVES DE SÉCURITÉ" : "Message du Gouverneur"}
                 </Button>
               </Link>
               <Link to="/services">
-                <Button variant="outline" className="border-2 border-white text-white hover:bg-white/10 font-bold px-8 py-6 h-auto text-lg rounded-sm shadow-lg backdrop-blur-sm">
-                  Services aux Citoyens
+                <Button variant="outline" className={cn(
+                  "border-2 font-bold px-8 py-6 h-auto text-lg rounded-sm shadow-lg backdrop-blur-sm transition-colors",
+                  emergencyMode ? "border-red-500 text-red-500 hover:bg-red-500/10" : "border-white text-white hover:bg-white/10"
+                )}>
+                  Services d'Urgence
                 </Button>
               </Link>
             </div>
           </div>
         </div>
-        
+
         {/* Bottom Banner with Seal */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white/5 backdrop-blur-md border-t border-white/20 py-4 z-20">
+        <div className={cn(
+          "absolute bottom-0 left-0 right-0 backdrop-blur-md border-t py-4 z-20 transition-colors",
+          emergencyMode ? "bg-red-600 border-red-500 shadow-[0_-4px_20px_rgba(220,38,38,0.3)]" : "bg-white/5 border-white/20"
+        )}>
           <div className="container mx-auto px-4 flex items-center justify-between">
-            <div className="hidden md:flex items-center gap-4 text-white/80 text-sm font-bold tracking-widest uppercase">
-              <Calendar className="w-5 h-5 text-secondary" />
-              <span>Prochaine Session : 20 Mai 2024</span>
+            <div className={cn(
+              "hidden md:flex items-center gap-4 text-sm font-bold tracking-widest uppercase",
+              emergencyMode ? "text-white animate-pulse" : "text-white/80"
+            )}>
+              <ShieldAlert className={cn("w-5 h-5", emergencyMode ? "text-white" : "text-secondary")} />
+              <span>{emergencyMode ? "ALERTE DE NIVEAU 1 : ACTIF" : "Prochaine Session : 20 Mai 2024"}</span>
             </div>
             <div className="flex items-center gap-2 text-white font-black text-sm uppercase tracking-tighter">
-              <ShieldCheck className="w-5 h-5 text-secondary" />
-              État d'urgence : Niveau Normal
+              <ShieldCheck className={cn("w-5 h-5", emergencyMode ? "text-white animate-bounce" : "text-secondary")} />
+              État d'urgence : {emergencyMode ? "CRITIQUE" : "Niveau Normal"}
             </div>
           </div>
         </div>

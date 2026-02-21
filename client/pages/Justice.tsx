@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const justiceDepts = [
   {
@@ -30,35 +31,57 @@ const justiceDepts = [
 ];
 
 export default function Justice() {
+  const { emergencyMode } = useAuth();
+
   return (
     <Layout>
       {/* Hero Section */}
-      <div className="bg-[#1B365D] py-24 text-white relative overflow-hidden">
+      <div className={cn(
+        "py-24 text-white relative overflow-hidden transition-colors duration-500",
+        emergencyMode ? "bg-red-950" : "bg-[#1B365D]"
+      )}>
         <div className="absolute inset-0 bg-white/5 opacity-10 pointer-events-none transform -rotate-12 scale-150 translate-x-1/4">
           <Gavel className="w-full h-full" />
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl space-y-6">
-            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none border-l-8 border-secondary pl-8">
-              Justice <br /> <span className="text-secondary">& Droits Civils</span>
+            <h1 className={cn(
+              "text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none border-l-8 pl-8 transition-colors",
+              emergencyMode ? "border-red-600" : "border-secondary"
+            )}>
+              {emergencyMode ? "LOI MARTIALE" : "Justice"} <br /> <span className={cn("transition-colors", emergencyMode ? "text-red-500" : "text-secondary")}>
+                {emergencyMode ? "ACTIF" : "& Droits Civils"}
+              </span>
             </h1>
-            <p className="text-xl md:text-2xl text-slate-300 font-medium leading-relaxed max-w-2xl uppercase tracking-tight">
-              Garantir une justice équitable, protéger les droits fondamentaux et assurer le respect des lois.
+            <p className={cn(
+              "text-xl md:text-2xl font-medium leading-relaxed max-w-2xl uppercase tracking-tight transition-colors",
+              emergencyMode ? "text-red-300" : "text-slate-300"
+            )}>
+              {emergencyMode
+                ? "LES PROCÉDURES CIVILES SONT SUSPENDUES. LES TRIBUNAUX MILITAIRES ONT COMPÉTENCE SUR TOUTES LES INFRACTIONS."
+                : "Garantir une justice équitable, protéger les droits fondamentaux et assurer le respect des lois."}
             </p>
           </div>
         </div>
       </div>
 
       {/* Quick Search Section */}
-      <section className="bg-slate-900 py-12 border-y-4 border-secondary shadow-2xl relative z-20">
+      <section className={cn(
+        "py-12 border-y-4 shadow-2xl relative z-20 transition-all duration-500",
+        emergencyMode ? "bg-red-700 border-red-500 animate-pulse" : "bg-slate-900 border-secondary"
+      )}>
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-4 text-white">
-            <div className="p-3 bg-secondary text-white rounded-full">
+            <div className={cn("p-3 rounded-full transition-colors", emergencyMode ? "bg-white text-red-700 shadow-lg" : "bg-secondary text-white")}>
               <Search className="w-8 h-8" />
             </div>
             <div>
-              <h2 className="text-2xl font-black uppercase tracking-tighter">Recherche de Dossier</h2>
-              <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Accéder aux archives judiciaires publiques</p>
+              <h2 className="text-2xl font-black uppercase tracking-tighter">
+                {emergencyMode ? "RECHERCHE DE MANDAT" : "Recherche de Dossier"}
+              </h2>
+              <p className={cn("font-bold uppercase text-[10px] tracking-widest transition-colors", emergencyMode ? "text-red-200" : "text-slate-400")}>
+                {emergencyMode ? "BASE DE DONNÉES DE SÉCURITÉ NATIONALE" : "Accéder aux archives judiciaires publiques"}
+              </p>
             </div>
           </div>
           <div className="flex flex-wrap gap-4 w-full md:w-auto">

@@ -10,10 +10,12 @@ import {
   Menu,
   X,
   Search,
-  ExternalLink
+  ExternalLink,
+  ShieldAlert
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { label: "Accueil", path: "/", icon: <Building2 className="w-4 h-4" /> },
@@ -29,27 +31,57 @@ const navItems = [
 export function Layout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { emergencyMode } = useAuth();
 
   const publicNavItems = navItems.filter(item => !item.isEmployee);
   const employeeItem = navItems.find(item => item.isEmployee);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-900">
+    <div className={cn(
+      "min-h-screen flex flex-col font-sans text-slate-900 transition-colors duration-500",
+      emergencyMode ? "bg-red-950/20" : "bg-slate-50"
+    )}>
+      {/* Emergency Mode Overlay/Border */}
+      {emergencyMode && (
+        <div className="fixed inset-0 pointer-events-none z-[100] border-[12px] border-red-600 animate-emergency-pulse pointer-events-none" />
+      )}
+
       {/* Official Top Bar */}
-      <div className="bg-[#1B365D] text-white py-1.5 px-4 text-[10px] md:text-xs font-semibold tracking-wide flex items-center justify-center border-b border-white/10 uppercase">
+      <div className={cn(
+        "text-white py-1.5 px-4 text-[10px] md:text-xs font-semibold tracking-wide flex items-center justify-center border-b uppercase transition-colors z-[60]",
+        emergencyMode ? "bg-red-600 border-red-700 shadow-lg" : "bg-[#1B365D] border-white/10"
+      )}>
         <span className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          Site Officiel de l'État de San Andreas — sanandreas.gov
+          <span className={cn("w-2 h-2 rounded-full animate-pulse", emergencyMode ? "bg-white" : "bg-red-500")} />
+          {emergencyMode ? "PROTOCOLE D'URGENCE ACTIF — RESTEZ CHEZ VOUS ET ÉCOUTEZ LES CONSIGNES OFFICIELLES" : "Site Officiel de l'État de San Andreas — sanandreas.gov"}
         </span>
       </div>
 
+      {/* Emergency Alert Bar (Marquee) */}
+      {emergencyMode && (
+        <div className="h-10 bg-red-800 flex items-center justify-center gap-8 overflow-hidden whitespace-nowrap z-[60] shadow-lg border-b border-red-700">
+           {Array.from({ length: 10 }).map((_, i) => (
+             <div key={i} className="flex items-center gap-4 animate-marquee">
+               <ShieldAlert className="w-4 h-4 text-white" />
+               <span className="text-white font-black uppercase text-[11px] tracking-[0.2em]">ALERTE ROUGE - COUVRE-FEU IMMÉDIAT - ÉVACUATION DES ZONES À RISQUE - PROTOCOLE GOUVERNEMENTAL ACTIVÉ</span>
+             </div>
+           ))}
+        </div>
+      )}
+
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+      <header className={cn(
+        "border-b sticky top-0 z-50 shadow-sm transition-colors",
+        emergencyMode ? "bg-red-900 border-red-800 text-white" : "bg-white border-slate-200"
+      )}>
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-20 md:h-24">
             {/* Logo Section */}
             <Link to="/" className="flex items-center gap-4 group">
-              <div className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0 bg-primary flex items-center justify-center rounded-full text-white overflow-hidden border-2 border-primary shadow-lg transition-transform group-hover:scale-105">
+              <div className={cn(
+                "w-12 h-12 md:w-16 md:h-16 flex-shrink-0 flex items-center justify-center rounded-full text-white overflow-hidden border-2 shadow-lg transition-transform group-hover:scale-105",
+                emergencyMode ? "bg-red-600 border-red-500 animate-pulse" : "bg-primary border-primary"
+              )}>
                 <img
                   src="/placeholder.svg"
                   alt="San Andreas Seal"
@@ -57,11 +89,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-lg md:text-xl font-extrabold text-primary leading-tight tracking-tight uppercase">
+                <span className={cn(
+                  "text-lg md:text-xl font-extrabold leading-tight tracking-tight uppercase",
+                  emergencyMode ? "text-white" : "text-primary"
+                )}>
                   État de San Andreas
                 </span>
-                <span className="text-xs md:text-sm font-semibold text-secondary tracking-widest uppercase">
-                  Gouvernement Officiel
+                <span className={cn(
+                  "text-xs md:text-sm font-semibold tracking-widest uppercase",
+                  emergencyMode ? "text-red-400" : "text-secondary"
+                )}>
+                  {emergencyMode ? "SÉCURITÉ NATIONALE" : "Gouvernement Officiel"}
                 </span>
               </div>
             </Link>
@@ -73,10 +111,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   key={item.path}
                   to={item.path}
                   className={cn(
-                    "px-3 py-2 text-sm font-bold transition-all border-b-2 hover:text-primary relative",
-                    location.pathname === item.path
-                      ? "text-primary border-secondary"
-                      : "text-slate-600 border-transparent hover:border-slate-300"
+                    "px-3 py-2 text-sm font-bold transition-all border-b-2 relative",
+                    emergencyMode
+                      ? (location.pathname === item.path ? "text-white border-white" : "text-red-300 border-transparent hover:text-white hover:border-red-400")
+                      : (location.pathname === item.path ? "text-primary border-secondary" : "text-slate-600 border-transparent hover:text-primary hover:border-slate-300")
                   )}
                 >
                   {item.label}
@@ -86,10 +124,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
               {employeeItem && (
                 <Link
                   to={employeeItem.path}
-                  className="ml-4 px-4 py-2 bg-[#1B365D] text-white text-xs font-bold rounded shadow-md hover:bg-[#254a7c] transition-colors uppercase tracking-wider flex items-center gap-2"
+                  className={cn(
+                    "ml-4 px-4 py-2 text-white text-xs font-bold rounded shadow-md transition-colors uppercase tracking-wider flex items-center gap-2",
+                    emergencyMode ? "bg-red-600 hover:bg-red-500 animate-pulse" : "bg-[#1B365D] hover:bg-[#254a7c]"
+                  )}
                 >
-                  {employeeItem.icon}
-                  {employeeItem.label}
+                  {emergencyMode ? <ShieldAlert className="w-4 h-4" /> : employeeItem.icon}
+                  {emergencyMode ? "CRISIS CENTER" : employeeItem.label}
                 </Link>
               )}
 
@@ -147,7 +188,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Footer */}
-      <footer className="bg-primary text-white pt-16 pb-8 border-t-8 border-secondary">
+      <footer className={cn(
+        "text-white pt-16 pb-8 border-t-8 transition-colors",
+        emergencyMode ? "bg-red-950 border-red-600" : "bg-primary border-secondary"
+      )}>
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
             <div className="space-y-6">
@@ -155,11 +199,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <img src="/placeholder.svg" alt="San Andreas Logo" className="w-12 h-12 brightness-0 invert" />
                 <div className="flex flex-col">
                   <span className="text-xl font-black uppercase tracking-tighter">San Andreas</span>
-                  <span className="text-xs uppercase tracking-widest text-slate-300">Gouvernement</span>
+                  <span className={cn(
+                    "text-xs uppercase tracking-widest",
+                    emergencyMode ? "text-red-400" : "text-slate-300"
+                  )}>Gouvernement</span>
                 </div>
               </div>
-              <p className="text-slate-300 text-sm leading-relaxed max-w-sm">
-                Le portail officiel du gouvernement de l'État de San Andreas. Votre source d'information directe pour les services publics, la législation et les actualités gouvernementales.
+              <p className={cn(
+                "text-sm leading-relaxed max-w-sm",
+                emergencyMode ? "text-red-200" : "text-slate-300"
+              )}>
+                {emergencyMode
+                  ? "CANAL D'INFORMATION D'URGENCE. Toutes les communications publiques sont soumises au protocole de sécurité nationale."
+                  : "Le portail officiel du gouvernement de l'État de San Andreas. Votre source d'information directe pour les services publics, la législation et les actualités gouvernementales."}
               </p>
               <div className="flex items-center gap-4">
                 <a href="#" className="p-2 bg-white/10 hover:bg-secondary rounded-full transition-colors">

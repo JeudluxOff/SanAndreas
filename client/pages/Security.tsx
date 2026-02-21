@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const securityAgencies = [
   {
@@ -30,35 +31,57 @@ const securityAgencies = [
 ];
 
 export default function Security() {
+  const { emergencyMode } = useAuth();
+
   return (
     <Layout>
       {/* Hero Section */}
-      <div className="bg-[#1B365D] py-24 text-white relative overflow-hidden">
+      <div className={cn(
+        "py-24 text-white relative overflow-hidden transition-colors duration-500",
+        emergencyMode ? "bg-red-950" : "bg-[#1B365D]"
+      )}>
         <div className="absolute inset-0 bg-white/5 opacity-10 pointer-events-none transform rotate-45 scale-150">
           <ShieldAlert className="w-full h-full" />
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl space-y-6">
-            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none border-l-8 border-secondary pl-8">
-              Sécurité <br /> <span className="text-secondary">& Ordre Public</span>
+            <h1 className={cn(
+              "text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none border-l-8 pl-8 transition-colors",
+              emergencyMode ? "border-red-600" : "border-secondary"
+            )}>
+              {emergencyMode ? "ÉTAT D'URGENCE" : "Sécurité"} <br /> <span className={cn("transition-colors", emergencyMode ? "text-red-500" : "text-secondary")}>
+                {emergencyMode ? "NATIONAL" : "& Ordre Public"}
+              </span>
             </h1>
-            <p className="text-xl md:text-2xl text-slate-300 font-medium leading-relaxed max-w-2xl uppercase tracking-tight">
-              Protéger, Servir et Maintenir la Paix Civile à travers l'État de San Andreas.
+            <p className={cn(
+              "text-xl md:text-2xl font-medium leading-relaxed max-w-2xl uppercase tracking-tight transition-colors",
+              emergencyMode ? "text-red-300" : "text-slate-300"
+            )}>
+              {emergencyMode
+                ? "DÉPLOIEMENT IMMÉDIAT DES FORCES DE SÉCURITÉ. TOUS LES SERVICES SONT SOUS COMMANDEMENT DIRECT DU CABINET."
+                : "Protéger, Servir et Maintenir la Paix Civile à travers l'État de San Andreas."}
             </p>
           </div>
         </div>
       </div>
 
       {/* Emergency Section */}
-      <section className="bg-red-600 py-8 border-y-4 border-white shadow-2xl relative z-20">
+      <section className={cn(
+        "py-8 border-y-4 shadow-2xl relative z-20 transition-all duration-500",
+        emergencyMode ? "bg-red-700 border-red-500 animate-pulse" : "bg-red-600 border-white"
+      )}>
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-4 text-white">
             <div className="p-3 bg-white text-red-600 rounded-full animate-pulse">
               <Phone className="w-8 h-8" />
             </div>
             <div>
-              <h2 className="text-2xl font-black uppercase tracking-tighter">Urgence Immédiate</h2>
-              <p className="text-white/80 font-bold uppercase text-xs tracking-widest">Composer le 911 en cas de danger</p>
+              <h2 className="text-2xl font-black uppercase tracking-tighter">
+                {emergencyMode ? "LIGNE DE CRISE" : "Urgence Immédiate"}
+              </h2>
+              <p className="text-white/80 font-bold uppercase text-xs tracking-widest">
+                {emergencyMode ? "PRIORITÉ ABSOLUE AUX APPELS DE SÉCURITÉ" : "Composer le 911 en cas de danger"}
+              </p>
             </div>
           </div>
           <div className="flex flex-wrap gap-4">

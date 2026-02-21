@@ -1,9 +1,10 @@
 import { Layout } from "@/components/Layout";
-import { TrendingUp, Landmark, Briefcase, ShoppingCart, DollarSign, PieChart, ArrowUpRight, ArrowDownRight, Building, Globe, Zap, BarChart3 } from "lucide-react";
+import { TrendingUp, Landmark, Briefcase, ShoppingCart, DollarSign, PieChart, ArrowUpRight, ArrowDownRight, Building, Globe, Zap, BarChart3, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const economyStats = [
   { label: "PIB de l'État", value: "$4.2B", trend: "+2.4%", status: "up" },
@@ -37,39 +38,68 @@ const economicSectors = [
 ];
 
 export default function Economy() {
+  const { emergencyMode } = useAuth();
+
   return (
     <Layout>
       {/* Hero Section */}
-      <div className="bg-[#1B365D] py-24 text-white relative overflow-hidden">
+      <div className={cn(
+        "py-24 text-white relative overflow-hidden transition-colors duration-500",
+        emergencyMode ? "bg-red-950" : "bg-[#1B365D]"
+      )}>
         <div className="absolute inset-0 bg-white/5 opacity-10 pointer-events-none transform translate-y-1/4 translate-x-1/4 scale-150">
           <TrendingUp className="w-full h-full" />
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl space-y-6">
-            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none border-l-8 border-secondary pl-8">
-              Économie <br /> <span className="text-secondary">& Commerce</span>
+            <h1 className={cn(
+              "text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none border-l-8 pl-8 transition-colors",
+              emergencyMode ? "border-red-600" : "border-secondary"
+            )}>
+              {emergencyMode ? "ÉCONOMIE DE" : "Économie"} <br /> <span className={cn("transition-colors", emergencyMode ? "text-red-500" : "text-secondary")}>
+                {emergencyMode ? "GUERRE" : "& Commerce"}
+              </span>
             </h1>
-            <p className="text-xl md:text-2xl text-slate-300 font-medium leading-relaxed max-w-2xl uppercase tracking-tight">
-              Soutenir l'innovation, réguler les marchés et assurer la prospérité durable de San Andreas.
+            <p className={cn(
+              "text-xl md:text-2xl font-medium leading-relaxed max-w-2xl uppercase tracking-tight transition-colors",
+              emergencyMode ? "text-red-300" : "text-slate-300"
+            )}>
+              {emergencyMode
+                ? "GEL DES MARCHÉS FINANCIERS. RÉQUISITION DES RESSOURCES INDUSTRIELLES POUR L'EFFORT NATIONAL."
+                : "Soutenir l'innovation, réguler les marchés et assurer la prospérité durable de San Andreas."}
             </p>
           </div>
         </div>
       </div>
 
       {/* Real-time Stats Section */}
-      <section className="bg-white py-12 border-y border-slate-200 shadow-sm relative z-20">
+      <section className={cn(
+        "py-12 border-y shadow-sm relative z-20 transition-colors duration-500",
+        emergencyMode ? "bg-red-900 border-red-800" : "bg-white border-slate-200"
+      )}>
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {economyStats.map((stat) => (
-              <div key={stat.label} className="p-6 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col items-center text-center space-y-2 group hover:bg-white hover:shadow-xl transition-all duration-300">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-primary transition-colors">{stat.label}</span>
-                <span className="text-3xl font-black text-primary tracking-tighter">{stat.value}</span>
+              <div key={stat.label} className={cn(
+                "p-6 border rounded-2xl flex flex-col items-center text-center space-y-2 group transition-all duration-300",
+                emergencyMode
+                  ? "bg-red-950 border-red-800 hover:bg-red-800 hover:shadow-[0_0_20px_rgba(220,38,38,0.3)]"
+                  : "bg-slate-50 border-slate-100 hover:bg-white hover:shadow-xl"
+              )}>
+                <span className={cn(
+                  "text-[10px] font-black uppercase tracking-widest transition-colors",
+                  emergencyMode ? "text-red-500" : "text-slate-400 group-hover:text-primary"
+                )}>{stat.label}</span>
+                <span className={cn(
+                  "text-3xl font-black tracking-tighter transition-colors",
+                  emergencyMode ? "text-white" : "text-primary"
+                )}>{emergencyMode ? "---" : stat.value}</span>
                 <div className={cn(
                   "flex items-center gap-1 font-bold text-xs uppercase tracking-widest",
-                  stat.status === 'up' ? 'text-emerald-600' : 'text-red-600'
+                  emergencyMode ? "text-red-500 animate-pulse" : (stat.status === 'up' ? 'text-emerald-600' : 'text-red-600')
                 )}>
-                  {stat.status === 'up' ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                  {stat.trend} <span className="text-[8px] text-slate-400 font-medium ml-1">CE MOIS</span>
+                  {emergencyMode ? <ShieldAlert className="w-4 h-4" /> : (stat.status === 'up' ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />)}
+                  {emergencyMode ? "SUSPENDU" : stat.trend} <span className={cn("text-[8px] font-medium ml-1", emergencyMode ? "text-red-800" : "text-slate-400")}>CE MOIS</span>
                 </div>
               </div>
             ))}
