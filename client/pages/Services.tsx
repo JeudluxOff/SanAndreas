@@ -1,18 +1,20 @@
 import { Layout } from "@/components/Layout";
-import { 
-  Building2, 
-  ShieldCheck, 
-  HeartPulse, 
-  MapPin, 
-  Info, 
-  ChevronRight, 
-  Phone, 
-  Clock, 
-  ExternalLink 
+import {
+  Building2,
+  ShieldCheck,
+  HeartPulse,
+  MapPin,
+  Info,
+  ChevronRight,
+  Phone,
+  Clock,
+  ExternalLink,
+  Users as UsersIcon
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 interface Location {
   id: string;
@@ -316,9 +318,9 @@ export default function Services() {
                 icon: <ShieldCheck className="w-10 h-10 text-primary" />,
                 desc: "Déposez une plainte en ligne ou signalez un véhicule volé directement aux services compétents."
               },
-              { 
-                title: "Recrutement", 
-                icon: <Users className="w-10 h-10 text-primary" />,
+              {
+                title: "Recrutement",
+                icon: <UsersIcon className="w-10 h-10 text-primary" />,
                 desc: "Rejoignez les rangs du LSPD, BCSO ou EMS. Postulez dès aujourd'hui pour servir votre État."
               }
             ].map((service, idx) => (
