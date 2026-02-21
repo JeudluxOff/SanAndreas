@@ -1,6 +1,7 @@
 import { Layout } from "@/components/Layout";
 import {
   Building2,
+  Shield,
   ShieldCheck,
   HeartPulse,
   MapPin,
