@@ -9,9 +9,12 @@ import {
   Phone,
   Clock,
   ExternalLink,
-  Users as UsersIcon
+  Users as UsersIcon,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
@@ -104,10 +107,70 @@ const locations: Location[] = [
 export default function Services() {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [filter, setFilter] = useState<'all' | 'police' | 'hospital'>('all');
+  const [zoom, setZoom] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const mapRef = useRef<HTMLDivElement>(null);
 
-  const filteredLocations = locations.filter(loc => 
+  const filteredLocations = locations.filter(loc =>
     filter === 'all' || loc.type === filter
   );
+
+  const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.5, 4));
+  const handleZoomOut = () => {
+    setZoom(prev => {
+      const newZoom = Math.max(prev - 0.5, 1);
+      if (newZoom === 1) setOffset({ x: 0, y: 0 });
+      return newZoom;
+    });
+  };
+  const handleReset = () => {
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (e.deltaY < 0) handleZoomIn();
+    else handleZoomOut();
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoom > 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && zoom > 1) {
+      setOffset({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
+  // Touch support
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (zoom > 1) {
+      setIsDragging(true);
+      const touch = e.touches[0];
+      setDragStart({ x: touch.clientX - offset.x, y: touch.clientY - offset.y });
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isDragging && zoom > 1) {
+      const touch = e.touches[0];
+      setOffset({
+        x: touch.clientX - dragStart.x,
+        y: touch.clientY - dragStart.y
+      });
+    }
+  };
 
   return (
     <Layout>
@@ -213,71 +276,130 @@ export default function Services() {
 
             {/* Map Area */}
             <div className="w-full lg:w-2/3 order-1 lg:order-2">
-              <div className="relative aspect-square bg-slate-950 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(30,58,138,0.2)] border-4 border-white ring-1 ring-slate-200 group">
+              <div
+                ref={mapRef}
+                className={cn(
+                  "relative aspect-square bg-slate-950 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(30,58,138,0.2)] border-4 border-white ring-1 ring-slate-200 group transition-all",
+                  zoom > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-default"
+                )}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onWheel={handleWheel}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleMouseUp}
+              >
                 {/* Tactical Scanlines Effect Overlay */}
-                <div className="absolute inset-0 pointer-events-none opacity-[0.05] z-20 pointer-events-none" style={{
+                <div className="absolute inset-0 pointer-events-none opacity-[0.05] z-30" style={{
                   backgroundImage: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
                   backgroundSize: '100% 2px, 3px 100%'
                 }} />
 
-                {/* Simulated Map Background */}
-                <div className="absolute inset-0 opacity-80 transition-opacity group-hover:opacity-100 duration-700">
-                  <img
-                    src="https://www.bragitoff.com/wp-content/uploads/2015/11/GTAV_ATLUS_8192x8192.png"
-                    alt="San Andreas Map Background"
-                    className="w-full h-full object-cover grayscale-[40%] brightness-[0.8] contrast-[1.1]"
-                  />
-                </div>
-                
-                {/* Map Grid / Topographic lines simulation */}
-                <div className="absolute inset-0 pointer-events-none opacity-20">
-                  <div className="w-full h-full" style={{
-                    backgroundImage: 'radial-gradient(circle, white 0.5px, transparent 0.5px)',
-                    backgroundSize: '20px 20px'
-                  }} />
+                {/* Transform Container */}
+                <div
+                  className="absolute inset-0 transition-transform duration-200 ease-out"
+                  style={{
+                    transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
+                    transformOrigin: 'center'
+                  }}
+                >
+                  {/* Simulated Map Background */}
+                  <div className="absolute inset-0 opacity-80">
+                    <img
+                      src="https://www.bragitoff.com/wp-content/uploads/2015/11/GTAV_ATLUS_8192x8192.png"
+                      alt="San Andreas Map Background"
+                      className="w-full h-full object-cover grayscale-[40%] brightness-[0.8] contrast-[1.1]"
+                    />
+                  </div>
+
+                  {/* Map Grid / Topographic lines simulation */}
+                  <div className="absolute inset-0 pointer-events-none opacity-20">
+                    <div className="w-full h-full" style={{
+                      backgroundImage: 'radial-gradient(circle, white 0.5px, transparent 0.5px)',
+                      backgroundSize: '20px 20px'
+                    }} />
+                  </div>
+
+                  {/* Markers Overlay */}
+                  <div className="absolute inset-0 p-8 md:p-12">
+                    <div className="relative w-full h-full">
+                      {filteredLocations.map((loc) => (
+                        <button
+                          key={loc.id}
+                          className={cn(
+                            "absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-125 z-10",
+                            selectedLocation?.id === loc.id ? "scale-125 z-20" : "z-10"
+                          )}
+                          style={{
+                            top: loc.coords.top,
+                            left: loc.coords.left,
+                            // Counter-scale markers so they don't get too big
+                            scale: `${1 / Math.sqrt(zoom)}`
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedLocation(loc);
+                          }}
+                        >
+                          <div className={cn(
+                            "relative p-2.5 rounded-full shadow-lg border-2 border-white animate-pulse-slow",
+                            loc.type === 'police' ? "bg-primary text-white" : "bg-secondary text-white",
+                            selectedLocation?.id === loc.id && "animate-none ring-4 ring-white/30"
+                          )}>
+                            {loc.type === 'police' ?
+                              <ShieldCheck className="w-5 h-5 md:w-6 md:h-6" /> :
+                              <HeartPulse className="w-5 h-5 md:w-6 md:h-6" />
+                            }
+
+                            {/* Label on Hover / Selected */}
+                            {(selectedLocation?.id === loc.id) && (
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 whitespace-nowrap bg-slate-900/90 text-white px-3 py-1.5 rounded text-[10px] font-black uppercase tracking-widest shadow-2xl border border-white/20 backdrop-blur-sm z-50">
+                                {loc.name}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Radar Effect for Selected */}
+                          {selectedLocation?.id === loc.id && (
+                            <div className={cn(
+                              "absolute inset-0 rounded-full animate-ping opacity-50",
+                              loc.type === 'police' ? "bg-primary" : "bg-secondary"
+                            )} />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Markers Overlay */}
-                <div className="absolute inset-0 p-8 md:p-12">
-                  <div className="relative w-full h-full">
-                    {filteredLocations.map((loc) => (
-                      <button
-                        key={loc.id}
-                        className={cn(
-                          "absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-125 z-10",
-                          selectedLocation?.id === loc.id ? "scale-125 z-20" : "z-10"
-                        )}
-                        style={{ top: loc.coords.top, left: loc.coords.left }}
-                        onClick={() => setSelectedLocation(loc)}
-                      >
-                        <div className={cn(
-                          "relative p-2.5 rounded-full shadow-lg border-2 border-white animate-pulse-slow",
-                          loc.type === 'police' ? "bg-primary text-white" : "bg-secondary text-white",
-                          selectedLocation?.id === loc.id && "animate-none ring-4 ring-white/30"
-                        )}>
-                          {loc.type === 'police' ? 
-                            <ShieldCheck className="w-5 h-5 md:w-6 md:h-6" /> : 
-                            <HeartPulse className="w-5 h-5 md:w-6 md:h-6" />
-                          }
-                          
-                          {/* Label on Hover / Selected */}
-                          {(selectedLocation?.id === loc.id) && (
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 whitespace-nowrap bg-slate-900/90 text-white px-3 py-1.5 rounded text-[10px] font-black uppercase tracking-widest shadow-2xl border border-white/20 backdrop-blur-sm z-50">
-                              {loc.name}
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Radar Effect for Selected */}
-                        {selectedLocation?.id === loc.id && (
-                          <div className={cn(
-                            "absolute inset-0 rounded-full animate-ping opacity-50",
-                            loc.type === 'police' ? "bg-primary" : "bg-secondary"
-                          )} />
-                        )}
-                      </button>
-                    ))}
-                  </div>
+                {/* Zoom Controls */}
+                <div className="absolute top-6 left-6 flex flex-col gap-2 z-40">
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="bg-slate-900/90 text-white border border-white/20 hover:bg-primary shadow-xl"
+                    onClick={handleZoomIn}
+                  >
+                    <ZoomIn className="w-5 h-5" />
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="bg-slate-900/90 text-white border border-white/20 hover:bg-primary shadow-xl"
+                    onClick={handleZoomOut}
+                  >
+                    <ZoomOut className="w-5 h-5" />
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="bg-slate-900/90 text-white border border-white/20 hover:bg-secondary shadow-xl"
+                    onClick={handleReset}
+                  >
+                    <RotateCcw className="w-5 h-5" />
+                  </Button>
                 </div>
 
                 {/* Map Legend */}
