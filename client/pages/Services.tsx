@@ -178,15 +178,18 @@ export default function Services() {
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = (e: MouseEvent) => {
     if (isEditMode && isDraggingMarker && mapRef.current) {
       const rect = mapRef.current.getBoundingClientRect();
       // Calculate position relative to the map container, accounting for zoom and offset
+      // Since transform-origin is 'center', we need to adjust the calculation
+      // Or we can change transform-origin to '0 0' for simpler math.
+      // Let's use '0 0' in the render and adjust here.
       const x = (e.clientX - rect.left - offset.x) / zoom;
       const y = (e.clientY - rect.top - offset.y) / zoom;
 
-      const leftPercent = (x / rect.width) * 100;
-      const topPercent = (y / rect.height) * 100;
+      const leftPercent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+      const topPercent = Math.max(0, Math.min(100, (y / rect.height) * 100));
 
       setDynamicLocations(prev => prev.map(loc =>
         loc.id === isDraggingMarker
@@ -194,13 +197,13 @@ export default function Services() {
           : loc
       ));
 
-      // Update selected location if it's the one being dragged to show live coords
       if (selectedLocation?.id === isDraggingMarker) {
         setSelectedLocation(prev => prev ? {
           ...prev,
           coords: { top: `${topPercent.toFixed(3)}%`, left: `${leftPercent.toFixed(3)}%` }
         } : null);
       }
+
       return;
     }
 
@@ -217,9 +220,7 @@ export default function Services() {
     setIsDraggingMarker(null);
   };
 
-  // Touch support
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (isEditMode && isDraggingMarker) return;
     if (zoom > 1) {
       setIsDraggingMap(true);
       const touch = e.touches[0];
@@ -227,15 +228,38 @@ export default function Services() {
     }
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const handleMarkerTouchStart = (e: React.TouchEvent, loc: Location) => {
+    if (isEditMode) {
+      e.stopPropagation();
+      setIsDraggingMarker(loc.id);
+      setSelectedLocation(loc);
+    }
+  };
+
+  useEffect(() => {
+    if (isDraggingMap || isDraggingMarker) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleTouchMove as any);
+      window.addEventListener('touchend', handleMouseUp);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove as any);
+      window.removeEventListener('touchend', handleMouseUp);
+    };
+  }, [isDraggingMap, isDraggingMarker, zoom, offset, dragStart]);
+
+  const handleTouchMove = (e: TouchEvent) => {
     if (isEditMode && isDraggingMarker && mapRef.current) {
       const rect = mapRef.current.getBoundingClientRect();
       const touch = e.touches[0];
       const x = (touch.clientX - rect.left - offset.x) / zoom;
       const y = (touch.clientY - rect.top - offset.y) / zoom;
 
-      const leftPercent = (x / rect.width) * 100;
-      const topPercent = (y / rect.height) * 100;
+      const leftPercent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+      const topPercent = Math.max(0, Math.min(100, (y / rect.height) * 100));
 
       setDynamicLocations(prev => prev.map(loc =>
         loc.id === isDraggingMarker
@@ -243,13 +267,13 @@ export default function Services() {
           : loc
       ));
 
-      // Update selected location if it's the one being dragged to show live coords
       if (selectedLocation?.id === isDraggingMarker) {
         setSelectedLocation(prev => prev ? {
           ...prev,
           coords: { top: `${topPercent.toFixed(3)}%`, left: `${leftPercent.toFixed(3)}%` }
         } : null);
       }
+
       return;
     }
 
@@ -430,7 +454,7 @@ export default function Services() {
               <div
                 ref={mapRef}
                 className={cn(
-                  "relative aspect-square bg-slate-950 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(30,58,138,0.2)] border-4 border-white ring-1 ring-slate-200 group transition-all",
+                  "relative aspect-square bg-slate-950 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(30,58,138,0.2)] border-4 border-white ring-1 ring-slate-200 group transition-all select-none",
                   zoom > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-default"
                 )}
                 onMouseDown={handleMouseDown}
@@ -447,12 +471,29 @@ export default function Services() {
                   backgroundSize: '100% 2px, 3px 100%'
                 }} />
 
+                <div
+                  className="absolute inset-0 z-20 pointer-events-none"
+                  style={{ opacity: isEditMode && selectedLocation ? 1 : 0 }}
+                >
+                  {dynamicLocations.map(loc => (
+                    loc.id === selectedLocation?.id && (
+                      <div
+                        key={`guide-${loc.id}`}
+                        className="absolute inset-0 pointer-events-none"
+                      >
+                        <div className="absolute w-full h-px bg-secondary/30" style={{ top: loc.coords.top }} />
+                        <div className="absolute h-full w-px bg-secondary/30" style={{ left: loc.coords.left }} />
+                      </div>
+                    )
+                  ))}
+                </div>
+
                 {/* Transform Container */}
                 <div
                   className="absolute inset-0 transition-transform duration-200 ease-out"
                   style={{
                     transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
-                    transformOrigin: 'center'
+                    transformOrigin: '0 0'
                   }}
                 >
                   {/* Simulated Map Background */}
@@ -481,7 +522,8 @@ export default function Services() {
                           className={cn(
                             "absolute transition-all duration-300 z-10",
                             selectedLocation?.id === loc.id ? "z-20 scale-125" : "z-10 hover:scale-110",
-                            isEditMode && "cursor-move"
+                            isEditMode && "cursor-move",
+                            isDraggingMarker === loc.id && "scale-150 brightness-125 z-30 transition-none"
                           )}
                           style={{
                             top: loc.coords.top,
@@ -496,6 +538,7 @@ export default function Services() {
                               setSelectedLocation(loc);
                             }
                           }}
+                          onTouchStart={(e) => handleMarkerTouchStart(e, loc)}
                           onClick={(e) => {
                             if (!isEditMode) {
                               e.stopPropagation();
