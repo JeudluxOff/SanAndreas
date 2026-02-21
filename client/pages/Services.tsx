@@ -22,7 +22,7 @@ import { Link } from "react-router-dom";
 interface Location {
   id: string;
   name: string;
-  type: 'police' | 'hospital';
+  type: 'police' | 'hospital' | 'government';
   description: string;
   coords: { top: string; left: string };
   address: string;
@@ -30,6 +30,24 @@ interface Location {
 }
 
 const locations: Location[] = [
+  {
+    id: 'gov-palais',
+    name: "Palais du Gouverneur",
+    type: 'government',
+    description: "Le centre du pouvoir exécutif de l'État de San Andreas. Bureaux du Gouverneur et du Cabinet.",
+    coords: { top: '75%', left: '50.5%' },
+    address: "Capital Boulevard, Los Santos",
+    phone: "555-GOV-01"
+  },
+  {
+    id: 'gov-doj',
+    name: "Department of Justice (DOJ)",
+    type: 'government',
+    description: "Siège de l'autorité judiciaire. Cour supérieure et bureaux du Procureur Général.",
+    coords: { top: '77%', left: '51.5%' },
+    address: "Rockford Hills, Los Santos",
+    phone: "555-DOJ-02"
+  },
   {
     id: 'lspd-mission-row',
     name: "LSPD - Mission Row",
@@ -106,7 +124,7 @@ const locations: Location[] = [
 
 export default function Services() {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
-  const [filter, setFilter] = useState<'all' | 'police' | 'hospital'>('all');
+  const [filter, setFilter] = useState<'all' | 'police' | 'hospital' | 'government'>('all');
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -130,10 +148,19 @@ export default function Services() {
     setOffset({ x: 0, y: 0 });
   };
 
-  const handleWheel = (e: React.WheelEvent) => {
-    if (e.deltaY < 0) handleZoomIn();
-    else handleZoomOut();
-  };
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      if (e.deltaY < 0) handleZoomIn();
+      else handleZoomOut();
+    };
+
+    map.addEventListener('wheel', onWheel, { passive: false });
+    return () => map.removeEventListener('wheel', onWheel);
+  }, []); // Stable dependencies
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (zoom > 1) {
@@ -214,7 +241,7 @@ export default function Services() {
                   >
                     <ShieldCheck className="mr-2 w-5 h-5" /> Postes de Police
                   </Button>
-                  <Button 
+                  <Button
                     variant={filter === 'hospital' ? 'default' : 'outline'}
                     className={cn(
                       "justify-start h-12 border-2",
@@ -224,6 +251,16 @@ export default function Services() {
                   >
                     <HeartPulse className="mr-2 w-5 h-5" /> Hôpitaux & EMS
                   </Button>
+                  <Button
+                    variant={filter === 'government' ? 'default' : 'outline'}
+                    className={cn(
+                      "justify-start h-12 border-2",
+                      filter === 'government' ? "bg-slate-700 border-slate-700" : "border-slate-300 text-slate-700"
+                    )}
+                    onClick={() => setFilter('government')}
+                  >
+                    <Building2 className="mr-2 w-5 h-5" /> Gouvernement & DOJ
+                  </Button>
                 </div>
               </div>
 
@@ -231,9 +268,11 @@ export default function Services() {
                 <div className="bg-white p-8 rounded-lg shadow-xl border-t-4 border-secondary animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <div className="space-y-6">
                     <div className="flex items-center gap-3">
-                      {selectedLocation.type === 'police' ? 
-                        <ShieldCheck className="w-8 h-8 text-primary" /> : 
-                        <HeartPulse className="w-8 h-8 text-secondary" />
+                      {selectedLocation.type === 'police' ?
+                        <ShieldCheck className="w-8 h-8 text-primary" /> :
+                        selectedLocation.type === 'hospital' ?
+                        <HeartPulse className="w-8 h-8 text-secondary" /> :
+                        <Building2 className="w-8 h-8 text-slate-700" />
                       }
                       <h3 className="text-2xl font-black text-primary uppercase tracking-tight leading-none">
                         {selectedLocation.name}
@@ -286,7 +325,6 @@ export default function Services() {
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
-                onWheel={handleWheel}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleMouseUp}
@@ -329,14 +367,14 @@ export default function Services() {
                         <button
                           key={loc.id}
                           className={cn(
-                            "absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-125 z-10",
+                            "absolute transition-all duration-300 hover:scale-125 z-10",
                             selectedLocation?.id === loc.id ? "scale-125 z-20" : "z-10"
                           )}
                           style={{
                             top: loc.coords.top,
                             left: loc.coords.left,
-                            // Counter-scale markers so they don't get too big
-                            scale: `${1 / Math.sqrt(zoom)}`
+                            // Keep markers the same pixel size as zoom increases while maintaining centering
+                            transform: `translate(-50%, -50%) scale(${1 / zoom})`
                           }}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -345,12 +383,16 @@ export default function Services() {
                         >
                           <div className={cn(
                             "relative p-2.5 rounded-full shadow-lg border-2 border-white animate-pulse-slow",
-                            loc.type === 'police' ? "bg-primary text-white" : "bg-secondary text-white",
+                            loc.type === 'police' ? "bg-primary text-white" :
+                            loc.type === 'hospital' ? "bg-secondary text-white" :
+                            "bg-slate-700 text-white",
                             selectedLocation?.id === loc.id && "animate-none ring-4 ring-white/30"
                           )}>
                             {loc.type === 'police' ?
                               <ShieldCheck className="w-5 h-5 md:w-6 md:h-6" /> :
-                              <HeartPulse className="w-5 h-5 md:w-6 md:h-6" />
+                              loc.type === 'hospital' ?
+                              <HeartPulse className="w-5 h-5 md:w-6 md:h-6" /> :
+                              <Building2 className="w-5 h-5 md:w-6 md:h-6" />
                             }
 
                             {/* Label on Hover / Selected */}
@@ -362,12 +404,14 @@ export default function Services() {
                           </div>
 
                           {/* Radar Effect for Selected */}
-                          {selectedLocation?.id === loc.id && (
-                            <div className={cn(
-                              "absolute inset-0 rounded-full animate-ping opacity-50",
-                              loc.type === 'police' ? "bg-primary" : "bg-secondary"
-                            )} />
-                          )}
+                        {selectedLocation?.id === loc.id && (
+                          <div className={cn(
+                            "absolute inset-0 rounded-full animate-ping opacity-50",
+                            loc.type === 'police' ? "bg-primary" :
+                            loc.type === 'hospital' ? "bg-secondary" :
+                            "bg-slate-700"
+                          )} />
+                        )}
                         </button>
                       ))}
                     </div>
@@ -411,6 +455,10 @@ export default function Services() {
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-secondary rounded-full shadow-[0_0_8px_rgba(200,16,46,0.8)]" />
                     <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">Hôpitaux / EMS</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-slate-700 rounded-full shadow-[0_0_8px_rgba(51,65,85,0.8)]" />
+                    <span className="text-[10px] font-bold text-white uppercase tracking-widest font-mono">Gouv. / DOJ</span>
                   </div>
                 </div>
                 
