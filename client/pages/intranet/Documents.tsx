@@ -14,6 +14,7 @@ import {
   FileLock2,
   FileWarning,
   FolderOpen,
+  Users,
   Eye,
   Edit3,
   Trash2,
