@@ -10,6 +10,7 @@ import {
   Search, 
   Filter, 
   ChevronRight,
+  ChevronLeft,
   ShieldCheck,
   TrendingUp,
   HeartPulse,
@@ -101,6 +102,11 @@ const Workspace = () => {
             </div>
             <div className="text-center md:text-left space-y-2">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                <Link to="/intranet">
+                  <Button variant="ghost" size="sm" className="h-6 px-2 text-white/70 hover:text-white hover:bg-white/10 gap-1 font-bold text-[9px] uppercase tracking-tighter">
+                    <ChevronLeft className="w-3 h-3" /> Retour
+                  </Button>
+                </Link>
                 <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm uppercase font-black text-[10px] tracking-widest">ESPACE DE TRAVAIL</Badge>
                 <Badge className="bg-white/10 text-white border-white/20 backdrop-blur-sm font-bold flex items-center gap-1">
                   <Users className="w-3 h-3" /> {currentWorkspace.members} Membres

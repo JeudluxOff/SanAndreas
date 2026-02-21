@@ -9,6 +9,7 @@ import {
   Share2, 
   MoreVertical,
   ChevronRight,
+  ChevronLeft,
   FileCheck,
   FileClock,
   FileLock2,
@@ -21,6 +22,7 @@ import {
   ArrowUpDown
 } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,9 +70,16 @@ const Documents = () => {
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight uppercase">Bibliothèque de Documents</h1>
-            <p className="text-slate-500 font-medium italic">Accédez à l'ensemble des documents officiels et archives de l'État.</p>
+          <div className="flex items-center gap-4">
+            <Link to="/intranet">
+              <Button variant="ghost" size="icon" className="h-10 w-10 border border-slate-200 text-slate-400 hover:text-primary rounded-full">
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight uppercase">Bibliothèque de Documents</h1>
+              <p className="text-slate-500 font-medium italic">Accédez à l'ensemble des documents officiels et archives de l'État.</p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Button className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold flex items-center gap-2">

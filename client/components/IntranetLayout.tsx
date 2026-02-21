@@ -10,9 +10,11 @@ import {
   Calendar, 
   Settings, 
   LogOut, 
-  Menu, 
-  X, 
-  Bell, 
+  Menu,
+  X,
+  ArrowLeft,
+  Home,
+  Bell,
   Search,
   ChevronRight,
   User,
@@ -175,15 +177,40 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
         {/* Header */}
         <header className="h-16 flex items-center justify-between px-6 bg-white border-b border-slate-200 shadow-sm z-40">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="text-slate-600 lg:flex"
             >
               {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
-            <div className="hidden md:flex items-center gap-2 text-sm text-slate-500 font-medium">
+
+            <div className="h-6 w-px bg-slate-200 mx-1 hidden md:block" />
+
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="text-slate-400 hover:text-primary h-9 w-9"
+                title="Retour"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <Link to="/">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-slate-400 hover:text-primary h-9 w-9"
+                  title="Accueil Public"
+                >
+                  <Home className="w-5 h-5" />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="hidden md:flex items-center gap-2 text-sm text-slate-500 font-medium ml-2">
               <span>Intranet</span>
               <ChevronRight className="w-4 h-4 text-slate-300" />
               <span className="text-slate-900 font-bold capitalize">

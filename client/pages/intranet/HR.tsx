@@ -1,23 +1,25 @@
 import { useState } from "react";
-import { 
-  Users, 
-  Search, 
-  Filter, 
-  UserPlus, 
-  MoreVertical, 
-  ShieldCheck, 
-  Mail, 
-  Phone, 
-  Calendar, 
-  MapPin, 
-  Settings, 
-  Trash2, 
-  UserCog, 
+import { Link } from "react-router-dom";
+import {
+  Users,
+  Search,
+  Filter,
+  UserPlus,
+  MoreVertical,
+  ShieldCheck,
+  Mail,
+  Phone,
+  Calendar,
+  MapPin,
+  Settings,
+  Trash2,
+  UserCog,
   History,
   Activity,
   ArrowRight,
   ShieldAlert,
   ChevronRight,
+  ChevronLeft,
   Printer,
   Download
 } from "lucide-react";
@@ -64,9 +66,16 @@ const HR = () => {
       <div className="space-y-8 pb-20">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight uppercase">Annuaire & Ressources Humaines</h1>
-            <p className="text-slate-500 font-medium italic">Gérez les effectifs gouvernementaux et accédez à l'annuaire complet.</p>
+          <div className="flex items-center gap-4">
+            <Link to="/intranet">
+              <Button variant="ghost" size="icon" className="h-10 w-10 border border-slate-200 text-slate-400 hover:text-primary rounded-full">
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight uppercase">Annuaire & Ressources Humaines</h1>
+              <p className="text-slate-500 font-medium italic">Gérez les effectifs gouvernementaux et accédez à l'annuaire complet.</p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {isAdmin && (

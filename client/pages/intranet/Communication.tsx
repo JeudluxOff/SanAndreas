@@ -18,9 +18,11 @@ import {
   User as UserIcon,
   Filter,
   FileText,
-  Volume2
+  Volume2,
+  ChevronLeft
 } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -171,6 +173,11 @@ const Communication = () => {
           {/* Chat Header */}
           <header className="h-16 flex items-center justify-between px-6 border-b border-slate-200 bg-white/80 backdrop-blur-md z-10">
             <div className="flex items-center gap-4">
+              <Link to="/intranet" className="md:hidden">
+                <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400">
+                  <ChevronLeft className="w-5 h-5" />
+                </Button>
+              </Link>
               <div className="bg-primary/10 p-2 rounded-lg text-primary">
                 {activeChannel.icon}
               </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Shield, Lock, User as UserIcon, AlertCircle, Info } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { Shield, Lock, User as UserIcon, AlertCircle, Info, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +50,11 @@ const Login = () => {
             <p className="mt-2 text-sm text-slate-600 font-medium uppercase tracking-widest">
               Gouvernement de San Andreas
             </p>
+            <div className="mt-4">
+              <Link to="/" className="text-sm font-bold text-primary hover:underline flex items-center justify-center gap-1 uppercase tracking-tighter">
+                <ArrowLeft className="w-4 h-4" /> Retour au site public
+              </Link>
+            </div>
           </div>
 
           <Card className="border-t-4 border-primary shadow-2xl">

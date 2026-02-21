@@ -1,12 +1,12 @@
-import { 
-  Bell, 
-  Calendar, 
-  FileText, 
-  FolderOpen, 
-  MessageSquare, 
-  PlusCircle, 
-  Clock, 
-  CheckCircle2, 
+import {
+  Bell,
+  Calendar,
+  FileText,
+  FolderOpen,
+  MessageSquare,
+  PlusCircle,
+  Clock,
+  CheckCircle2,
   AlertTriangle,
   ChevronRight,
   TrendingUp,
@@ -15,9 +15,11 @@ import {
   ShieldAlert,
   Search,
   Filter,
-  ArrowRight
+  ArrowRight,
+  ArrowLeft
 } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -70,7 +72,13 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Button className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold rounded shadow-lg flex items-center gap-2">
+            <Link to="/">
+              <Button variant="ghost" className="text-slate-500 hover:text-primary font-bold flex items-center gap-2 uppercase text-[10px] tracking-widest h-10 border border-slate-200 bg-white">
+                <ArrowLeft className="w-4 h-4" />
+                Quitter l'espace
+              </Button>
+            </Link>
+            <Button className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold rounded shadow-lg flex items-center gap-2 h-10 px-4 uppercase text-[10px] tracking-widest">
               <PlusCircle className="w-4 h-4" />
               Nouveau Dossier
             </Button>
