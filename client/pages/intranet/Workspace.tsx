@@ -19,7 +19,11 @@ import {
   ShieldAlert,
   Download,
   Printer,
-  Lock
+  Lock,
+  Archive,
+  Edit,
+  Trash2,
+  MoreVertical
 } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -28,13 +32,204 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { useAuth, ServiceID, Permission } from "@/contexts/AuthContext";
+
+// Initial mock data
+const INITIAL_WORKSPACES: Record<string, any> = {
+  cabinet: {
+    name: "Cabinet du Gouverneur",
+    icon: <ShieldCheck className="w-8 h-8" />,
+    color: "bg-primary",
+    members: 12,
+    activeDossiers: 8,
+    description: "Centre névralgique du gouvernement. Gestion des décrets, de la stratégie politique et des relations institutionnelles.",
+    procedures: ["Rédaction d'un décret", "Protocole de signature", "Liaison inter-agences"],
+    staff: [
+      { name: "Arthur Vance", role: "Gouverneur", role_short: "Gov", status: 'available' },
+      { name: "Elena Rodriguez", role: "Lieutenant-Gouverneur", role_short: "Lt-Gov", status: 'busy' },
+      { name: "Jean Dupont", role: "Chef de Cabinet", role_short: "Chef", status: 'away' }
+    ],
+    tasks: [
+      { id: 1, title: "Rédaction Décret Urbanisme", status: "in_progress", priority: "high", due: "Demain" },
+      { id: 2, title: "Préparation Conférence de Presse", status: "pending", priority: "medium", due: "26 Mai" }
+    ],
+    announcements: [
+      { id: 1, title: "Rappel : Réunion Hebdomadaire", text: "Présence obligatoire de tous les membres demain à 9h.", date: "Il y a 2h", author: "Arthur V." }
+    ],
+    documents: [
+      { id: "DOC-CAB-001", title: "Plan Stratégique 2024", type: "PDF", date: "15 Mai", archived: false },
+      { id: "DOC-CAB-002", title: "Protocole Crise", type: "DOCX", date: "10 Mai", archived: false }
+    ],
+    dossiers: [
+      { id: "DOS-CAB-88", title: "Réforme Constitutionnelle", status: "En cours", archived: false },
+      { id: "DOS-CAB-92", title: "Budget État T3", status: "À valider", archived: false }
+    ]
+  },
+  securite_publique: {
+    name: "Sécurité Publique (LSPD/LSSD)",
+    icon: <ShieldAlert className="w-8 h-8" />,
+    color: "bg-emerald-700",
+    members: 85,
+    activeDossiers: 154,
+    description: "Coordination des forces de l'ordre, gestion des budgets de sécurité et élaboration des plans de réponse aux urgences.",
+    procedures: ["Rapport d'incident", "Demande de renforts", "Protocole d'intervention"],
+    staff: [
+      { name: "Jackson Teller", role: "Secrétaire Sécurité", role_short: "Sec", status: 'available' },
+      { name: "Marcus Wright", role: "Commandant LSPD", role_short: "Cmd", status: 'busy' },
+      { name: "Sarah Miller", role: "Shérif LSSD", role_short: "Shr", status: 'available' }
+    ],
+    tasks: [
+      { id: 1, title: "Déploiement Patrouilles Sud", status: "completed", priority: "high", due: "Terminé" },
+      { id: 2, title: "Révision Budget Munitions", status: "in_progress", priority: "medium", due: "30 Mai" }
+    ],
+    announcements: [
+      { id: 1, title: "Alerte : Manifestation prévue", text: "Déploiement préventif aux alentours de la Mairie.", date: "Il y a 1h", author: "Jackson T." }
+    ],
+    documents: [
+      { id: "DOC-SEC-442", title: "Inventaire Arsenal LSPD", type: "XLSX", date: "20 Mai", archived: false },
+      { id: "DOC-SEC-445", title: "Carte Patrouilles", type: "IMG", date: "18 Mai", archived: false }
+    ],
+    dossiers: [
+      { id: "DOS-SEC-1024", title: "Opération Clean Street", status: "En cours", archived: false },
+      { id: "DOS-SEC-1056", title: "Achat Véhicules Intervention", status: "Clos", archived: false }
+    ]
+  },
+  justice: {
+    name: "Département de la Justice",
+    icon: <Gavel className="w-8 h-8" />,
+    color: "bg-amber-600",
+    members: 24,
+    activeDossiers: 89,
+    description: "Gestion du système judiciaire, des parquets et de l'administration pénitentiaire. Rédaction du Code Pénal.",
+    procedures: ["Dépôt de plainte État", "Mandat judiciaire", "Rapport d'audition"],
+    staff: [
+      { name: "Thomas Vercetti", role: "Secrétaire Justice", role_short: "Sec", status: 'available' },
+      { name: "Harvey Dent", role: "Procureur", role_short: "Proc", status: 'away' }
+    ],
+    tasks: [
+      { id: 1, title: "Rédaction nouveau Code Pénal", status: "in_progress", priority: "critical", due: "15 Juin" }
+    ],
+    announcements: [],
+    documents: [],
+    dossiers: []
+  },
+  sante_humains: {
+    name: "Santé & Services Humains",
+    icon: <HeartPulse className="w-8 h-8" />,
+    color: "bg-red-600",
+    members: 42,
+    activeDossiers: 30,
+    description: "Gestion de la santé publique, des services sociaux et des protocoles d'urgence médicale (SAMS).",
+    procedures: ["Aide sociale", "Licence médicale", "Rapport épidémiologique"],
+    staff: [
+      { name: "Julian Frost", role: "Secrétaire Santé", role_short: "Sec", status: 'available' }
+    ],
+    tasks: [],
+    announcements: [],
+    documents: [],
+    dossiers: []
+  },
+  securite_interieure: {
+    name: "Sécurité Intérieure",
+    icon: <Lock className="w-8 h-8" />,
+    color: "bg-slate-700",
+    members: 15,
+    activeDossiers: 12,
+    description: "Contre-espionnage, protection des infrastructures critiques et gestion des menaces intérieures.",
+    procedures: ["Habilitation Secret-Défense", "Surveillance zone", "Note de renseignement"],
+    staff: [
+      { name: "Sarah Connor", role: "Secrétaire S.I.", role_short: "Sec", status: 'available' }
+    ],
+    tasks: [],
+    announcements: [],
+    documents: [],
+    dossiers: []
+  },
+  tresor_commerce: {
+    name: "Trésor & Commerce",
+    icon: <TrendingUp className="w-8 h-8" />,
+    color: "bg-blue-600",
+    members: 18,
+    activeDossiers: 45,
+    description: "Gestion des finances publiques, régulation du commerce et développement des entreprises de San Andreas.",
+    procedures: ["Octroi de licence", "Demande de subvention", "Rapport fiscal"],
+    staff: [
+      { name: "Franklin Clinton", role: "Secrétaire Trésor", role_short: "Sec", status: 'available' }
+    ],
+    tasks: [],
+    announcements: [],
+    documents: [],
+    dossiers: []
+  },
+  communication: {
+    name: "Bureau de la Communication",
+    icon: <MessageSquare className="w-8 h-8" />,
+    color: "bg-purple-600",
+    members: 8,
+    activeDossiers: 5,
+    description: "Gestion de l'image du gouvernement, relations presse et diffusion des communiqués officiels.",
+    procedures: ["Communiqué de presse", "Briefing média", "Journal Officiel"],
+    staff: [
+      { name: "Lamar Davis", role: "Press Secretary", role_short: "Press", status: 'available' }
+    ],
+    tasks: [],
+    announcements: [],
+    documents: [],
+    dossiers: []
+  },
+  administration_generale: {
+    name: "Administration Générale",
+    icon: <Briefcase className="w-8 h-8" />,
+    color: "bg-slate-800",
+    members: 30,
+    activeDossiers: 20,
+    description: "Coordination inter-services, gestion des ressources humaines et logistique gouvernementale.",
+    procedures: ["Formulaire embauche", "Demande matériel", "Ordre de mission"],
+    staff: [
+      { name: "James Marshall", role: "Secrétaire d'État", role_short: "Sec", status: 'available' }
+    ],
+    tasks: [],
+    announcements: [],
+    documents: [],
+    dossiers: []
+  }
+};
 
 const Workspace = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
   const { user, canAccessService, hasPermission, logAction, emergencyMode } = useAuth();
   const [activeTab, setActiveTab] = React.useState("overview");
+  const [allWorkspaces, setAllWorkspaces] = React.useState(INITIAL_WORKSPACES);
+
+  // States for modals
+  const [isDocumentModalOpen, setIsDocumentModalOpen] = React.useState(false);
+  const [isDossierModalOpen, setIsDossierModalOpen] = React.useState(false);
+  const [editingDoc, setEditingDoc] = React.useState<any>(null);
+
+  // Form states
+  const [docTitle, setDocTitle] = React.useState("");
+  const [docType, setDocType] = React.useState("PDF");
+  const [dossierTitle, setDossierTitle] = React.useState("");
 
   const upperServiceId = serviceId?.toUpperCase() as ServiceID;
 
@@ -57,170 +252,113 @@ const Workspace = () => {
     );
   }
 
-  // Mock data for workspaces
-  const workspaces: Record<string, any> = {
-    cabinet: {
-      name: "Cabinet du Gouverneur",
-      icon: <ShieldCheck className="w-8 h-8" />,
-      color: "bg-primary",
-      members: 12,
-      activeDossiers: 8,
-      description: "Centre névralgique du gouvernement. Gestion des décrets, de la stratégie politique et des relations institutionnelles.",
-      procedures: ["Rédaction d'un décret", "Protocole de signature", "Liaison inter-agences"],
-      staff: [
-        { name: "Arthur Vance", role: "Gouverneur", role_short: "Gov", status: 'available' },
-        { name: "Elena Rodriguez", role: "Lieutenant-Gouverneur", role_short: "Lt-Gov", status: 'busy' },
-        { name: "Jean Dupont", role: "Chef de Cabinet", role_short: "Chef", status: 'away' }
-      ],
-      tasks: [
-        { id: 1, title: "Rédaction Décret Urbanisme", status: "in_progress", priority: "high", due: "Demain" },
-        { id: 2, title: "Préparation Conférence de Presse", status: "pending", priority: "medium", due: "26 Mai" }
-      ],
-      announcements: [
-        { id: 1, title: "Rappel : Réunion Hebdomadaire", text: "Présence obligatoire de tous les membres demain à 9h.", date: "Il y a 2h", author: "Arthur V." }
-      ],
-      documents: [
-        { id: "DOC-CAB-001", title: "Plan Stratégique 2024", type: "PDF", date: "15 Mai" },
-        { id: "DOC-CAB-002", title: "Protocole Crise", type: "DOCX", date: "10 Mai" }
-      ],
-      dossiers: [
-        { id: "DOS-CAB-88", title: "Réforme Constitutionnelle", status: "En cours" },
-        { id: "DOS-CAB-92", title: "Budget État T3", status: "À valider" }
-      ]
-    },
-    securite_publique: {
-      name: "Sécurité Publique (LSPD/LSSD)",
-      icon: <ShieldAlert className="w-8 h-8" />,
-      color: "bg-emerald-700",
-      members: 85,
-      activeDossiers: 154,
-      description: "Coordination des forces de l'ordre, gestion des budgets de sécurité et élaboration des plans de réponse aux urgences.",
-      procedures: ["Rapport d'incident", "Demande de renforts", "Protocole d'intervention"],
-      staff: [
-        { name: "Jackson Teller", role: "Secrétaire Sécurité", role_short: "Sec", status: 'available' },
-        { name: "Marcus Wright", role: "Commandant LSPD", role_short: "Cmd", status: 'busy' },
-        { name: "Sarah Miller", role: "Shérif LSSD", role_short: "Shr", status: 'available' }
-      ],
-      tasks: [
-        { id: 1, title: "Déploiement Patrouilles Sud", status: "completed", priority: "high", due: "Terminé" },
-        { id: 2, title: "Révision Budget Munitions", status: "in_progress", priority: "medium", due: "30 Mai" }
-      ],
-      announcements: [
-        { id: 1, title: "Alerte : Manifestation prévue", text: "Déploiement préventif aux alentours de la Mairie.", date: "Il y a 1h", author: "Jackson T." }
-      ],
-      documents: [
-        { id: "DOC-SEC-442", title: "Inventaire Arsenal LSPD", type: "XLSX", date: "20 Mai" },
-        { id: "DOC-SEC-445", title: "Carte Patrouilles", type: "IMG", date: "18 Mai" }
-      ],
-      dossiers: [
-        { id: "DOS-SEC-1024", title: "Opération Clean Street", status: "En cours" },
-        { id: "DOS-SEC-1056", title: "Achat Véhicules Intervention", status: "Clos" }
-      ]
-    },
-    justice: {
-      name: "Département de la Justice",
-      icon: <Gavel className="w-8 h-8" />,
-      color: "bg-amber-600",
-      members: 24,
-      activeDossiers: 89,
-      description: "Gestion du système judiciaire, des parquets et de l'administration pénitentiaire. Rédaction du Code Pénal.",
-      procedures: ["Dépôt de plainte État", "Mandat judiciaire", "Rapport d'audition"],
-      staff: [
-        { name: "Thomas Vercetti", role: "Secrétaire Justice", role_short: "Sec", status: 'available' },
-        { name: "Harvey Dent", role: "Procureur", role_short: "Proc", status: 'away' }
-      ],
-      tasks: [
-        { id: 1, title: "Rédaction nouveau Code Pénal", status: "in_progress", priority: "critical", due: "15 Juin" }
-      ],
-      announcements: [],
-      documents: [],
-      dossiers: []
-    },
-    sante_humains: {
-      name: "Santé & Services Humains",
-      icon: <HeartPulse className="w-8 h-8" />,
-      color: "bg-red-600",
-      members: 42,
-      activeDossiers: 30,
-      description: "Gestion de la santé publique, des services sociaux et des protocoles d'urgence médicale (SAMS).",
-      procedures: ["Aide sociale", "Licence médicale", "Rapport épidémiologique"],
-      staff: [
-        { name: "Julian Frost", role: "Secrétaire Santé", role_short: "Sec", status: 'available' }
-      ],
-      tasks: [],
-      announcements: [],
-      documents: [],
-      dossiers: []
-    },
-    securite_interieure: {
-      name: "Sécurité Intérieure",
-      icon: <Lock className="w-8 h-8" />,
-      color: "bg-slate-700",
-      members: 15,
-      activeDossiers: 12,
-      description: "Contre-espionnage, protection des infrastructures critiques et gestion des menaces intérieures.",
-      procedures: ["Habilitation Secret-Défense", "Surveillance zone", "Note de renseignement"],
-      staff: [
-        { name: "Sarah Connor", role: "Secrétaire S.I.", role_short: "Sec", status: 'available' }
-      ],
-      tasks: [],
-      announcements: [],
-      documents: [],
-      dossiers: []
-    },
-    tresor_commerce: {
-      name: "Trésor & Commerce",
-      icon: <TrendingUp className="w-8 h-8" />,
-      color: "bg-blue-600",
-      members: 18,
-      activeDossiers: 45,
-      description: "Gestion des finances publiques, régulation du commerce et développement des entreprises de San Andreas.",
-      procedures: ["Octroi de licence", "Demande de subvention", "Rapport fiscal"],
-      staff: [
-        { name: "Franklin Clinton", role: "Secrétaire Trésor", role_short: "Sec", status: 'available' }
-      ],
-      tasks: [],
-      announcements: [],
-      documents: [],
-      dossiers: []
-    },
-    communication: {
-      name: "Bureau de la Communication",
-      icon: <MessageSquare className="w-8 h-8" />,
-      color: "bg-purple-600",
-      members: 8,
-      activeDossiers: 5,
-      description: "Gestion de l'image du gouvernement, relations presse et diffusion des communiqués officiels.",
-      procedures: ["Communiqué de presse", "Briefing média", "Journal Officiel"],
-      staff: [
-        { name: "Lamar Davis", role: "Press Secretary", role_short: "Press", status: 'available' }
-      ],
-      tasks: [],
-      announcements: [],
-      documents: [],
-      dossiers: []
-    },
-    administration_generale: {
-      name: "Administration Générale",
-      icon: <Briefcase className="w-8 h-8" />,
-      color: "bg-slate-800",
-      members: 30,
-      activeDossiers: 20,
-      description: "Coordination inter-services, gestion des ressources humaines et logistique gouvernementale.",
-      procedures: ["Formulaire embauche", "Demande matériel", "Ordre de mission"],
-      staff: [
-        { name: "James Marshall", role: "Secrétaire d'État", role_short: "Sec", status: 'available' }
-      ],
-      tasks: [],
-      announcements: [],
-      documents: [],
-      dossiers: []
-    }
+  const currentWorkspace = allWorkspaces[serviceId?.toLowerCase() || ''] || allWorkspaces.cabinet;
+
+  const handleCreateDocument = () => {
+    if (!docTitle) return;
+
+    const newDoc = {
+      id: `DOC-${upperServiceId}-${Math.floor(Math.random() * 999)}`,
+      title: docTitle,
+      type: docType,
+      date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
+      archived: false
+    };
+
+    setAllWorkspaces(prev => ({
+      ...prev,
+      [serviceId?.toLowerCase() || '']: {
+        ...currentWorkspace,
+        documents: [newDoc, ...(currentWorkspace.documents || [])]
+      }
+    }));
+
+    setDocTitle("");
+    setIsDocumentModalOpen(false);
+    logAction(`Création du document : ${docTitle}`);
   };
 
-  const currentWorkspace = workspaces[serviceId?.toLowerCase() || ''] || workspaces.cabinet;
+  const handleUpdateDocument = () => {
+    if (!docTitle || !editingDoc) return;
+
+    setAllWorkspaces(prev => ({
+      ...prev,
+      [serviceId?.toLowerCase() || '']: {
+        ...currentWorkspace,
+        documents: currentWorkspace.documents.map((doc: any) =>
+          doc.id === editingDoc.id ? { ...doc, title: docTitle, type: docType } : doc
+        )
+      }
+    }));
+
+    setDocTitle("");
+    setEditingDoc(null);
+    setIsDocumentModalOpen(false);
+    logAction(`Modification du document : ${docTitle}`);
+  };
+
+  const handleCreateDossier = () => {
+    if (!dossierTitle) return;
+
+    const newDossier = {
+      id: `DOS-${upperServiceId}-${Math.floor(Math.random() * 9999)}`,
+      title: dossierTitle,
+      status: "En cours",
+      archived: false
+    };
+
+    setAllWorkspaces(prev => ({
+      ...prev,
+      [serviceId?.toLowerCase() || '']: {
+        ...currentWorkspace,
+        dossiers: [newDossier, ...(currentWorkspace.dossiers || [])]
+      }
+    }));
+
+    setDossierTitle("");
+    setIsDossierModalOpen(false);
+    logAction(`Création du dossier : ${dossierTitle}`);
+  };
+
+  const handleArchiveDocument = (docId: string) => {
+    setAllWorkspaces(prev => ({
+      ...prev,
+      [serviceId?.toLowerCase() || '']: {
+        ...currentWorkspace,
+        documents: currentWorkspace.documents.map((doc: any) =>
+          doc.id === docId ? { ...doc, archived: !doc.archived } : doc
+        )
+      }
+    }));
+    logAction(`Archivage/Désarchivage du document ID : ${docId}`);
+  };
+
+  const handleArchiveDossier = (dosId: string) => {
+    setAllWorkspaces(prev => ({
+      ...prev,
+      [serviceId?.toLowerCase() || '']: {
+        ...currentWorkspace,
+        dossiers: currentWorkspace.dossiers.map((dos: any) =>
+          dos.id === dosId ? { ...dos, archived: !dos.archived } : dos
+        )
+      }
+    }));
+    logAction(`Archivage/Désarchivage du dossier ID : ${dosId}`);
+  };
+
+  const openEditDoc = (doc: any) => {
+    setEditingDoc(doc);
+    setDocTitle(doc.title);
+    setDocType(doc.type);
+    setIsDocumentModalOpen(true);
+  };
 
   const [tasks, setTasks] = React.useState(currentWorkspace.tasks || []);
+
+  const visibleDocuments = (currentWorkspace.documents || []).filter((d: any) => !d.archived);
+  const archivedDocuments = (currentWorkspace.documents || []).filter((d: any) => d.archived);
+  const visibleDossiers = (currentWorkspace.dossiers || []).filter((d: any) => !d.archived);
+  const archivedDossiers = (currentWorkspace.dossiers || []).filter((d: any) => d.archived);
 
   const handleAction = (action: string) => {
     logAction(`${action} dans le service: ${currentWorkspace.name}`);
@@ -276,7 +414,10 @@ const Workspace = () => {
             </div>
             <div className="md:ml-auto flex flex-col items-center md:items-end gap-3">
               <div className="flex items-center gap-2">
-                <Button className="bg-white text-slate-900 hover:bg-white/90 font-bold uppercase text-[10px] tracking-widest px-6 h-10 shadow-lg">
+                <Button
+                  onClick={() => { setEditingDoc(null); setDocTitle(""); setIsDocumentModalOpen(true); }}
+                  className="bg-white text-slate-900 hover:bg-white/90 font-bold uppercase text-[10px] tracking-widest px-6 h-10 shadow-lg"
+                >
                   <Plus className="w-4 h-4 mr-2" /> Nouveau Document
                 </Button>
                 <Button variant="outline" className="bg-transparent border-white/30 text-white hover:bg-white/10 font-bold uppercase text-[10px] tracking-widest h-10">
@@ -321,11 +462,11 @@ const Workspace = () => {
                 )}>
                   Tâches Opérationnelles
                 </TabsTrigger>
-                <TabsTrigger value="members" className={cn(
+                <TabsTrigger value="archive" className={cn(
                   "font-bold uppercase text-[10px] tracking-widest h-10 px-6",
                   emergencyMode ? "data-[state=active]:bg-red-600 text-red-400" : "data-[state=active]:bg-primary text-slate-500"
                 )}>
-                  Effectifs
+                  Archives
                 </TabsTrigger>
               </TabsList>
 
@@ -393,13 +534,14 @@ const Workspace = () => {
                 {/* Quick Shortcuts */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
-                    { label: "Créer Rapport", icon: <FileText className="w-5 h-5" />, color: "bg-blue-50 text-blue-600" },
-                    { label: "Nouveau Dossier", icon: <FolderOpen className="w-5 h-5" />, color: "bg-amber-50 text-amber-600" },
-                    { label: "Archive Service", icon: <Book className="w-5 h-5" />, color: "bg-emerald-50 text-emerald-600" },
-                    { label: "Imprimer Forms", icon: <Printer className="w-5 h-5" />, color: "bg-slate-50 text-slate-600" }
+                    { label: "Créer Rapport", icon: <FileText className="w-5 h-5" />, color: "bg-blue-50 text-blue-600", action: () => { setEditingDoc(null); setDocTitle(""); setIsDocumentModalOpen(true); } },
+                    { label: "Nouveau Dossier", icon: <FolderOpen className="w-5 h-5" />, color: "bg-amber-50 text-amber-600", action: () => { setDossierTitle(""); setIsDossierModalOpen(true); } },
+                    { label: "Archive Service", icon: <Archive className="w-5 h-5" />, color: "bg-emerald-50 text-emerald-600", action: () => setActiveTab("archive") },
+                    { label: "Imprimer Forms", icon: <Printer className="w-5 h-5" />, color: "bg-slate-50 text-slate-600", action: () => window.print() }
                   ].map((s, i) => (
                     <button
                       key={i}
+                      onClick={s.action}
                       className={cn(
                         "flex flex-col items-center justify-center p-6 bg-white border border-slate-200 rounded-xl hover:border-primary hover:shadow-lg transition-all group",
                         emergencyMode && "bg-red-950/20 border-red-900 hover:border-red-600"
@@ -421,11 +563,16 @@ const Workspace = () => {
                       <CardTitle className={cn("text-xs font-black uppercase tracking-widest", emergencyMode && "text-red-400")}>Bibliothèque de Service</CardTitle>
                       <CardDescription className={cn("text-[10px] font-bold uppercase", emergencyMode && "text-red-800")}>Fichiers partagés et archives administratives</CardDescription>
                     </div>
-                    <Button size="sm" className={cn("bg-primary font-bold uppercase text-[10px] px-4", emergencyMode && "bg-red-600")}>Importer</Button>
+                    <Button
+                      onClick={() => { setEditingDoc(null); setDocTitle(""); setIsDocumentModalOpen(true); }}
+                      size="sm" className={cn("bg-primary font-bold uppercase text-[10px] px-4", emergencyMode && "bg-red-600")}
+                    >
+                      Nouveau Document
+                    </Button>
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="divide-y divide-slate-100">
-                      {(currentWorkspace.documents || []).length > 0 ? currentWorkspace.documents.map((doc: any) => (
+                      {visibleDocuments.length > 0 ? visibleDocuments.map((doc: any) => (
                         <div key={doc.id} className="p-4 flex items-center justify-between group hover:bg-slate-50/50 transition-colors">
                           <div className="flex items-center gap-4">
                             <div className="p-2 bg-slate-100 rounded text-slate-400 group-hover:text-primary transition-colors">
@@ -440,6 +587,16 @@ const Workspace = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 hover:text-primary"><MoreVertical className="w-4 h-4" /></Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-40 uppercase font-bold text-[10px]">
+                                <DropdownMenuItem onClick={() => openEditDoc(doc)} className="gap-2"><Edit className="w-3 h-3" /> Modifier</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleArchiveDocument(doc.id)} className="gap-2"><Archive className="w-3 h-3" /> Archiver</DropdownMenuItem>
+                                <DropdownMenuItem className="gap-2 text-red-600"><Trash2 className="w-3 h-3" /> Supprimer</DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 group-hover:text-primary"><Download className="w-4 h-4" /></Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 group-hover:text-primary"><Printer className="w-4 h-4" /></Button>
                           </div>
@@ -461,11 +618,16 @@ const Workspace = () => {
                       <CardTitle className={cn("text-xs font-black uppercase tracking-widest", emergencyMode && "text-red-400")}>Dossiers Spécifiques au Service</CardTitle>
                       <CardDescription className={cn("text-[10px] font-bold uppercase", emergencyMode && "text-red-800")}>Suivi des dossiers de niveau {currentWorkspace.name}</CardDescription>
                     </div>
-                    <Button size="sm" className={cn("bg-primary font-bold uppercase text-[10px] px-4", emergencyMode && "bg-red-600")}>Nouveau Dossier</Button>
+                    <Button
+                      onClick={() => { setDossierTitle(""); setIsDossierModalOpen(true); }}
+                      size="sm" className={cn("bg-primary font-bold uppercase text-[10px] px-4", emergencyMode && "bg-red-600")}
+                    >
+                      Nouveau Dossier
+                    </Button>
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="divide-y divide-slate-100">
-                      {(currentWorkspace.dossiers || []).length > 0 ? currentWorkspace.dossiers.map((dos: any) => (
+                      {visibleDossiers.length > 0 ? visibleDossiers.map((dos: any) => (
                         <div key={dos.id} className="p-4 flex items-center justify-between group hover:bg-slate-50/50 transition-colors">
                           <div className="flex items-center gap-4">
                             <div className="p-2 bg-slate-100 rounded text-slate-400 group-hover:text-primary transition-colors">
@@ -483,6 +645,15 @@ const Workspace = () => {
                             )}>
                               {dos.status}
                             </Badge>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 hover:text-primary"><MoreVertical className="w-4 h-4" /></Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-40 uppercase font-bold text-[10px]">
+                                <DropdownMenuItem onClick={() => handleArchiveDossier(dos.id)} className="gap-2"><Archive className="w-3 h-3" /> Archiver</DropdownMenuItem>
+                                <DropdownMenuItem className="gap-2 text-red-600"><Trash2 className="w-3 h-3" /> Supprimer</DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 group-hover:text-primary"><ChevronRight className="w-4 h-4" /></Button>
                           </div>
                         </div>
@@ -590,6 +761,60 @@ const Workspace = () => {
                    </CardContent>
                 </Card>
               </TabsContent>
+
+              <TabsContent value="archive" className="mt-6 space-y-6">
+                <Card className={cn("border-none shadow-md", emergencyMode && "bg-red-950/20")}>
+                  <CardHeader className="border-b border-slate-100">
+                    <CardTitle className={cn("text-xs font-black uppercase tracking-widest flex items-center gap-2", emergencyMode && "text-red-400")}>
+                      <Archive className="w-4 h-4" /> Documents Archivés
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="divide-y divide-slate-100">
+                      {archivedDocuments.length > 0 ? archivedDocuments.map((doc: any) => (
+                        <div key={doc.id} className="p-4 flex items-center justify-between group hover:bg-slate-50/50 transition-colors">
+                          <div className="flex items-center gap-4">
+                            <FileText className="w-5 h-5 text-slate-300" />
+                            <div>
+                              <p className="text-sm font-black uppercase text-slate-400">{doc.title}</p>
+                              <span className="text-[9px] font-bold text-slate-400 uppercase">{doc.id}</span>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm" onClick={() => handleArchiveDocument(doc.id)} className="text-[9px] font-black uppercase">Désarchiver</Button>
+                        </div>
+                      )) : (
+                        <div className="p-8 text-center text-slate-400 italic text-xs">Aucun document archivé.</div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className={cn("border-none shadow-md", emergencyMode && "bg-red-950/20")}>
+                  <CardHeader className="border-b border-slate-100">
+                    <CardTitle className={cn("text-xs font-black uppercase tracking-widest flex items-center gap-2", emergencyMode && "text-red-400")}>
+                      <Archive className="w-4 h-4" /> Dossiers Archivés
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="divide-y divide-slate-100">
+                      {archivedDossiers.length > 0 ? archivedDossiers.map((dos: any) => (
+                        <div key={dos.id} className="p-4 flex items-center justify-between group hover:bg-slate-50/50 transition-colors">
+                          <div className="flex items-center gap-4">
+                            <FolderOpen className="w-5 h-5 text-slate-300" />
+                            <div>
+                              <p className="text-sm font-black uppercase text-slate-400">{dos.title}</p>
+                              <span className="text-[9px] font-bold text-slate-400 uppercase">{dos.id}</span>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm" onClick={() => handleArchiveDossier(dos.id)} className="text-[9px] font-black uppercase">Désarchiver</Button>
+                        </div>
+                      )) : (
+                        <div className="p-8 text-center text-slate-400 italic text-xs">Aucun dossier archivé.</div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
             </Tabs>
           </div>
 
@@ -619,7 +844,7 @@ const Workspace = () => {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-slate-100">
-                  {currentWorkspace.staff.map((p, i) => (
+                  {currentWorkspace.staff.map((p: any, i: number) => (
                     <div key={i} className="p-4 flex items-center gap-4 group hover:bg-slate-50 transition-colors">
                       <div className="relative">
                         <Avatar className="h-10 w-10 border-2 border-slate-100 shadow-sm">
@@ -688,6 +913,77 @@ const Workspace = () => {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <Dialog open={isDocumentModalOpen} onOpenChange={setIsDocumentModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="uppercase font-black tracking-tight">{editingDoc ? "Modifier le Document" : "Nouveau Document"}</DialogTitle>
+            <DialogDescription className="text-xs font-bold uppercase italic">
+              Enregistrez un nouveau document dans la bibliothèque du service.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-[10px] font-black uppercase tracking-widest">Titre du document</Label>
+              <Input
+                id="title"
+                value={docTitle}
+                onChange={(e) => setDocTitle(e.target.value)}
+                placeholder="Ex: Rapport d'intervention #442"
+                className="font-bold uppercase text-xs"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="type" className="text-[10px] font-black uppercase tracking-widest">Type de fichier</Label>
+              <Select value={docType} onValueChange={setDocType}>
+                <SelectTrigger className="font-bold uppercase text-xs">
+                  <SelectValue placeholder="Sélectionnez le type" />
+                </SelectTrigger>
+                <SelectContent className="font-bold uppercase text-[10px]">
+                  <SelectItem value="PDF">PDF (Protocole / Rapport)</SelectItem>
+                  <SelectItem value="DOCX">DOCX (Édition / Brouillon)</SelectItem>
+                  <SelectItem value="XLSX">XLSX (Tableur / Inventaire)</SelectItem>
+                  <SelectItem value="IMG">IMG (Preuve / Carte)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={editingDoc ? handleUpdateDocument : handleCreateDocument} className="font-black uppercase tracking-widest text-[10px] w-full py-6">
+              {editingDoc ? "Mettre à jour" : "Créer le document"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDossierModalOpen} onOpenChange={setIsDossierModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="uppercase font-black tracking-tight">Ouvrir un Nouveau Dossier</DialogTitle>
+            <DialogDescription className="text-xs font-bold uppercase italic">
+              Créez un suivi opérationnel pour une nouvelle affaire ou mission.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="dos-title" className="text-[10px] font-black uppercase tracking-widest">Nom du dossier</Label>
+              <Input
+                id="dos-title"
+                value={dossierTitle}
+                onChange={(e) => setDossierTitle(e.target.value)}
+                placeholder="Ex: Opération Underworld"
+                className="font-bold uppercase text-xs"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleCreateDossier} className="font-black uppercase tracking-widest text-[10px] w-full py-6 bg-emerald-600 hover:bg-emerald-700">
+              Ouvrir le dossier
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </IntranetLayout>
   );
 };
