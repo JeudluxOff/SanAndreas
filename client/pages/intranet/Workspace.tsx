@@ -221,6 +221,14 @@ const Workspace = () => {
   const [activeTab, setActiveTab] = React.useState("overview");
   const [allWorkspaces, setAllWorkspaces] = React.useState(INITIAL_WORKSPACES);
 
+  const currentWorkspace = allWorkspaces[serviceId?.toLowerCase() || ''] || INITIAL_WORKSPACES.cabinet;
+  const [tasks, setTasks] = React.useState(currentWorkspace.tasks || []);
+
+  // Sync tasks when switching service
+  React.useEffect(() => {
+    setTasks(currentWorkspace.tasks || []);
+  }, [currentWorkspace.name]);
+
   // States for modals
   const [isDocumentModalOpen, setIsDocumentModalOpen] = React.useState(false);
   const [isDossierModalOpen, setIsDossierModalOpen] = React.useState(false);
@@ -352,8 +360,6 @@ const Workspace = () => {
     setDocType(doc.type);
     setIsDocumentModalOpen(true);
   };
-
-  const [tasks, setTasks] = React.useState(currentWorkspace.tasks || []);
 
   const visibleDocuments = (currentWorkspace.documents || []).filter((d: any) => !d.archived);
   const archivedDocuments = (currentWorkspace.documents || []).filter((d: any) => d.archived);
