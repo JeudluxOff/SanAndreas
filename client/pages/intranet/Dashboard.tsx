@@ -150,7 +150,7 @@ const Dashboard = () => {
                 <div className="h-1.5 flex-grow bg-slate-200 rounded-full" />
               </div>
             </CardContent>
-          </Card>Statistique des dossiers
+          </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

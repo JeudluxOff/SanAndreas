@@ -4,10 +4,11 @@ import { Building2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
-export default function Placeholder() {
+export default function Placeholder({ title: propTitle }: { title?: string }) {
   const location = useLocation();
   const path = location.pathname.substring(1);
-  const title = path.charAt(0).toUpperCase() + path.slice(1).replace(/-/g, ' ');
+  const derivedTitle = path.charAt(0).toUpperCase() + path.slice(1).replace(/-/g, ' ');
+  const title = propTitle || derivedTitle;
 
   return (
     <Layout>
