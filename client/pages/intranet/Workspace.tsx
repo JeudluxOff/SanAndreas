@@ -1,5 +1,5 @@
+import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useState } from "react";
 import {
   Briefcase, 
   FileText, 
@@ -34,7 +34,7 @@ import { useAuth, ServiceID, Permission } from "@/contexts/AuthContext";
 const Workspace = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
   const { user, canAccessService, hasPermission, logAction, emergencyMode } = useAuth();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = React.useState("overview");
 
   const upperServiceId = serviceId?.toUpperCase() as ServiceID;
 
@@ -220,7 +220,7 @@ const Workspace = () => {
 
   const currentWorkspace = workspaces[serviceId?.toLowerCase() || ''] || workspaces.cabinet;
 
-  const [tasks, setTasks] = useState(currentWorkspace.tasks || []);
+  const [tasks, setTasks] = React.useState(currentWorkspace.tasks || []);
 
   const handleAction = (action: string) => {
     logAction(`${action} dans le service: ${currentWorkspace.name}`);
