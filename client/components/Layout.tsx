@@ -23,11 +23,15 @@ const navItems = [
   { label: "Économie", path: "/economie", icon: <TrendingUp className="w-4 h-4" /> },
   { label: "Santé", path: "/sante", icon: <HeartPulse className="w-4 h-4" /> },
   { label: "Services", path: "/services", icon: <Building2 className="w-4 h-4" /> },
+  { label: "Espace Employés", path: "/login", icon: <Users className="w-4 h-4" />, isEmployee: true },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+
+  const publicNavItems = navItems.filter(item => !item.isEmployee);
+  const employeeItem = navItems.find(item => item.isEmployee);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-900">
@@ -46,9 +50,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {/* Logo Section */}
             <Link to="/" className="flex items-center gap-4 group">
               <div className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0 bg-primary flex items-center justify-center rounded-full text-white overflow-hidden border-2 border-primary shadow-lg transition-transform group-hover:scale-105">
-                <img 
-                  src="/placeholder.svg" 
-                  alt="San Andreas Seal" 
+                <img
+                  src="/placeholder.svg"
+                  alt="San Andreas Seal"
                   className="w-10 h-10 md:w-14 md:h-14 opacity-90 group-hover:opacity-100"
                 />
               </div>
@@ -64,7 +68,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-1">
-              {navItems.map((item) => (
+              {publicNavItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
@@ -78,7 +82,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   {item.label}
                 </Link>
               ))}
-              <div className="ml-4 pl-4 border-l border-slate-200">
+
+              {employeeItem && (
+                <Link
+                  to={employeeItem.path}
+                  className="ml-4 px-4 py-2 bg-[#1B365D] text-white text-xs font-bold rounded shadow-md hover:bg-[#254a7c] transition-colors uppercase tracking-wider flex items-center gap-2"
+                >
+                  {employeeItem.icon}
+                  {employeeItem.label}
+                </Link>
+              )}
+
+              <div className="ml-2 pl-2 border-l border-slate-200">
                 <Button size="icon" variant="ghost" className="text-slate-600">
                   <Search className="w-5 h-5" />
                 </Button>
@@ -86,7 +101,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </nav>
 
             {/* Mobile Menu Toggle */}
-            <button 
+            <button
               className="lg:hidden p-2 text-primary"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
@@ -108,7 +123,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     "flex items-center gap-3 p-3 rounded-lg text-base font-bold transition-colors",
                     location.pathname === item.path
                       ? "bg-primary/5 text-primary border-l-4 border-secondary"
-                      : "text-slate-600 hover:bg-slate-50 border-l-4 border-transparent"
+                      : "text-slate-600 hover:bg-slate-50 border-l-4 border-transparent",
+                    item.isEmployee && "bg-slate-900 text-white hover:bg-slate-800"
                   )}
                 >
                   {item.icon}
