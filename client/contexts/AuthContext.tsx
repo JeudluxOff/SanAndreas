@@ -129,7 +129,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const savedUser = localStorage.getItem('sa_gov_user');
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      try {
+        const parsedUser = JSON.parse(savedUser) as User;
+        // If user object is missing permissions (old session), re-attach them
+        if (!parsedUser.permissions) {
+          parsedUser.permissions = ROLE_PERMISSIONS[parsedUser.role] || [];
+        }
+        setUser(parsedUser);
+      } catch (e) {
+        console.error("Erreur de chargement de la session:", e);
+        localStorage.removeItem('sa_gov_user');
+      }
     }
     setIsLoading(false);
   }, []);
@@ -226,7 +236,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const hasPermission = (permission: Permission): boolean => {
-    if (!user) return false;
+    if (!user || !user.permissions) return false;
     return user.permissions.includes(permission);
   };
 
