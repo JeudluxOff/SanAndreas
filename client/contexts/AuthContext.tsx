@@ -33,6 +33,8 @@ export type Permission =
   | 'admin:users_manage' | 'admin:roles_manage'
   | 'audit:logs_view' | 'audit:reports_export';
 
+export type UserStatus = 'available' | 'busy' | 'away' | 'offline';
+
 export interface User {
   id: string;
   username: string;
@@ -42,6 +44,7 @@ export interface User {
   service_name: string;
   grade: string;
   permissions: Permission[];
+  status: UserStatus;
 }
 
 interface AuthContextType {
@@ -52,6 +55,7 @@ interface AuthContextType {
   hasPermission: (permission: Permission) => boolean;
   canAccessService: (serviceId: ServiceID) => boolean;
   logAction: (action: string, metadata?: any) => void;
+  updateStatus: (status: UserStatus) => void;
 }
 
 const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
@@ -140,6 +144,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser) as User;
+        // Migration: If user object is missing status, set to available
+        if (!parsedUser.status) {
+          parsedUser.status = 'available';
+        }
         // If user object is missing permissions (old session), re-attach them
         if (!parsedUser.permissions) {
           parsedUser.permissions = ROLE_PERMISSIONS[parsedUser.role] || [];
@@ -239,7 +247,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           name: baseUser.name!,
           service_name: baseUser.service_name!,
           grade: baseUser.grade!,
-          permissions: ROLE_PERMISSIONS[baseUser.role!]
+          permissions: ROLE_PERMISSIONS[baseUser.role!],
+          status: 'available'
         };
 
         setUser(fullUser);
@@ -286,8 +295,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('sa_gov_user');
   };
 
+  const updateStatus = (status: UserStatus) => {
+    if (!user) return;
+    const updatedUser = { ...user, status };
+    setUser(updatedUser);
+    localStorage.setItem('sa_gov_user', JSON.stringify(updatedUser));
+    logAction('Mise à jour statut', { status });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading, hasPermission, canAccessService, logAction }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading, hasPermission, canAccessService, logAction, updateStatus }}>
       {children}
     </AuthContext.Provider>
   );

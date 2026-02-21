@@ -28,11 +28,26 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { UserStatus } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
-  const { user, hasPermission, logAction } = useAuth();
+  const { user, hasPermission, logAction, updateStatus } = useAuth();
 
   if (!user) return null;
+
+  const statusColors = {
+    available: 'bg-emerald-500',
+    busy: 'bg-red-500',
+    away: 'bg-amber-500',
+    offline: 'bg-slate-500'
+  };
+
+  const statusLabels = {
+    available: 'En service',
+    busy: 'Occupé',
+    away: 'Absent',
+    offline: 'Hors service'
+  };
 
   const notifications = [
     { id: 1, type: 'validation', text: 'Décret #SA-2024-042 en attente de signature', time: 'il y a 2h', priority: 'high', service_id: 'CABINET' },
@@ -412,6 +427,50 @@ const Dashboard = () => {
             </Card>
 
             {/* Quick Status / Help */}
+            <Card className="shadow-lg border-none overflow-hidden">
+              <CardHeader className="bg-slate-50 border-b border-slate-100 py-4">
+                <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                  <UserIcon className="w-4 h-4 text-primary" />
+                  Votre Disponibilité
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="relative">
+                    <Avatar className="h-12 w-12 border-2 border-primary shadow-md">
+                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} />
+                      <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className={cn(
+                      "absolute -bottom-0.5 -right-0.5 w-4 h-4 border-2 border-white rounded-full",
+                      statusColors[user.status || 'available']
+                    )} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-slate-900 uppercase">{user.name}</p>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{statusLabels[user.status || 'available']}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {(['available', 'busy', 'away', 'offline'] as UserStatus[]).map((status) => (
+                    <Button
+                      key={status}
+                      variant="outline"
+                      className={cn(
+                        "h-9 text-[9px] font-black uppercase tracking-widest gap-2 border-slate-200 justify-start",
+                        user.status === status && "bg-primary/5 border-primary text-primary"
+                      )}
+                      onClick={() => updateStatus(status)}
+                    >
+                      <div className={cn("w-2 h-2 rounded-full", statusColors[status])} />
+                      {statusLabels[status]}
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="p-6 bg-gradient-to-br from-primary to-[#254a7c] rounded-2xl text-white shadow-xl relative overflow-hidden group">
               <Activity className="absolute bottom-[-10px] right-[-10px] w-32 h-32 opacity-10 group-hover:scale-110 transition-transform duration-700" />
               <div className="relative z-10">

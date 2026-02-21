@@ -21,7 +21,7 @@ import {
   Activity,
   Briefcase
 } from 'lucide-react';
-import { useAuth, Role, Permission, ServiceID } from '@/contexts/AuthContext';
+import { useAuth, Role, Permission, ServiceID, UserStatus } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
@@ -67,11 +67,25 @@ const workspaceServices: { id: ServiceID, label: string, color: string }[] = [
 
 export function IntranetLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { user, logout, hasPermission, canAccessService } = useAuth();
+  const { user, logout, hasPermission, canAccessService, updateStatus } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
   if (!user) return null;
+
+  const statusColors = {
+    available: 'bg-emerald-500',
+    busy: 'bg-red-500',
+    away: 'bg-amber-500',
+    offline: 'bg-slate-500'
+  };
+
+  const statusLabels = {
+    available: 'En service',
+    busy: 'Occupé',
+    away: 'Absent',
+    offline: 'Hors service'
+  };
 
   const filteredSidebarItems = sidebarItems.filter(item =>
     !item.permission || hasPermission(item.permission)
@@ -161,18 +175,47 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
 
         <div className="mt-auto p-4 border-t border-slate-800 space-y-4">
           <div className={cn("flex items-center gap-3 overflow-hidden", sidebarOpen ? "px-2" : "justify-center")}>
-            <Avatar className="w-10 h-10 border-2 border-slate-800 shadow-lg">
-              <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} />
-              <AvatarFallback className="bg-primary text-white">{user.name.charAt(0)}</AvatarFallback>
-            </Avatar>
+            <div className="relative flex-shrink-0">
+              <Avatar className="w-10 h-10 border-2 border-slate-800 shadow-lg">
+                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} />
+                <AvatarFallback className="bg-primary text-white">{user.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div className={cn(
+                "absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-2 border-slate-900 rounded-full",
+                statusColors[user.status || 'available']
+              )} />
+            </div>
             {sidebarOpen && (
-              <div className="flex flex-col min-w-0">
+              <div className="flex flex-col min-w-0 flex-grow">
                 <span className="text-sm font-bold text-white truncate">{user.name}</span>
-                <span className="text-[10px] uppercase font-bold text-slate-500 truncate">{user.grade}</span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-1 hover:text-white transition-colors">
+                      {statusLabels[user.status || 'available']}
+                      <ChevronRight className="w-2.5 h-2.5 rotate-90" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-40 font-bold text-[10px] uppercase tracking-widest">
+                    <DropdownMenuLabel>Changer Statut</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="flex items-center gap-2" onClick={() => updateStatus('available')}>
+                      <div className="w-2 h-2 rounded-full bg-emerald-500" /> En service
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="flex items-center gap-2" onClick={() => updateStatus('busy')}>
+                      <div className="w-2 h-2 rounded-full bg-red-500" /> Occupé
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="flex items-center gap-2" onClick={() => updateStatus('away')}>
+                      <div className="w-2 h-2 rounded-full bg-amber-500" /> Absent
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="flex items-center gap-2" onClick={() => updateStatus('offline')}>
+                      <div className="w-2 h-2 rounded-full bg-slate-500" /> Hors service
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             )}
           </div>
-          <button 
+          <button
             onClick={handleLogout}
             className={cn(
               "flex items-center gap-3 w-full px-3 py-2.5 rounded-md hover:bg-red-900/20 hover:text-red-400 transition-all text-slate-400",

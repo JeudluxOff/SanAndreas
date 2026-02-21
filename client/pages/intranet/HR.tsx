@@ -56,11 +56,26 @@ const HR = () => {
   const canManageRoles = hasPermission('admin:roles_manage');
   const [searchTerm, setSearchTerm] = useState("");
 
+  const statusLabels: Record<string, string> = {
+    available: 'En service',
+    busy: 'Occupé',
+    away: 'Absent',
+    offline: 'Hors service'
+  };
+
   const handleAdminAction = (action: string, target?: string) => {
     logAction(`${action}${target ? ' sur ' + target : ''}`);
   };
 
-  const filteredEmployees = employees.filter(emp => 
+  // Sync current user status in list
+  const displayEmployees = employees.map(emp => {
+    if (emp.name === user?.name) {
+      return { ...emp, status: statusLabels[user.status] || emp.status };
+    }
+    return emp;
+  });
+
+  const filteredEmployees = displayEmployees.filter(emp =>
     emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     emp.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
     emp.role.toLowerCase().includes(searchTerm.toLowerCase())
@@ -119,7 +134,7 @@ const HR = () => {
               </div>
               <div className="flex items-baseline gap-2">
                 <h3 className="text-4xl font-black text-slate-900">
-                  {employees.filter(e => e.status === "En service").length}
+                  {displayEmployees.filter(e => e.status === "En service").length}
                 </h3>
                 <Badge className="bg-emerald-500 text-white animate-pulse">LIVE</Badge>
               </div>
@@ -237,11 +252,15 @@ const HR = () => {
                         <div className="flex items-center gap-2">
                           <div className={cn(
                             "w-2 h-2 rounded-full",
-                            emp.status === "En service" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-300"
+                            emp.status === "En service" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" :
+                            emp.status === "Occupé" ? "bg-red-500" :
+                            emp.status === "Absent" ? "bg-amber-500" : "bg-slate-300"
                           )} />
                           <span className={cn(
                             "text-[10px] font-black uppercase tracking-widest",
-                            emp.status === "En service" ? "text-emerald-700" : "text-slate-500"
+                            emp.status === "En service" ? "text-emerald-700" :
+                            emp.status === "Occupé" ? "text-red-700" :
+                            emp.status === "Absent" ? "text-amber-700" : "text-slate-500"
                           )}>{emp.status}</span>
                         </div>
                       </td>

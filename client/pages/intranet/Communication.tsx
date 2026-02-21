@@ -29,6 +29,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -60,7 +68,21 @@ const messages = [
 ];
 
 const Communication = () => {
-  const { user, canAccessService, hasPermission, logAction } = useAuth();
+  const { user, canAccessService, hasPermission, logAction, updateStatus } = useAuth();
+
+  const statusColors = {
+    available: 'bg-emerald-500',
+    busy: 'bg-red-500',
+    away: 'bg-amber-500',
+    offline: 'bg-slate-500'
+  };
+
+  const statusLabels = {
+    available: 'En service',
+    busy: 'Occupé',
+    away: 'Absent',
+    offline: 'Hors service'
+  };
 
   const visibleChannels = allChannels.filter(channel =>
     channel.id === 'general' || canAccessService(channel.service_id)
@@ -169,15 +191,44 @@ const Communication = () => {
 
           <div className="p-4 bg-slate-900 text-white rounded-b-2xl">
             <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10 border-2 border-primary shadow-lg">
-                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`} />
-                <AvatarFallback>M</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col overflow-hidden">
-                <span className="text-sm font-black truncate uppercase">{user?.name}</span>
-                <span className="text-[10px] font-bold text-slate-500 truncate uppercase tracking-tighter">{user?.role.replace('_', ' ')}</span>
+              <div className="relative">
+                <Avatar className="h-10 w-10 border-2 border-primary shadow-lg">
+                  <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`} />
+                  <AvatarFallback>M</AvatarFallback>
+                </Avatar>
+                <div className={cn(
+                  "absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-slate-900 rounded-full",
+                  statusColors[user?.status || 'available']
+                )} />
               </div>
-              <Button variant="ghost" size="icon" className="ml-auto text-slate-400 hover:text-white">
+              <div className="flex flex-col overflow-hidden flex-grow">
+                <span className="text-sm font-black truncate uppercase">{user?.name}</span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="text-[10px] font-bold text-slate-500 truncate uppercase tracking-tighter flex items-center gap-1 hover:text-white transition-colors">
+                      {statusLabels[user?.status || 'available']}
+                      <ChevronRight className="w-2.5 h-2.5 rotate-90" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-40 font-bold text-[10px] uppercase tracking-widest">
+                    <DropdownMenuLabel>Changer Statut</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="flex items-center gap-2" onClick={() => updateStatus('available')}>
+                      <div className="w-2 h-2 rounded-full bg-emerald-500" /> En service
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="flex items-center gap-2" onClick={() => updateStatus('busy')}>
+                      <div className="w-2 h-2 rounded-full bg-red-500" /> Occupé
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="flex items-center gap-2" onClick={() => updateStatus('away')}>
+                      <div className="w-2 h-2 rounded-full bg-amber-500" /> Absent
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="flex items-center gap-2" onClick={() => updateStatus('offline')}>
+                      <div className="w-2 h-2 rounded-full bg-slate-500" /> Hors service
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white">
                 <Settings className="w-4 h-4" />
               </Button>
             </div>
