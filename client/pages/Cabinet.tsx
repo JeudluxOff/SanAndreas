@@ -11,6 +11,7 @@ import {
   Phone, 
   MapPin, 
   ChevronRight,
+  ChevronLeft,
   Menu,
   X,
   Lock,
@@ -31,16 +32,25 @@ const Navigation = () => {
 
   return (
     <nav className="fixed w-full z-50 bg-[#0a0f18]/90 backdrop-blur-md border-b border-white/5">
-      <div className="container mx-auto px-6 h-24 flex items-center justify-between">
-        <Link to="/cabinet" className="flex items-center gap-3 group">
-          <div className="p-2 bg-gradient-to-br from-[#c1a461] to-[#927843] rounded shadow-lg group-hover:scale-105 transition-transform">
-            <Scale className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-black text-white tracking-[0.2em] uppercase leading-none">Harrington <span className="text-[#c1a461]">&</span> Cole</h1>
-            <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em] mt-1">Cabinet d'Avocats</p>
-          </div>
-        </Link>
+      <div className="container mx-auto px-6 h-24 flex items-center justify-between gap-8">
+        <div className="flex items-center gap-8">
+          <Link to="/">
+            <Button variant="ghost" className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] hover:text-[#c1a461] hover:bg-white/5 gap-2 px-0 group">
+              <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+              <span className="hidden md:inline">Retour Portail</span>
+            </Button>
+          </Link>
+
+          <Link to="/cabinet" className="flex items-center gap-3 group">
+            <div className="p-2 bg-gradient-to-br from-[#c1a461] to-[#927843] rounded shadow-lg group-hover:scale-105 transition-transform">
+              <Scale className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-black text-white tracking-[0.2em] uppercase leading-none">Harrington <span className="text-[#c1a461]">&</span> Cole</h1>
+              <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em] mt-1">Cabinet d'Avocats</p>
+            </div>
+          </Link>
+        </div>
 
         {/* Desktop Nav */}
         <div className="hidden lg:flex items-center gap-10">

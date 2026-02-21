@@ -1,16 +1,17 @@
 import React from 'react';
-import { 
-  Scale, 
-  Lock, 
-  FileText, 
-  CreditCard, 
-  MessageSquare, 
-  Calendar, 
-  ArrowRight, 
-  Download, 
-  Clock, 
-  ShieldCheck, 
+import {
+  Scale,
+  Lock,
+  FileText,
+  CreditCard,
+  MessageSquare,
+  Calendar,
+  ArrowRight,
+  Download,
+  Clock,
+  ShieldCheck,
   ChevronRight,
+  ChevronLeft,
   LogOut,
   Bell,
   Search,
@@ -33,16 +34,27 @@ const Portal = () => {
   return (
     <div className="min-h-screen bg-[#0a0f18] flex flex-col font-sans">
       {/* Client Portal Header */}
-      <header className="h-24 border-b border-white/5 bg-[#0a0f18]/80 backdrop-blur-xl sticky top-0 z-50 px-10 flex items-center justify-between">
-        <Link to="/cabinet" className="flex items-center gap-3">
-          <div className="p-2 bg-[#c1a461] rounded shadow-lg">
-            <Scale className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-xs font-black tracking-[0.2em] uppercase text-white leading-none">Harrington <span className="text-[#c1a461]">&</span> Cole</h1>
-            <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mt-1">Portail Client Sécurisé</p>
-          </div>
-        </Link>
+      <header className="h-24 border-b border-white/5 bg-[#0a0f18]/80 backdrop-blur-xl sticky top-0 z-50 px-10 flex items-center justify-between gap-8">
+        <div className="flex items-center gap-8">
+          <Link to="/cabinet">
+            <Button variant="ghost" className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] hover:text-[#c1a461] hover:bg-white/5 gap-2 px-0 group">
+              <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+              <span className="hidden md:inline">Quitter le Portail</span>
+            </Button>
+          </Link>
+
+          <div className="h-6 w-px bg-white/5" />
+
+          <Link to="/cabinet" className="flex items-center gap-3">
+            <div className="p-2 bg-[#c1a461] rounded shadow-lg">
+              <Scale className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xs font-black tracking-[0.2em] uppercase text-white leading-none">Harrington <span className="text-[#c1a461]">&</span> Cole</h1>
+              <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mt-1">Portail Client Sécurisé</p>
+            </div>
+          </Link>
+        </div>
 
         <div className="flex items-center gap-8">
           <nav className="hidden md:flex items-center gap-8">

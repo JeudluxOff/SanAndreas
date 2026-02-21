@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Scale, Lock, ShieldCheck, ArrowRight, Fingerprint } from 'lucide-react';
+import { Scale, Lock, ShieldCheck, ArrowRight, Fingerprint, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +24,16 @@ export default function CabinetLogin() {
 
   return (
     <div className="min-h-screen bg-[#0a0f18] flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Back Button */}
+      <div className="absolute top-10 left-10 z-50">
+        <Link to="/cabinet">
+          <Button variant="ghost" className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] hover:text-[#c1a461] hover:bg-white/5 gap-2 px-4 group h-12">
+            <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            Retour au Cabinet
+          </Button>
+        </Link>
+      </div>
+
       {/* Background Ambience */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-[#c1a461] rounded-full blur-[150px]" />

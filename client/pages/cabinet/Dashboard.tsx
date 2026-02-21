@@ -24,7 +24,9 @@ import {
   UserCheck,
   TrendingUp,
   FileCheck,
-  Zap
+  Zap,
+  ArrowLeft,
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -97,12 +99,21 @@ export const Sidebar = ({ activeRole }: { activeRole: string }) => (
 
 export const Header = () => (
   <header className="h-20 bg-white border-b border-slate-100 sticky top-0 z-40 px-10 flex items-center justify-between shadow-sm">
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-8">
+      <Link to="/cabinet">
+        <Button variant="ghost" className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-[#c1a461] hover:bg-[#c1a461]/5 gap-2 group px-0">
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+          <span className="hidden md:inline">Sortir du Cabinet</span>
+        </Button>
+      </Link>
+
+      <div className="h-6 w-px bg-slate-100" />
+
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <input 
-          type="text" 
-          placeholder="RECHERCHER UN DOSSIER, UN CLIENT, UN DOCUMENT..." 
+        <input
+          type="text"
+          placeholder="RECHERCHER UN DOSSIER, UN CLIENT, UN DOCUMENT..."
           className="w-96 h-10 bg-slate-50 border-none rounded-lg pl-10 text-[10px] font-bold uppercase tracking-widest placeholder:text-slate-400 focus:ring-2 ring-primary/5 transition-all"
         />
       </div>
