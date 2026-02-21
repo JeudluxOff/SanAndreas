@@ -20,8 +20,7 @@ import {
   Edit3,
   Trash2,
   ArrowUpDown,
-  ShieldCheck,
-  FileClock
+  ShieldCheck
 } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
 import { Link } from "react-router-dom";
