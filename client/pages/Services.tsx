@@ -12,10 +12,15 @@ import {
   Users as UsersIcon,
   ZoomIn,
   ZoomOut,
-  RotateCcw
+  RotateCcw,
+  Edit2,
+  Copy,
+  Check,
+  Save
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 
@@ -123,15 +128,18 @@ const locations: Location[] = [
 ];
 
 export default function Services() {
+  const [dynamicLocations, setDynamicLocations] = useState<Location[]>(locations);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [filter, setFilter] = useState<'all' | 'police' | 'hospital' | 'government'>('all');
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDraggingMap, setIsDraggingMap] = useState(false);
+  const [isDraggingMarker, setIsDraggingMarker] = useState<string | null>(null);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isEditMode, setIsEditMode] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
-  const filteredLocations = locations.filter(loc =>
+  const filteredLocations = dynamicLocations.filter(loc =>
     filter === 'all' || loc.type === filter
   );
 
@@ -160,17 +168,43 @@ export default function Services() {
 
     map.addEventListener('wheel', onWheel, { passive: false });
     return () => map.removeEventListener('wheel', onWheel);
-  }, []); // Stable dependencies
+  }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (isEditMode && isDraggingMarker) return;
     if (zoom > 1) {
-      setIsDragging(true);
+      setIsDraggingMap(true);
       setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging && zoom > 1) {
+    if (isEditMode && isDraggingMarker && mapRef.current) {
+      const rect = mapRef.current.getBoundingClientRect();
+      // Calculate position relative to the map container, accounting for zoom and offset
+      const x = (e.clientX - rect.left - offset.x) / zoom;
+      const y = (e.clientY - rect.top - offset.y) / zoom;
+
+      const leftPercent = (x / rect.width) * 100;
+      const topPercent = (y / rect.height) * 100;
+
+      setDynamicLocations(prev => prev.map(loc =>
+        loc.id === isDraggingMarker
+          ? { ...loc, coords: { top: `${topPercent.toFixed(3)}%`, left: `${leftPercent.toFixed(3)}%` } }
+          : loc
+      ));
+
+      // Update selected location if it's the one being dragged to show live coords
+      if (selectedLocation?.id === isDraggingMarker) {
+        setSelectedLocation(prev => prev ? {
+          ...prev,
+          coords: { top: `${topPercent.toFixed(3)}%`, left: `${leftPercent.toFixed(3)}%` }
+        } : null);
+      }
+      return;
+    }
+
+    if (isDraggingMap && zoom > 1) {
       setOffset({
         x: e.clientX - dragStart.x,
         y: e.clientY - dragStart.y
@@ -178,25 +212,60 @@ export default function Services() {
     }
   };
 
-  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseUp = () => {
+    setIsDraggingMap(false);
+    setIsDraggingMarker(null);
+  };
 
   // Touch support
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (isEditMode && isDraggingMarker) return;
     if (zoom > 1) {
-      setIsDragging(true);
+      setIsDraggingMap(true);
       const touch = e.touches[0];
       setDragStart({ x: touch.clientX - offset.x, y: touch.clientY - offset.y });
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (isDragging && zoom > 1) {
+    if (isEditMode && isDraggingMarker && mapRef.current) {
+      const rect = mapRef.current.getBoundingClientRect();
+      const touch = e.touches[0];
+      const x = (touch.clientX - rect.left - offset.x) / zoom;
+      const y = (touch.clientY - rect.top - offset.y) / zoom;
+
+      const leftPercent = (x / rect.width) * 100;
+      const topPercent = (y / rect.height) * 100;
+
+      setDynamicLocations(prev => prev.map(loc =>
+        loc.id === isDraggingMarker
+          ? { ...loc, coords: { top: `${topPercent.toFixed(3)}%`, left: `${leftPercent.toFixed(3)}%` } }
+          : loc
+      ));
+
+      // Update selected location if it's the one being dragged to show live coords
+      if (selectedLocation?.id === isDraggingMarker) {
+        setSelectedLocation(prev => prev ? {
+          ...prev,
+          coords: { top: `${topPercent.toFixed(3)}%`, left: `${leftPercent.toFixed(3)}%` }
+        } : null);
+      }
+      return;
+    }
+
+    if (isDraggingMap && zoom > 1) {
       const touch = e.touches[0];
       setOffset({
         x: touch.clientX - dragStart.x,
         y: touch.clientY - dragStart.y
       });
     }
+  };
+
+  const copyToClipboard = () => {
+    const code = JSON.stringify(dynamicLocations.map(l => ({ id: l.id, name: l.name, coords: l.coords })), null, 2);
+    navigator.clipboard.writeText(code);
+    toast.success("Coordonnées copiées dans le presse-papier !");
   };
 
   return (
@@ -264,6 +333,42 @@ export default function Services() {
                 </div>
               </div>
 
+              {/* Admin Tools */}
+              <div className="bg-slate-900 p-6 rounded-lg shadow-xl border border-white/10 space-y-4">
+                <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
+                  <Edit2 className="w-4 h-4 text-secondary" />
+                  Outils d'Administration
+                </h3>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    variant={isEditMode ? "secondary" : "outline"}
+                    className={cn(
+                      "w-full justify-start h-10 text-xs font-bold uppercase tracking-widest",
+                      isEditMode ? "bg-secondary text-white border-none" : "text-white border-white/20 hover:bg-white/5"
+                    )}
+                    onClick={() => setIsEditMode(!isEditMode)}
+                  >
+                    {isEditMode ? <Check className="mr-2 w-4 h-4" /> : <Edit2 className="mr-2 w-4 h-4" />}
+                    {isEditMode ? "Quitter l'édition" : "Activer l'édition"}
+                  </Button>
+                  {isEditMode && (
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start h-10 text-xs font-bold uppercase tracking-widest text-white border-white/20 hover:bg-white/5"
+                      onClick={copyToClipboard}
+                    >
+                      <Copy className="mr-2 w-4 h-4" />
+                      Copier les positions
+                    </Button>
+                  )}
+                </div>
+                {isEditMode && (
+                  <p className="text-[10px] text-slate-400 font-medium italic">
+                    En mode édition, maintenez le clic sur un point pour le déplacer. Utilisez le bouton ci-dessus pour récupérer les nouvelles coordonnées.
+                  </p>
+                )}
+              </div>
+
               {selectedLocation ? (
                 <div className="bg-white p-8 rounded-lg shadow-xl border-t-4 border-secondary animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <div className="space-y-6">
@@ -282,6 +387,13 @@ export default function Services() {
                       {selectedLocation.description}
                     </p>
                     <div className="space-y-4 pt-4 border-t border-slate-100">
+                      {isEditMode && selectedLocation && (
+                        <div className="p-3 bg-secondary/10 border border-secondary/20 rounded text-[10px] font-mono font-bold text-secondary space-y-1">
+                          <p className="uppercase tracking-tighter">Outils Édition : Coordonnées Live</p>
+                          <p>Top: {selectedLocation.coords.top}</p>
+                          <p>Left: {selectedLocation.coords.left}</p>
+                        </div>
+                      )}
                       <div className="flex items-start gap-3 text-sm">
                         <MapPin className="w-5 h-5 text-slate-400 flex-shrink-0" />
                         <span className="font-bold text-slate-700">{selectedLocation.address}</span>
@@ -367,8 +479,9 @@ export default function Services() {
                         <button
                           key={loc.id}
                           className={cn(
-                            "absolute transition-all duration-300 hover:scale-125 z-10",
-                            selectedLocation?.id === loc.id ? "scale-125 z-20" : "z-10"
+                            "absolute transition-all duration-300 z-10",
+                            selectedLocation?.id === loc.id ? "z-20 scale-125" : "z-10 hover:scale-110",
+                            isEditMode && "cursor-move"
                           )}
                           style={{
                             top: loc.coords.top,
@@ -376,9 +489,18 @@ export default function Services() {
                             // Keep markers the same pixel size as zoom increases while maintaining centering
                             transform: `translate(-50%, -50%) scale(${1 / zoom})`
                           }}
+                          onMouseDown={(e) => {
+                            if (isEditMode) {
+                              e.stopPropagation();
+                              setIsDraggingMarker(loc.id);
+                              setSelectedLocation(loc);
+                            }
+                          }}
                           onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedLocation(loc);
+                            if (!isEditMode) {
+                              e.stopPropagation();
+                              setSelectedLocation(loc);
+                            }
                           }}
                         >
                           <div className={cn(
