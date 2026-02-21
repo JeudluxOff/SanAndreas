@@ -44,7 +44,7 @@ const ROLE_COLORS = {
   'Auditeur': 'bg-red-600 text-white'
 };
 
-const Sidebar = ({ activeRole }: { activeRole: string }) => (
+export const Sidebar = ({ activeRole }: { activeRole: string }) => (
   <div className="w-64 bg-[#0a0f18] text-white flex flex-col h-screen fixed left-0 top-0 border-r border-white/5 z-50">
     <div className="p-8 border-b border-white/5">
       <div className="flex items-center gap-3">
@@ -95,7 +95,7 @@ const Sidebar = ({ activeRole }: { activeRole: string }) => (
   </div>
 );
 
-const Header = () => (
+export const Header = () => (
   <header className="h-20 bg-white border-b border-slate-100 sticky top-0 z-40 px-10 flex items-center justify-between shadow-sm">
     <div className="flex items-center gap-4">
       <div className="relative">

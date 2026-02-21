@@ -1,4 +1,5 @@
 import { Layout } from "@/components/Layout";
+import { Link } from "react-router-dom";
 import { Gavel, Scale, FileText, Landmark, GraduationCap, Users, Search, ArrowRight, BookOpen, Clock, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
