@@ -17,6 +17,12 @@ import LegalClients from "./pages/cabinet/Clients";
 import LegalAdmin from "./pages/cabinet/Admin";
 import LegalWorkspaces from "./pages/cabinet/Workspaces";
 import CabinetLogin from "./pages/cabinet/Login";
+import CriminalLaw from "./pages/cabinet/public/CriminalLaw";
+import CivilLaw from "./pages/cabinet/public/CivilLaw";
+import BusinessLaw from "./pages/cabinet/public/BusinessLaw";
+import AdministrativeLaw from "./pages/cabinet/public/AdministrativeLaw";
+import Methodology from "./pages/cabinet/public/Methodology";
+import Fees from "./pages/cabinet/public/Fees";
 import NotFound from "./pages/NotFound";
 import Placeholder from "./pages/Placeholder";
 import Governance from "./pages/Gouvernement";
@@ -63,6 +69,12 @@ const AppRoutes = () => (
     {/* Public Routes */}
     <Route path="/" element={<Index />} />
     <Route path="/cabinet" element={<Cabinet />} />
+    <Route path="/cabinet/criminal-law" element={<CriminalLaw />} />
+    <Route path="/cabinet/civil-law" element={<CivilLaw />} />
+    <Route path="/cabinet/business-law" element={<BusinessLaw />} />
+    <Route path="/cabinet/administrative-law" element={<AdministrativeLaw />} />
+    <Route path="/cabinet/methodology" element={<Methodology />} />
+    <Route path="/cabinet/fees" element={<Fees />} />
     <Route path="/cabinet/login" element={<CabinetLogin />} />
     <Route path="/cabinet/portal" element={
       <ProtectedRoute>

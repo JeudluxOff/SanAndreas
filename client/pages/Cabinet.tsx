@@ -1,21 +1,20 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Scale, 
-  Shield, 
-  Gavel, 
-  Award, 
-  Users, 
-  ArrowRight, 
-  Mail, 
-  Phone, 
-  MapPin, 
+import { Navigation } from '@/components/cabinet/Navigation';
+import { Footer } from '@/components/cabinet/Footer';
+import {
+  Scale,
+  Shield,
+  Gavel,
+  Users,
+  ArrowRight,
+  Mail,
+  Phone,
+  MapPin,
   ChevronRight,
   ChevronLeft,
-  Menu,
   X,
   Lock,
-  Search,
   BookOpen,
   Briefcase,
   Landmark,
@@ -26,96 +25,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-
-const Navigation = () => {
-  const [isOpen, setIsOpen] = React.useState(false);
-
-  return (
-    <nav className="fixed w-full z-50 bg-[#0a0f18]/90 backdrop-blur-md border-b border-white/5 animate-in fade-in slide-in-from-top duration-700">
-      {/* Top Bar: Logo & Actions */}
-      <div className="container mx-auto px-6 h-20 flex items-center justify-between border-b border-white/5">
-        <div className="flex items-center gap-8">
-          <Link to="/">
-            <Button variant="ghost" className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] hover:text-[#c1a461] hover:bg-white/5 gap-2 px-0 group">
-              <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-              <span className="hidden md:inline">Retour Portail</span>
-            </Button>
-          </Link>
-
-          <Link to="/cabinet" className="flex items-center gap-3 group">
-            <div className="p-2 bg-gradient-to-br from-[#c1a461] to-[#927843] rounded shadow-lg group-hover:scale-105 transition-transform">
-              <Scale className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-black text-white tracking-[0.2em] uppercase leading-none">Harrington <span className="text-[#c1a461]">&</span> Cole</h1>
-              <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.3em] mt-1">Cabinet d'Avocats</p>
-            </div>
-          </Link>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="hidden lg:flex items-center gap-4">
-          <Link to="/cabinet/login">
-            <Button variant="ghost" className="text-[10px] font-black text-[#c1a461] uppercase tracking-[0.2em] hover:bg-[#c1a461]/10 gap-2 border border-[#c1a461]/20 px-6 h-10">
-              <Lock className="w-3 h-3" /> Accès Avocats
-            </Button>
-          </Link>
-          <Link to="/cabinet/portal">
-            <Button className="bg-[#c1a461] hover:bg-[#927843] text-white font-black uppercase text-[10px] tracking-[0.2em] px-8 h-10 shadow-xl shadow-[#c1a461]/10">
-              Portail Client
-            </Button>
-          </Link>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden text-white p-2">
-          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
-      </div>
-
-      {/* Sub-Bar: Navigation Menu */}
-      <div className="hidden lg:block bg-white/[0.02]">
-        <div className="container mx-auto px-6 h-12 flex items-center justify-center gap-16">
-          {['Expertise', 'Équipe', 'Méthodologie', 'Honoraires', 'Contact'].map((item) => (
-            <a
-              key={item}
-              href={`#${item.toLowerCase()}`}
-              className="group relative"
-            >
-              <span className="text-[10px] font-black text-white/40 hover:text-[#c1a461] uppercase tracking-[0.4em] transition-colors duration-300">
-                {item}
-              </span>
-              <span className="absolute -bottom-1 left-0 w-0 h-px bg-[#c1a461] transition-all duration-300 group-hover:w-full opacity-50" />
-            </a>
-          ))}
-        </div>
-      </div>
-
-      {/* Mobile Nav */}
-      {isOpen && (
-        <div className="lg:hidden bg-[#0a0f18] border-b border-white/5 p-6 animate-in slide-in-from-top duration-300">
-          <div className="flex flex-col gap-6">
-            {['Expertise', 'Équipe', 'Méthodologie', 'Honoraires', 'Contact'].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                onClick={() => setIsOpen(false)}
-                className="text-[11px] font-black text-white/60 uppercase tracking-[0.2em]"
-              >
-                {item}
-              </a>
-            ))}
-            <hr className="border-white/5" />
-            <Link to="/cabinet/login" className="text-[11px] font-black text-[#c1a461] uppercase tracking-[0.2em]">Accès Avocats</Link>
-            <Link to="/cabinet/portal">
-              <Button className="w-full bg-[#c1a461] text-white font-black uppercase text-[11px] tracking-[0.2em] h-12">Portail Client</Button>
-            </Link>
-          </div>
-        </div>
-      )}
-    </nav>
-  );
-};
 
 const Hero = () => (
   <section className="relative min-h-screen flex items-center pt-24 overflow-hidden bg-[#0a0f18]">
@@ -146,12 +55,16 @@ const Hero = () => (
               <span className="text-white">L'excellence au service de votre défense.</span>
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button className="bg-white text-[#0a0f18] hover:bg-white/90 font-black uppercase text-xs tracking-[0.2em] px-10 h-16 shadow-2xl">
-                Prendre rendez-vous
-              </Button>
-              <Button variant="outline" className="border-white/10 text-white hover:bg-white/5 font-black uppercase text-xs tracking-[0.2em] px-10 h-16">
-                Voir nos expertises
-              </Button>
+              <a href="#contact">
+                <Button className="bg-white text-[#0a0f18] hover:bg-white/90 font-black uppercase text-xs tracking-[0.2em] px-10 h-16 shadow-2xl">
+                  Prendre rendez-vous
+                </Button>
+              </a>
+              <a href="#expertise">
+                <Button variant="outline" className="border-white/10 text-white hover:bg-white/5 font-black uppercase text-xs tracking-[0.2em] px-10 h-16">
+                  Voir nos expertises
+                </Button>
+              </a>
             </div>
           </div>
           
@@ -173,10 +86,10 @@ const Hero = () => (
 
 const Expertise = () => {
   const expertises = [
-    { title: "Droit Pénal", desc: "Défense d'urgence, crimes graves et délits complexes. Protection absolue de vos libertés.", icon: <Shield className="w-8 h-8" /> },
-    { title: "Droit Civil", desc: "Litiges contractuels, responsabilité civile et protection du patrimoine familial.", icon: <Users className="w-8 h-8" /> },
-    { title: "Droit des Affaires", desc: "Conseil stratégique, fusions-acquisitions et contentieux commercial de haut vol.", icon: <Briefcase className="w-8 h-8" /> },
-    { title: "Droit Administratif", desc: "Recours contre l'État, marchés publics et contentieux des collectivités territoriales.", icon: <Landmark className="w-8 h-8" /> }
+    { title: "Droit Pénal", desc: "Défense d'urgence, crimes graves et délits complexes. Protection absolue de vos libertés.", icon: <Shield className="w-8 h-8" />, href: "/cabinet/criminal-law" },
+    { title: "Droit Civil", desc: "Litiges contractuels, responsabilité civile et protection du patrimoine familial.", icon: <Users className="w-8 h-8" />, href: "/cabinet/civil-law" },
+    { title: "Droit des Affaires", desc: "Conseil stratégique, fusions-acquisitions et contentieux commercial de haut vol.", icon: <Briefcase className="w-8 h-8" />, href: "/cabinet/business-law" },
+    { title: "Droit Administratif", desc: "Recours contre l'État, marchés publics et contentieux des collectivités territoriales.", icon: <Landmark className="w-8 h-8" />, href: "/cabinet/administrative-law" }
   ];
 
   return (
@@ -222,9 +135,11 @@ const Expertise = () => {
                   </div>
                   <h3 className="text-xl font-black text-[#0a0f18] uppercase tracking-tighter leading-tight">{exp.title}</h3>
                   <p className="text-sm text-slate-500 font-medium leading-relaxed">{exp.desc}</p>
-                  <Button variant="link" className="p-0 text-[10px] font-black uppercase tracking-widest text-[#c1a461] gap-2">
-                    En savoir plus <ArrowRight className="w-3 h-3" />
-                  </Button>
+                  <Link to={exp.href}>
+                    <Button variant="link" className="p-0 text-[10px] font-black uppercase tracking-widest text-[#c1a461] gap-2">
+                      En savoir plus <ArrowRight className="w-3 h-3" />
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             ))}
@@ -375,85 +290,6 @@ const Testimonials = () => (
       </div>
     </div>
   </section>
-);
-
-const Footer = () => (
-  <footer id="contact" className="bg-[#0a0f18] pt-32 pb-12 text-white border-t border-white/5">
-    <div className="container mx-auto px-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-24">
-        <div className="space-y-8">
-          <Link to="/cabinet" className="flex items-center gap-3">
-            <div className="p-2 bg-[#c1a461] rounded shadow-lg">
-              <Scale className="w-5 h-5 text-white" />
-            </div>
-            <h1 className="text-lg font-black text-white tracking-[0.2em] uppercase leading-none">Harrington <span className="text-[#c1a461]">&</span> Cole</h1>
-          </Link>
-          <p className="text-sm text-white/40 font-medium leading-relaxed uppercase tracking-tight">
-            L'excellence juridique au service des intérêts les plus sensibles de San Andreas.
-          </p>
-          <div className="flex gap-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-[#c1a461] hover:border-[#c1a461] transition-all cursor-pointer">
-                <Shield className="w-4 h-4" />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-8">
-          <h4 className="text-[10px] font-black text-[#c1a461] uppercase tracking-[0.4em]">Expertises</h4>
-          <ul className="space-y-4">
-            {['Pénal', 'Civil', 'Affaires', 'Administratif'].map(item => (
-              <li key={item} className="text-[11px] font-black text-white/40 hover:text-white uppercase tracking-[0.2em] transition-colors cursor-pointer">
-                Droit {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="space-y-8">
-          <h4 className="text-[10px] font-black text-[#c1a461] uppercase tracking-[0.4em]">Cabinet</h4>
-          <ul className="space-y-4">
-            {['Équipe', 'Méthodologie', 'Honoraires', 'Carrières'].map(item => (
-              <li key={item} className="text-[11px] font-black text-white/40 hover:text-white uppercase tracking-[0.2em] transition-colors cursor-pointer">
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="space-y-8">
-          <h4 className="text-[10px] font-black text-[#c1a461] uppercase tracking-[0.4em]">Siège Social</h4>
-          <div className="space-y-6">
-            <div className="flex items-start gap-4">
-              <MapPin className="w-5 h-5 text-[#c1a461]" />
-              <p className="text-[11px] font-bold text-white/60 uppercase tracking-widest leading-relaxed">
-                442 Rockwell Avenue <br />
-                Financial District, Los Santos
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <Phone className="w-5 h-5 text-[#c1a461]" />
-              <p className="text-[11px] font-bold text-white/60 uppercase tracking-widest">555-010-942</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <Mail className="w-5 h-5 text-[#c1a461]" />
-              <p className="text-[11px] font-bold text-white/60 uppercase tracking-widest">contact@harrington-cole.sa</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">
-        <p>© 2024 Harrington & Cole. Tous droits réservés.</p>
-        <div className="flex gap-8">
-          <span className="hover:text-white transition-colors cursor-pointer">Mentions Légales</span>
-          <span className="hover:text-white transition-colors cursor-pointer">Politique de Confidentialité</span>
-          <span className="hover:text-white transition-colors cursor-pointer">Déontologie</span>
-        </div>
-      </div>
-    </div>
-  </footer>
 );
 
 export default function Cabinet() {
