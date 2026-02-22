@@ -2,6 +2,7 @@ import React, { createContext, useContext } from 'react';
 import { 
   Scale,
   Briefcase,
+  Archive,
   FileText,
   Users,
   Calendar,
@@ -17,8 +18,7 @@ import {
   ArrowLeft,
   Menu,
   X,
-  Zap,
-  Archive
+  Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
