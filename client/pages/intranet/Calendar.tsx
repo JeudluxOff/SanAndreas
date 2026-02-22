@@ -22,12 +22,7 @@ export default function Calendar() {
 
   const MOCK_EVENTS = store.getCalendarEvents().map(e => ({
     ...e,
-    id: Math.random(),
-    time: e.time,
-    date: new Date(), // Simulé pour aujourd'hui dans ce contexte
-    participants: 5,
-    location: "Salle de réunion",
-    service: e.type.toUpperCase()
+    date: new Date(e.date),
   }));
 
   // Generate a range of dates for the scroller (15 days before, 30 days after)

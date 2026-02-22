@@ -6,12 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 
-const healthStats = [
-  { label: "Médecins Actifs", value: "245", trend: "+12", status: "up" },
-  { label: "Établissements", value: "12", trend: "Stable", status: "neutral" },
-  { label: "Urgences / Jour", value: "85", trend: "-5%", status: "down" },
-  { label: "Budget Santé", value: "$450M", trend: "+15%", status: "up" }
-];
+import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 
 const healthServices = [
   {
@@ -39,6 +34,8 @@ const healthServices = [
 
 export default function Health() {
   const { emergencyMode } = useAuth();
+  const store = useGovernmentStore();
+  const healthStats = store.getHealthStats();
 
   return (
     <Layout>

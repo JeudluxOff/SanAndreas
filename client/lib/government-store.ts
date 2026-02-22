@@ -22,6 +22,10 @@ const INITIAL_DATA: GovernmentStore = {
   notifications: [],
   messages: [],
   auditLogs: [],
+  economyStats: [],
+  healthStats: [],
+  securityStats: [],
+  justiceStats: [],
   emergencyMode: false
 };
 
@@ -132,6 +136,10 @@ class GovernmentStoreManager {
     this.data.auditLogs.unshift(log);
     this.save();
   }
+  clearAuditLogs() {
+    this.data.auditLogs = [];
+    this.save();
+  }
 
   // Emergency Mode
   getEmergencyMode() { return this.data.emergencyMode; }
@@ -139,6 +147,18 @@ class GovernmentStoreManager {
     this.data.emergencyMode = mode;
     this.save();
   }
+
+  // Economy
+  getEconomyStats() { return this.data.economyStats || []; }
+
+  // Health
+  getHealthStats() { return this.data.healthStats || []; }
+
+  // Security
+  getSecurityStats() { return this.data.securityStats || []; }
+
+  // Justice
+  getJusticeStats() { return this.data.justiceStats || []; }
 
   // Documents
   getGlobalDocuments() {

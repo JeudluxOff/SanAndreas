@@ -55,6 +55,12 @@ export interface GovDossier {
   status: string;
   archived: boolean;
   acl: string[];
+  priority?: string;
+  creationDate?: string;
+  deadline?: string;
+  description?: string;
+  progress?: number;
+  participants?: { id: string, name: string, role: string }[];
 }
 
 export interface GovEmployee {
@@ -77,9 +83,14 @@ export interface GovNotification {
 }
 
 export interface GovCalendarEvent {
+  id: number;
   time: string;
   title: string;
   type: string;
+  date: string;
+  participants: number;
+  location: string;
+  service: string;
 }
 
 export interface GovMessage {
@@ -110,6 +121,27 @@ export interface GovEconomyStat {
   status: string;
 }
 
+export interface GovHealthStat {
+  label: string;
+  value: string;
+  trend: string;
+  status: string;
+}
+
+export interface GovSecurityStat {
+  label: string;
+  value: string;
+  trend: string;
+  status: string;
+}
+
+export interface GovJusticeStat {
+  label: string;
+  value: string;
+  trend: string;
+  status: string;
+}
+
 export interface GovernmentStore {
   workspaces: Record<string, GovWorkspace>;
   employees: GovEmployee[];
@@ -119,5 +151,8 @@ export interface GovernmentStore {
   messages: GovMessage[];
   auditLogs: GovAuditLog[];
   economyStats: GovEconomyStat[];
+  healthStats: GovHealthStat[];
+  securityStats: GovSecurityStat[];
+  justiceStats: GovJusticeStat[];
   emergencyMode: boolean;
 }

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 
 const justiceDepts = [
   {
@@ -33,6 +34,8 @@ const justiceDepts = [
 
 export default function Justice() {
   const { emergencyMode } = useAuth();
+  const store = useGovernmentStore();
+  const justiceStats = store.getJusticeStats();
 
   return (
     <Layout>
@@ -87,15 +90,49 @@ export default function Justice() {
           </div>
           <div className="flex flex-wrap gap-4 w-full md:w-auto">
             <div className="relative flex-grow md:w-80">
-              <input 
-                type="text" 
-                placeholder="N° DE DOSSIER (EX: SA-2024-XXX)" 
+              <input
+                type="text"
+                placeholder="N° DE DOSSIER (EX: SA-2024-XXX)"
                 className="w-full bg-white/10 border border-white/20 rounded-sm h-12 px-4 text-white text-xs font-bold uppercase tracking-widest placeholder:text-white/40 focus:bg-white/20 transition-all outline-none"
               />
             </div>
             <Button className="bg-secondary text-white hover:bg-secondary/90 font-black uppercase tracking-widest px-8 h-12">
               Vérifier le statut
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className={cn(
+        "py-12 border-b shadow-sm relative z-20 transition-colors duration-500",
+        emergencyMode ? "bg-red-900 border-red-800" : "bg-white border-slate-200"
+      )}>
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {justiceStats.map((stat) => (
+              <div key={stat.label} className={cn(
+                "p-6 border rounded-2xl flex flex-col items-center text-center space-y-2 group transition-all duration-300",
+                emergencyMode
+                  ? "bg-red-950 border-red-800 hover:bg-red-800 hover:shadow-[0_0_20px_rgba(220,38,38,0.3)]"
+                  : "bg-slate-50 border-slate-100 hover:bg-white hover:shadow-xl"
+              )}>
+                <span className={cn(
+                  "text-[10px] font-black uppercase tracking-widest transition-colors",
+                  emergencyMode ? "text-red-500" : "text-slate-400 group-hover:text-primary"
+                )}>{stat.label}</span>
+                <span className={cn(
+                  "text-3xl font-black tracking-tighter transition-colors",
+                  emergencyMode ? "text-white" : "text-primary"
+                )}>{emergencyMode ? "---" : stat.value}</span>
+                <div className={cn(
+                  "flex items-center gap-1 font-bold text-[10px] uppercase tracking-widest",
+                  stat.status === 'up' ? 'text-emerald-600' : 'text-red-600'
+                )}>
+                  {stat.trend}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

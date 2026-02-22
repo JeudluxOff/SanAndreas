@@ -25,8 +25,37 @@
         { "id": "DEC-24-0041", "title": "Décret sur les subventions SAMS", "type": "Décret", "date": "08 Mai 2024", "status": "Signé", "author": "Arthur Vance", "archived": false, "acl": [] }
       ],
       "dossiers": [
-        { "id": "DOS-CAB-88", "title": "Réforme Constitutionnelle", "status": "En cours", "archived": false, "acl": [] },
-        { "id": "DOS-CAB-92", "title": "Budget État T3", "status": "À valider", "archived": false, "acl": [] }
+        {
+          "id": "DOS-CAB-88",
+          "title": "Réforme Constitutionnelle",
+          "status": "En cours",
+          "archived": false,
+          "acl": [],
+          "priority": "Haute",
+          "creationDate": "12 Avril 2024",
+          "deadline": "30 Juin 2024",
+          "description": "Projet de refonte des articles fondamentaux de la constitution de l'État.",
+          "progress": 65,
+          "participants": [
+            { "id": "governor", "name": "Arthur Vance", "role": "Gouverneur" },
+            { "id": "press", "name": "Elena Rodriguez", "role": "Press Secretary" }
+          ]
+        },
+        {
+          "id": "DOS-CAB-92",
+          "title": "Budget État T3",
+          "status": "À valider",
+          "archived": false,
+          "acl": [],
+          "priority": "Critique",
+          "creationDate": "01 Mai 2024",
+          "deadline": "15 Juin 2024",
+          "description": "Validation des budgets pour le troisième trimestre.",
+          "progress": 40,
+          "participants": [
+            { "id": "governor", "name": "Arthur Vance", "role": "Gouverneur" }
+          ]
+        }
       ]
     },
     "securite_publique": {
@@ -158,7 +187,7 @@
     }
   },
   "employees": [
-    { "name": "Arthur Vance", "role": "Gouverneur", "service: ":"Cabinet", "grade": "Exécutif", "status": "En service", "email": "a.vance@sa.gov", "joinDate": "Jan 2024" },
+    { "name": "Arthur Vance", "role": "Gouverneur", "service": "Cabinet", "grade": "Exécutif", "status": "En service", "email": "a.vance@sa.gov", "joinDate": "Jan 2024" },
     { "name": "Elena Rodriguez", "role": "Press Secretary", "service": "Cabinet", "grade": "Cabinet", "status": "En service", "email": "e.rodriguez@sa.gov", "joinDate": "Fév 2024" },
     { "name": "Jackson Teller", "role": "Secrétaire Sécurité", "service": "LSPD/LSSD", "grade": "Secrétaire", "status": "Hors service", "email": "j.teller@sa.gov", "joinDate": "Mar 2024" },
     { "name": "Thomas Vercetti", "role": "Secrétaire Justice", "service": "Justice", "grade": "Secrétaire", "status": "En service", "email": "t.vercetti@sa.gov", "joinDate": "Mar 2024" },
@@ -167,17 +196,17 @@
     { "name": "Julian Frost", "role": "Secrétaire Santé", "service": "Santé & Social", "grade": "Secrétaire", "status": "En service", "email": "j.frost@sa.gov", "joinDate": "Jan 2024" }
   ],
   "globalAnnouncements": [
-    { "id": 1, "title": "Note de Service #24-05", "text: ":"Nouvelles consignes pour la rédaction des décrets officiels.", "date": "Hier" },
+    { "id": 1, "title": "Note de Service #24-05", "text": "Nouvelles consignes pour la rédaction des décrets officiels.", "date": "Hier" },
     { "id": 2, "title": "Maintenance Système", "text": "L'intranet sera indisponible dimanche de 02h à 04h.", "date": "19 Mai" }
   ],
   "calendarEvents": [
-    { "time": "09:00", "title": "Briefing Sécurité", "type": "securite" },
-    { "time": "11:30", "title": "Réunion Budget 2025", "type": "economie" },
-    { "time": "14:00", "title": "Audience Publique", "type": "justice" },
-    { "time": "16:30", "title": "Point Presse Gouverneur", "type: ":"cabinet" }
+    { "id": 1, "time": "09:00 - 10:30", "title": "Briefing Sécurité", "type": "official", "date": "2024-05-22", "participants": 8, "location": "Salle de Briefing LSPD", "service": "SECURITE_PUBLIQUE" },
+    { "id": 2, "time": "11:30 - 13:00", "title": "Réunion Budget 2025", "type": "official", "date": "2024-05-22", "participants": 5, "location": "Bureaux du Trésor", "service": "TRESOR_COMMERCE" },
+    { "id": 3, "time": "14:00 - 16:00", "title": "Audience Publique", "type": "official", "date": "2024-05-22", "participants": 25, "location": "Cour de Los Santos", "service": "JUSTICE" },
+    { "id": 4, "time": "16:30 - 17:30", "title": "Point Presse Gouverneur", "type": "official", "date": "2024-05-22", "participants": 15, "location": "Salle de Presse", "service": "CABINET" }
   ],
   "notifications": [
-    { "id": 1, "type: ":"validation", "text": "Décret #SA-2024-042 en attente de signature", "time": "il y a 2h", "priority": "high", "service_id": "CABINET" },
+    { "id": 1, "type": "validation", "text": "Décret #SA-2024-042 en attente de signature", "time": "il y a 2h", "priority": "high", "service_id": "CABINET" },
     { "id": 2, "type": "assignment", "text": "Nouveau dossier judiciaire assigné #JD-8941", "time": "il y a 5h", "priority": "medium", "service_id": "JUSTICE" },
     { "id": 3, "type": "meeting", "text": "Réunion de cabinet demain à 09:00", "time": "il y a 1j", "priority": "low", "service_id": "CABINET" },
     { "id": 4, "type": "system", "text": "Mise à jour des protocoles de sécurité", "time": "il y a 2j", "priority": "medium", "service_id": "SECURITE_PUBLIQUE" }
@@ -189,6 +218,24 @@
     { "label": "Taux de Chômage", "value": "3.8%", "trend": "-0.5%", "status": "down" },
     { "label": "Inflation Annuelle", "value": "2.1%", "trend": "+0.1%", "status": "up" },
     { "label": "Dette Publique", "value": "$1.2B", "trend": "-1.2%", "status": "down" }
+  ],
+  "healthStats": [
+    { "label": "Médecins Actifs", "value": "245", "trend": "+12", "status": "up" },
+    { "label": "Établissements", "value": "12", "trend": "Stable", "status": "neutral" },
+    { "label": "Urgences / Jour", "value": "85", "trend": "-5%", "status": "down" },
+    { "label": "Budget Santé", "value": "$450M", "trend": "+15%", "status": "up" }
+  ],
+  "securityStats": [
+    { "label": "Effectifs LSPD", "value": "210", "trend": "+15", "status": "up" },
+    { "label": "Effectifs LSSD", "value": "145", "trend": "+8", "status": "up" },
+    { "label": "Incidents / Jour", "value": "124", "trend": "-12%", "status": "down" },
+    { "label": "Taux de Résolution", "value": "78%", "trend": "+2.5%", "status": "up" }
+  ],
+  "justiceStats": [
+    { "label": "Dossiers En Cours", "value": "342", "trend": "+24", "status": "up" },
+    { "label": "Peines Prononcées", "value": "128", "trend": "Stable", "status": "neutral" },
+    { "label": "Grâces Accordées", "value": "12", "trend": "-2", "status": "down" },
+    { "label": "Budget DOJ", "value": "$125M", "trend": "+5%", "status": "up" }
   ],
   "emergencyMode": false
 }

@@ -6,12 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 
-const economyStats = [
-  { label: "PIB de l'État", value: "$4.2B", trend: "+2.4%", status: "up" },
-  { label: "Taux de Chômage", value: "3.8%", trend: "-0.5%", status: "down" },
-  { label: "Inflation Annuelle", value: "2.1%", trend: "+0.1%", status: "up" },
-  { label: "Dette Publique", value: "$1.2B", trend: "-1.2%", status: "down" }
-];
+import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 
 const economicSectors = [
   {
@@ -39,6 +34,8 @@ const economicSectors = [
 
 export default function Economy() {
   const { emergencyMode } = useAuth();
+  const store = useGovernmentStore();
+  const economyStats = store.getEconomyStats();
 
   return (
     <Layout>

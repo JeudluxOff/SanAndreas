@@ -48,8 +48,7 @@ const AuditLogs = () => {
 
   const clearLogs = () => {
     if (confirm("Êtes-vous sûr de vouloir vider les registres d'audit ? Cette action est irréversible.")) {
-      localStorage.setItem('sa_gov_audit_logs', '[]');
-      setLogs([]);
+      store.clearAuditLogs();
       logAction('Nettoyage des registres d\'audit');
     }
   };

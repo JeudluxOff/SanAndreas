@@ -45,17 +45,14 @@ const DossierDetail = () => {
   // Adapt store data to local UI structure if needed, or use directly
   const dossier = {
     ...dossierData,
-    priority: "Haute", // Store could be enhanced with priority later
-    creationDate: "12 Avril 2024",
-    deadline: "30 Juin 2024",
+    priority: dossierData.priority || "Moyenne",
+    creationDate: dossierData.creationDate || "Date inconnue",
+    deadline: dossierData.deadline || "Aucune échéance",
     owner: dossierData.owner,
     is_confidential: dossierData.status === "Confidentiel",
-    description: "Dossier gouvernemental officiel synchronisé.",
-    progress: 65,
-    participants: [
-      { id: 'governor', name: "Arthur Vance", role: "Gouverneur" },
-      { id: 'press', name: "Lamar Davis", role: "Press Secretary" }
-    ],
+    description: dossierData.description || "Aucune description fournie.",
+    progress: dossierData.progress || 0,
+    participants: dossierData.participants || [],
     documents: store.getGlobalDocuments().filter(d => d.id.startsWith('DOC')), // Simplified link
     timeline: [
       { date: "22 Mai, 14:30", user: dossierData.owner, action: "Synchronisation effectuée", type: "system" }
