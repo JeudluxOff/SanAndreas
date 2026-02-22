@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Navigation } from '@/components/cabinet/Navigation';
+import Navigation from '@/components/cabinet/Navigation';
 import { Footer } from '@/components/cabinet/Footer';
 import {
   Scale,

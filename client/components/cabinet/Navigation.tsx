@@ -1,15 +1,15 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  Scale, 
+import {
+  Scale,
   ChevronLeft,
-  Menu,
-  X,
+  Menu as MenuIcon,
+  X as XIcon,
   Lock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export const Navigation = () => {
+const Navigation = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const location = useLocation();
   const isHome = location.pathname === '/cabinet';
@@ -61,7 +61,7 @@ export const Navigation = () => {
 
         {/* Mobile Menu Button */}
         <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden text-white p-2">
-          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {isOpen ? <XIcon className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
         </button>
       </div>
 
@@ -132,3 +132,5 @@ export const Navigation = () => {
     </nav>
   );
 };
+
+export default Navigation;

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Navigation } from '@/components/cabinet/Navigation';
+import Navigation from '@/components/cabinet/Navigation';
 import { Footer } from '@/components/cabinet/Footer';
 import { Briefcase, CheckCircle2, TrendingUp, Building2, Landmark, Gavel } from 'lucide-react';
 import { Button } from '@/components/ui/button';
