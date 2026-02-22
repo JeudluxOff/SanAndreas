@@ -21,13 +21,21 @@ import {
   UserPlus,
   Send,
   Eye,
-  Activity
+  Activity,
+  Archive,
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -164,6 +172,42 @@ const DossierDetail = () => {
     });
   };
 
+  const handleArchiveCase = () => {
+    if (!id || !user) return;
+    legalStore.archiveCase(id, user.id);
+    setLocalStatus('Archivé');
+  };
+
+  const handleDeleteCase = () => {
+    if (!id || !user) return;
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce dossier ? Cette action est irréversible.")) {
+      legalStore.deleteCase(id, user.id);
+      navigate('/cabinet/intranet/dossiers');
+    }
+  };
+
+  const handleArchiveDoc = (docId: string) => {
+    if (!id || !user) return;
+    legalStore.archiveDocument(docId, user.id);
+    setDocs(legalStore.getDocuments(id));
+  };
+
+  const handleDeleteDoc = (docId: string) => {
+    if (!id || !user) return;
+    if (confirm("Supprimer ce document ?")) {
+      legalStore.deleteDocument(docId, user.id);
+      setDocs(legalStore.getDocuments(id));
+    }
+  };
+
+  const handleDeleteEvi = (eviId: string) => {
+    if (!id || !user) return;
+    if (confirm("Supprimer cette preuve ?")) {
+      legalStore.deleteEvidence(eviId, user.id);
+      setEvidences(legalStore.getEvidence(id));
+    }
+  };
+
   // Security check for Sealed cases
   React.useEffect(() => {
     if (dossier?.confidentiality === 'Scellé') {
@@ -241,9 +285,28 @@ const DossierDetail = () => {
                 <CheckCircle2 className="w-4 h-4" /> Clôturer Dossier
               </Button>
             )}
-            <Button className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 gap-2 shadow-xl shadow-black/10">
-              Actions Dossier <MoreVertical className="w-4 h-4" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 gap-2 shadow-xl shadow-black/10">
+                  Actions Dossier <MoreVertical className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-white border-slate-100 rounded-xl shadow-xl p-2 min-w-[180px]">
+                <DropdownMenuItem
+                  onClick={handleArchiveCase}
+                  disabled={localStatus === 'Archivé'}
+                  className="text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-[#c1a461] p-3 rounded-lg cursor-pointer flex gap-3"
+                >
+                  <Archive className="w-4 h-4" /> Archiver Dossier
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleDeleteCase}
+                  className="text-[10px] font-black uppercase tracking-widest text-red-600 hover:text-red-700 p-3 rounded-lg cursor-pointer flex gap-3"
+                >
+                  <Trash2 className="w-4 h-4" /> Supprimer Dossier
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -402,15 +465,38 @@ const DossierDetail = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-6">
-                          <Badge className={cn("text-[9px] font-black uppercase tracking-widest px-3 py-1", 
-                            doc.status === 'Signé' ? 'bg-emerald-600 text-white' : 
-                            doc.status === 'Validé' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'
+                          <Badge className={cn("text-[9px] font-black uppercase tracking-widest px-3 py-1",
+                            doc.status === 'Signé' ? 'bg-emerald-600 text-white' :
+                            doc.status === 'Validé' ? 'bg-blue-600 text-white' :
+                            doc.status === 'Archivé' ? 'bg-slate-400 text-white' : 'bg-slate-200 text-slate-600'
                           )}>
                             {doc.status}
                           </Badge>
-                          <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
-                            <Download className="w-5 h-5" />
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                                <MoreVertical className="w-5 h-5" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-white border-slate-100 rounded-xl shadow-xl p-2">
+                              <DropdownMenuItem className="text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-[#c1a461] p-3 rounded-lg cursor-pointer flex gap-3">
+                                <Download className="w-4 h-4" /> Télécharger
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleArchiveDoc(doc.id)}
+                                disabled={doc.status === 'Archivé'}
+                                className="text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-[#c1a461] p-3 rounded-lg cursor-pointer flex gap-3"
+                              >
+                                <Archive className="w-4 h-4" /> Archiver
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteDoc(doc.id)}
+                                className="text-[10px] font-black uppercase tracking-widest text-red-600 hover:text-red-700 p-3 rounded-lg cursor-pointer flex gap-3"
+                              >
+                                <Trash2 className="w-4 h-4" /> Supprimer
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
                     </Card>
@@ -461,9 +547,24 @@ const DossierDetail = () => {
                         <span className="text-[10px] font-black text-slate-300 uppercase">{evi.id}</span>
                         <div className="flex gap-2">
                            {evi.to_produce_at_hearing && <Badge className="bg-red-50 text-red-600 border-red-100 text-[8px] uppercase">À produire</Badge>}
-                           <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
-                             <Download className="w-5 h-5" />
-                           </Button>
+                           <DropdownMenu>
+                             <DropdownMenuTrigger asChild>
+                               <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                                 <MoreVertical className="w-5 h-5" />
+                               </Button>
+                             </DropdownMenuTrigger>
+                             <DropdownMenuContent align="end" className="bg-white border-slate-100 rounded-xl shadow-xl p-2">
+                               <DropdownMenuItem className="text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-[#c1a461] p-3 rounded-lg cursor-pointer flex gap-3">
+                                 <Download className="w-4 h-4" /> Télécharger
+                               </DropdownMenuItem>
+                               <DropdownMenuItem
+                                 onClick={() => handleDeleteEvi(evi.id)}
+                                 className="text-[10px] font-black uppercase tracking-widest text-red-600 hover:text-red-700 p-3 rounded-lg cursor-pointer flex gap-3"
+                               >
+                                 <Trash2 className="w-4 h-4" /> Supprimer
+                               </DropdownMenuItem>
+                             </DropdownMenuContent>
+                           </DropdownMenu>
                         </div>
                       </div>
                     </Card>

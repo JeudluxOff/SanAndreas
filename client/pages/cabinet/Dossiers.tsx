@@ -5,7 +5,7 @@ import {
   Plus, 
   Filter, 
   MoreVertical, 
-  ChevronRight, 
+  ChevronRight,
   Lock,
   UserCheck,
   Calendar,
@@ -13,11 +13,19 @@ import {
   Search as SearchIcon,
   CheckCircle2,
   AlertCircle,
-  FolderOpen
+  FolderOpen,
+  Archive,
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -145,6 +153,20 @@ const Dossiers = () => {
       target_id: caseToCreate.id,
       metadata: { title: caseToCreate.title }
     });
+  };
+
+  const handleArchiveCase = (id: string) => {
+    if (!user) return;
+    legalStore.archiveCase(id, user.id);
+    setCases(legalStore.getCases());
+  };
+
+  const handleDeleteCase = (id: string) => {
+    if (!user) return;
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce dossier ? Cette action est irréversible.")) {
+      legalStore.deleteCase(id, user.id);
+      setCases(legalStore.getCases());
+    }
   };
 
   const filteredCases = cases.filter(c => 
@@ -516,9 +538,33 @@ const Dossiers = () => {
                         <p className="text-[10px] font-black text-slate-900 uppercase tracking-tight">{lead?.name || 'Non assigné'}</p>
                       </td>
                       <td className="px-8 py-6 text-right">
-                        <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
-                          <MoreVertical className="w-5 h-5" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                              <MoreVertical className="w-5 h-5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-white border-slate-100 rounded-xl shadow-xl p-2">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleArchiveCase(item.id);
+                              }}
+                              className="text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-[#c1a461] p-3 rounded-lg cursor-pointer flex gap-3"
+                            >
+                              <Archive className="w-4 h-4" /> Archiver
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteCase(item.id);
+                              }}
+                              className="text-[10px] font-black uppercase tracking-widest text-red-600 hover:text-red-700 p-3 rounded-lg cursor-pointer flex gap-3"
+                            >
+                              <Trash2 className="w-4 h-4" /> Supprimer
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </td>
                     </tr>
                   );

@@ -17,12 +17,20 @@ import {
   CheckCircle2,
   FileSignature,
   FileEdit,
-  History
+  History,
+  Archive,
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -140,6 +148,20 @@ const Documents = () => {
       handleUpdateStatus(selectedDocId, 'Signé');
       setShowSignModal(false);
       setSelectedDocId(null);
+    }
+  };
+
+  const handleArchiveDoc = (id: string) => {
+    if (!user) return;
+    legalStore.archiveDocument(id, user.id);
+    setDocs(legalStore.getDocuments());
+  };
+
+  const handleDeleteDoc = (id: string) => {
+    if (!user) return;
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce document ?")) {
+      legalStore.deleteDocument(id, user.id);
+      setDocs(legalStore.getDocuments());
     }
   };
 
@@ -365,10 +387,11 @@ const Documents = () => {
                         <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-200">{item.category}</Badge>
                       </td>
                       <td className="px-8 py-6">
-                        <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-3 py-1", 
-                          item.status === 'Signé' ? 'bg-emerald-600 text-white' : 
-                          item.status === 'Validé' ? 'bg-blue-600 text-white' : 
-                          item.status === 'Relecture' ? 'bg-[#c1a461] text-white' : 'bg-slate-100 text-slate-600'
+                        <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-3 py-1",
+                          item.status === 'Signé' ? 'bg-emerald-600 text-white' :
+                          item.status === 'Validé' ? 'bg-blue-600 text-white' :
+                          item.status === 'Relecture' ? 'bg-[#c1a461] text-white' :
+                          item.status === 'Archivé' ? 'bg-slate-400 text-white' : 'bg-slate-100 text-slate-600'
                         )}>
                           {item.status}
                         </Badge>
@@ -409,9 +432,28 @@ const Documents = () => {
                           <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
                             <Download className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
-                            <MoreVertical className="w-5 h-5" />
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                                <MoreVertical className="w-5 h-5" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-white border-slate-100 rounded-xl shadow-xl p-2">
+                              <DropdownMenuItem
+                                onClick={() => handleArchiveDoc(item.id)}
+                                disabled={item.status === 'Archivé'}
+                                className="text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-[#c1a461] p-3 rounded-lg cursor-pointer flex gap-3"
+                              >
+                                <Archive className="w-4 h-4" /> Archiver
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteDoc(item.id)}
+                                className="text-[10px] font-black uppercase tracking-widest text-red-600 hover:text-red-700 p-3 rounded-lg cursor-pointer flex gap-3"
+                              >
+                                <Trash2 className="w-4 h-4" /> Supprimer
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </td>
                     </tr>

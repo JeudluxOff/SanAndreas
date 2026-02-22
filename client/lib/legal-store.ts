@@ -454,6 +454,98 @@ class LegalStoreManager {
       });
     }
   }
+
+  archiveCase(id: string, userId: string) {
+    const dossier = this.getCase(id);
+    if (dossier) {
+      dossier.status = 'Archivé';
+      this.updateCase(dossier);
+      this.logAction({
+        id: `LOG-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user_id: userId,
+        user_name: 'System',
+        action: 'Archivage du dossier',
+        target_type: 'Case',
+        target_id: id
+      });
+    }
+  }
+
+  deleteCase(id: string, userId: string) {
+    const idx = this.data.cases.findIndex(c => c.id === id);
+    if (idx !== -1) {
+      const title = this.data.cases[idx].title;
+      this.data.cases.splice(idx, 1);
+      this.save();
+      this.logAction({
+        id: `LOG-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user_id: userId,
+        user_name: 'System',
+        action: 'Suppression du dossier',
+        target_type: 'Case',
+        target_id: id,
+        metadata: { title }
+      });
+    }
+  }
+
+  archiveDocument(id: string, userId: string) {
+    const doc = this.data.documents.find(d => d.id === id);
+    if (doc) {
+      doc.status = 'Archivé';
+      this.updateDocument(doc);
+      this.logAction({
+        id: `LOG-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user_id: userId,
+        user_name: 'System',
+        action: 'Archivage du document',
+        target_type: 'Document',
+        target_id: id,
+        metadata: { title: doc.title }
+      });
+    }
+  }
+
+  deleteDocument(id: string, userId: string) {
+    const idx = this.data.documents.findIndex(d => d.id === id);
+    if (idx !== -1) {
+      const title = this.data.documents[idx].title;
+      this.data.documents.splice(idx, 1);
+      this.save();
+      this.logAction({
+        id: `LOG-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user_id: userId,
+        user_name: 'System',
+        action: 'Suppression du document',
+        target_type: 'Document',
+        target_id: id,
+        metadata: { title }
+      });
+    }
+  }
+
+  deleteEvidence(id: string, userId: string) {
+    const idx = this.data.evidence.findIndex(e => e.id === id);
+    if (idx !== -1) {
+      const name = this.data.evidence[idx].name;
+      this.data.evidence.splice(idx, 1);
+      this.save();
+      this.logAction({
+        id: `LOG-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user_id: userId,
+        user_name: 'System',
+        action: 'Suppression de preuve',
+        target_type: 'Evidence',
+        target_id: id,
+        metadata: { name }
+      });
+    }
+  }
 }
 
 export const legalStore = new LegalStoreManager();
