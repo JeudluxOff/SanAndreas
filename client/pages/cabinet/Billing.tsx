@@ -59,20 +59,27 @@ const Billing = () => {
 
   // Real-time animation for numbers (simulated)
   const [displayTotal, setDisplayTotal] = React.useState(0);
+  const [isUpdating, setIsUpdating] = React.useState(false);
 
   const totalInvoiced = invoices.reduce((acc, inv) => acc + inv.amount, 0);
   const totalPending = invoices.filter(i => i.status !== 'Payé').reduce((acc, inv) => acc + inv.amount, 0);
   const totalPaid = invoices.filter(i => i.status === 'Payé').reduce((acc, inv) => acc + inv.amount, 0);
 
   React.useEffect(() => {
-    let start = 0;
+    let start = displayTotal;
     const end = totalInvoiced;
     if (start === end) return;
 
+    setIsUpdating(true);
     let timer = setInterval(() => {
-      start += Math.ceil((end - start) / 10);
-      if (start >= end) {
+      const diff = end - start;
+      const step = Math.ceil(Math.abs(diff) / 10) * (diff > 0 ? 1 : -1);
+
+      start += step;
+
+      if ((diff > 0 && start >= end) || (diff < 0 && start <= end)) {
         setDisplayTotal(end);
+        setIsUpdating(false);
         clearInterval(timer);
       } else {
         setDisplayTotal(start);
@@ -281,9 +288,12 @@ const Billing = () => {
         </Dialog>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <Card className="bg-[#0a0f18] text-white border-none shadow-2xl px-8 py-10 flex flex-col justify-between rounded-[40px] relative overflow-hidden group">
+          <Card className={cn(
+            "bg-[#0a0f18] text-white border-none shadow-2xl px-8 py-10 flex flex-col justify-between rounded-[40px] relative overflow-hidden group transition-all duration-500",
+            isUpdating && "ring-4 ring-[#c1a461]/20 scale-[1.02]"
+          )}>
             <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-              <TrendingUp className="w-24 h-24 rotate-12" />
+              <TrendingUp className={cn("w-24 h-24 rotate-12 transition-transform duration-500", isUpdating && "scale-110")} />
             </div>
             <div className="relative z-10">
               <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] mb-4">Chiffre d'Affaires Global</p>
@@ -294,7 +304,7 @@ const Billing = () => {
             </div>
             <div className="relative z-10 mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#c1a461] animate-pulse" />
+                <div className={cn("w-1.5 h-1.5 rounded-full transition-colors", isUpdating ? "bg-[#c1a461] animate-ping" : "bg-[#c1a461] animate-pulse")} />
                 <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest text-left">Mise à jour en temps réel</span>
               </div>
               <ArrowRight className="w-4 h-4 text-white/20" />
