@@ -65,6 +65,7 @@ export interface LegalDocument {
   id: string; // Format: HC-YYYY-XXXX
   case_id: string;
   title: string;
+  content?: string;
   category: DocumentCategory;
   status: DocumentStatus;
   current_version: number;
