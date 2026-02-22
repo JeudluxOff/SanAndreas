@@ -37,6 +37,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useLegalRBAC } from './intranet/LegalIntranetLayout';
 import { Link, useLocation } from 'react-router-dom';
@@ -75,6 +76,7 @@ const Dossiers = () => {
   // Create Case Form State
   const [newCase, setNewCase] = React.useState<Partial<Case>>({
     title: '',
+    description: '',
     client_id: '',
     type: 'Pénal',
     confidentiality: 'Normal',
@@ -125,6 +127,7 @@ const Dossiers = () => {
     const caseToCreate: Case = {
       id: `HC-2024-${String(cases.length + 1).padStart(3, '0')}`,
       title: newCase.title,
+      description: newCase.description,
       client_id: newCase.client_id,
       type: (newCase.type as CaseType) || 'Pénal',
       status: 'Ouvert',
@@ -141,7 +144,7 @@ const Dossiers = () => {
     setConflictResult(null);
     setConflictSearchQuery('');
     setError(null);
-    setNewCase({ title: '', client_id: '', type: 'Pénal', confidentiality: 'Normal' });
+    setNewCase({ title: '', description: '', client_id: '', type: 'Pénal', confidentiality: 'Normal' });
 
     store.logAction({
       id: `LOG-${Date.now()}`,
@@ -349,6 +352,16 @@ const Dossiers = () => {
                   onChange={(e) => setNewCase({ ...newCase, title: e.target.value })}
                   placeholder="EX: ÉTAT DE SA VS. JOHN DOE..."
                   className="h-14 bg-slate-50 border-none rounded-2xl px-6 text-sm font-bold uppercase tracking-widest focus:ring-2 ring-[#c1a461]/20 transition-all"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Description / Notes de Synthèse</Label>
+                <Textarea
+                  value={newCase.description}
+                  onChange={(e) => setNewCase({ ...newCase, description: e.target.value })}
+                  placeholder="RÉSUMÉ DE L'AFFAIRE, ÉLÉMENTS CLÉS, LIENS UTILES..."
+                  className="bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 ring-[#c1a461]/20 transition-all min-h-[120px]"
                 />
               </div>
 

@@ -53,6 +53,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { legalStore } from '@/lib/legal-store';
 import { useLegalStore } from '@/hooks/useLegalStore';
@@ -78,23 +79,39 @@ const DossierDetail = () => {
 
   // Modals state
   const [showDocModal, setShowDocModal] = React.useState(false);
+  const [showDocViewModal, setShowDocViewModal] = React.useState(false);
   const [showEviModal, setShowEviModal] = React.useState(false);
   const [showTaskModal, setShowTaskModal] = React.useState(false);
   const [showStatusModal, setShowStatusModal] = React.useState(false);
   const [showProgressionModal, setShowProgressionModal] = React.useState(false);
   const [showMemberModal, setShowMemberModal] = React.useState(false);
+  const [showEviViewModal, setShowEviViewModal] = React.useState(false);
+  const [selectedDocId, setSelectedDocId] = React.useState<string | null>(null);
+  const [selectedEviId, setSelectedEviId] = React.useState<string | null>(null);
 
   // Form states
-  const [newDoc, setNewDoc] = React.useState({ title: '', category: 'Conclusions' as DocumentCategory });
-  const [newEvi, setNewEvi] = React.useState({ name: '', type: 'Document', confidentiality: 'Normal' as ConfidentialityLevel });
+  const [newDoc, setNewDoc] = React.useState({ title: '', category: 'Conclusions' as DocumentCategory, content: '' });
+  const [newEvi, setNewEvi] = React.useState({ name: '', type: 'Document', content: '', confidentiality: 'Normal' as ConfidentialityLevel });
   const [newTask, setNewTask] = React.useState({ title: '', priority: 'Moyenne' as any });
   const [progression, setProgression] = React.useState(dossier?.progression || 0);
   const [stepDescription, setStepDescription] = React.useState(dossier?.step_description || '');
+  const [caseDescription, setCaseDescription] = React.useState(dossier?.description || '');
   const [newMember, setNewMember] = React.useState({ user_id: '', name: '', role: '' });
   const [internalNotes, setInternalNotes] = React.useState<InternalNote[]>(dossier?.internal_notes || []);
   const [newNote, setNewNote] = React.useState('');
 
   const staff = store.getStaff();
+
+  const linkify = (text: string) => {
+    if (!text) return null;
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.split(urlRegex).map((part, i) => {
+      if (part.match(urlRegex)) {
+        return <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-[#c1a461] hover:underline break-all">{part}</a>;
+      }
+      return part;
+    });
+  };
 
   const handleUpdateCase = (updates: Partial<Case>) => {
     if (!dossier || !user) return;
@@ -104,6 +121,7 @@ const DossierDetail = () => {
     if (updates.status) setLocalStatus(updates.status);
     if (updates.progression !== undefined) setProgression(updates.progression);
     if (updates.step_description !== undefined) setStepDescription(updates.step_description);
+    if (updates.description !== undefined) setCaseDescription(updates.description);
     if (updates.members) setMembers(updates.members);
     if (updates.internal_notes) setInternalNotes(updates.internal_notes);
 
@@ -165,6 +183,7 @@ const DossierDetail = () => {
       id: `HC-2024-${Math.floor(Math.random() * 9000) + 1000}`,
       case_id: id,
       title: newDoc.title,
+      content: newDoc.content,
       category: newDoc.category,
       status: 'Brouillon',
       current_version: 1,
@@ -175,7 +194,7 @@ const DossierDetail = () => {
     };
     store.createDocument(doc);
     setShowDocModal(false);
-    setNewDoc({ title: '', category: 'Conclusions' });
+    setNewDoc({ title: '', category: 'Conclusions', content: '' });
   };
 
   const handleCreateEvi = () => {
@@ -185,6 +204,7 @@ const DossierDetail = () => {
       case_id: id,
       name: newEvi.name,
       type: newEvi.type,
+      content: newEvi.content,
       file_url: '#',
       confidentiality: newEvi.confidentiality,
       uploaded_by: user.name,
@@ -193,7 +213,7 @@ const DossierDetail = () => {
     };
     store.addEvidence(evi);
     setShowEviModal(false);
-    setNewEvi({ name: '', type: 'Document', confidentiality: 'Normal' });
+    setNewEvi({ name: '', type: 'Document', content: '', confidentiality: 'Normal' });
   };
 
   const handleCreateTask = () => {
@@ -413,6 +433,27 @@ const DossierDetail = () => {
           <div className="lg:col-span-8 space-y-10">
             {activeTab === 'overview' && (
               <>
+                {/* Dossier Summary / Content */}
+                <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
+                  <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between">
+                    <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-[#c1a461]" /> Synthèse de l'Affaire
+                    </CardTitle>
+                    <Button
+                      variant="ghost"
+                      onClick={() => setShowProgressionModal(true)}
+                      className="text-[10px] font-black uppercase text-[#c1a461]"
+                    >
+                      <Eye className="w-4 h-4 mr-2" /> Modifier
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="p-8">
+                    <div className="whitespace-pre-wrap text-sm text-slate-700 font-medium leading-relaxed text-left">
+                      {linkify(caseDescription || "AUCUNE SYNTHÈSE RÉDIGÉE POUR LE MOMENT.")}
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {/* Status & Summary */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <Card
@@ -529,7 +570,7 @@ const DossierDetail = () => {
                 </div>
                 <div className="grid grid-cols-1 gap-4">
                   {docs.map((doc, idx) => (
-                    <Card key={idx} className="border-none shadow-md hover:shadow-xl transition-all group p-6 rounded-[24px]">
+                    <Card key={idx} className="border-none shadow-md hover:shadow-xl transition-all group p-6 rounded-[24px] cursor-pointer" onClick={() => { setSelectedDocId(doc.id); setShowDocViewModal(true); }}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-6">
                           <div className="p-4 bg-slate-50 rounded-2xl text-slate-400 group-hover:text-[#c1a461] transition-colors">
@@ -604,7 +645,7 @@ const DossierDetail = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {evidences.map((evi, idx) => (
-                    <Card key={idx} className="border-none shadow-md hover:shadow-xl transition-all p-8 rounded-[32px] bg-white group">
+                    <Card key={idx} className="border-none shadow-md hover:shadow-xl transition-all p-8 rounded-[32px] bg-white group cursor-pointer" onClick={() => { setSelectedEviId(evi.id); setShowEviViewModal(true); }}>
                       <div className="flex justify-between items-start mb-6">
                         <div className="p-4 bg-slate-50 rounded-2xl text-slate-400 group-hover:text-[#c1a461] transition-colors">
                           <ShieldCheck className="w-8 h-8" />
@@ -835,6 +876,15 @@ const DossierDetail = () => {
                 <Input value={newDoc.title} onChange={(e) => setNewDoc({...newDoc, title: e.target.value})} placeholder="EX: CONCLUSIONS PÉNALES..." className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase" />
               </div>
               <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contenu du Document</Label>
+                <Textarea
+                  value={newDoc.content}
+                  onChange={(e) => setNewDoc({...newDoc, content: e.target.value})}
+                  placeholder="RÉDIGEZ LE CONTENU ICI..."
+                  className="bg-slate-50 border-none rounded-xl min-h-[150px] text-sm font-medium"
+                />
+              </div>
+              <div className="space-y-2 text-left">
                 <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Catégorie</Label>
                 <Select value={newDoc.category} onValueChange={(val) => setNewDoc({...newDoc, category: val as any})}>
                   <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12"><SelectValue /></SelectTrigger>
@@ -861,6 +911,15 @@ const DossierDetail = () => {
               <div className="space-y-2 text-left">
                 <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nom de la preuve</Label>
                 <Input value={newEvi.name} onChange={(e) => setNewEvi({...newEvi, name: e.target.value})} placeholder="EX: ENREGISTREMENT CCTV..." className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase" />
+              </div>
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contenu / Description de la preuve</Label>
+                <Textarea
+                  value={newEvi.content}
+                  onChange={(e) => setNewEvi({...newEvi, content: e.target.value})}
+                  placeholder="DÉCRIVEZ LA PREUVE ICI. LES LIENS SONT SUPPORTÉS."
+                  className="bg-slate-50 border-none rounded-xl min-h-[150px] text-sm font-medium"
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2 text-left">
@@ -921,6 +980,86 @@ const DossierDetail = () => {
           </DialogContent>
         </Dialog>
 
+        {/* Document View Modal */}
+        <Dialog open={showDocViewModal} onOpenChange={setShowDocViewModal}>
+          <DialogContent className="max-w-4xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            {selectedDocId && (
+              <>
+                <DialogHeader className="flex flex-row items-center justify-between space-y-0 text-left">
+                  <div className="space-y-1">
+                    <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">
+                      {docs.find(d => d.id === selectedDocId)?.title}
+                    </DialogTitle>
+                    <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      {selectedDocId} • Version {docs.find(d => d.id === selectedDocId)?.current_version}
+                    </DialogDescription>
+                  </div>
+                  <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-3 py-1",
+                    docs.find(d => d.id === selectedDocId)?.status === 'Signé' ? 'bg-emerald-600 text-white' :
+                    docs.find(d => d.id === selectedDocId)?.status === 'Validé' ? 'bg-blue-600 text-white' :
+                    docs.find(d => d.id === selectedDocId)?.status === 'Archivé' ? 'bg-slate-400 text-white' : 'bg-slate-100 text-slate-600'
+                  )}>
+                    {docs.find(d => d.id === selectedDocId)?.status}
+                  </Badge>
+                </DialogHeader>
+
+                <div className="my-8 p-8 bg-slate-50 rounded-2xl border border-slate-100 min-h-[400px]">
+                  <div className="whitespace-pre-wrap text-sm text-slate-700 font-medium leading-relaxed text-left">
+                    {linkify(docs.find(d => d.id === selectedDocId)?.content || "AUCUN CONTENU RÉDIGÉ POUR CE DOCUMENT.")}
+                  </div>
+                </div>
+
+                <DialogFooter className="flex justify-between items-center w-full">
+                  <div className="flex gap-4">
+                    <Button variant="outline" size="sm" className="text-[10px] font-black uppercase tracking-widest h-10 px-6 gap-2">
+                      <Download className="w-4 h-4" /> Télécharger
+                    </Button>
+                  </div>
+                  <Button
+                    onClick={() => setShowDocViewModal(false)}
+                    className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-10 px-8 rounded-xl shadow-xl shadow-black/10"
+                  >
+                    Fermer
+                  </Button>
+                </DialogFooter>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Evidence View Modal */}
+        <Dialog open={showEviViewModal} onOpenChange={setShowEviViewModal}>
+          <DialogContent className="max-w-2xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            {selectedEviId && (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">
+                    {evidences.find(e => e.id === selectedEviId)?.name}
+                  </DialogTitle>
+                  <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                    {evidences.find(e => e.id === selectedEviId)?.type} • Vault Security Level: {evidences.find(e => e.id === selectedEviId)?.confidentiality}
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="my-8 p-8 bg-slate-50 rounded-2xl border border-slate-100 min-h-[200px]">
+                  <div className="whitespace-pre-wrap text-sm text-slate-700 font-medium leading-relaxed text-left">
+                    {linkify(evidences.find(e => e.id === selectedEviId)?.content || "AUCUNE DESCRIPTION DISPONIBLE.")}
+                  </div>
+                </div>
+
+                <DialogFooter>
+                  <Button
+                    onClick={() => setShowEviViewModal(false)}
+                    className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-10 rounded-xl w-full"
+                  >
+                    Fermer
+                  </Button>
+                </DialogFooter>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
+
         {/* Status Edit Modal */}
         <Dialog open={showStatusModal} onOpenChange={setShowStatusModal}>
           <DialogContent className="max-w-md bg-white rounded-[32px] p-10 border-none shadow-2xl">
@@ -955,6 +1094,15 @@ const DossierDetail = () => {
             </DialogHeader>
             <div className="space-y-6 my-6">
               <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Synthèse Globale du Dossier</Label>
+                <Textarea
+                  value={caseDescription}
+                  onChange={(e) => setCaseDescription(e.target.value)}
+                  placeholder="MODIFIEZ LA SYNTHÈSE ICI..."
+                  className="bg-slate-50 border-none rounded-xl min-h-[200px] text-sm font-medium"
+                />
+              </div>
+              <div className="space-y-2 text-left">
                 <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pourcentage ({progression}%)</Label>
                 <input
                   type="range"
@@ -978,7 +1126,7 @@ const DossierDetail = () => {
             <DialogFooter>
               <Button
                 onClick={() => {
-                  handleUpdateCase({ progression, step_description: stepDescription });
+                  handleUpdateCase({ progression, step_description: stepDescription, description: caseDescription });
                   setShowProgressionModal(false);
                 }}
                 className="bg-[#c1a461] text-white text-[10px] font-black uppercase h-12 px-8 rounded-xl w-full shadow-xl shadow-[#c1a461]/20"

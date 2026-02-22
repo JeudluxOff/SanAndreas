@@ -15,28 +15,30 @@ import {
   ShieldAlert,
   ChevronRight,
   Zap,
-  Clock
+  Clock,
+  FileEdit
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogDescription,
   DialogFooter
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { legalStore } from '@/lib/legal-store';
 import { useAuth } from '@/contexts/AuthContext';
@@ -47,15 +49,37 @@ const EvidenceVault = () => {
   const { user } = useAuth();
   const [evidence, setEvidence] = React.useState(legalStore.getCases().flatMap(c => legalStore.getEvidence(c.id)));
   const [showUploadModal, setShowUploadModal] = React.useState(false);
+  const [showEditModal, setShowEditModal] = React.useState(false);
+  const [showViewModal, setShowViewModal] = React.useState(false);
+  const [selectedEviId, setSelectedEviId] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [newEvidence, setNewEvidence] = React.useState({
     name: '',
     case_id: '',
     type: 'Document',
+    content: '',
+    confidentiality: 'Normal' as ConfidentialityLevel
+  });
+  const [editingEvi, setEditingEvi] = React.useState({
+    name: '',
+    case_id: '',
+    type: 'Document',
+    content: '',
     confidentiality: 'Normal' as ConfidentialityLevel
   });
 
   const cases = legalStore.getCases();
+
+  const linkify = (text: string) => {
+    if (!text) return null;
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.split(urlRegex).map((part, i) => {
+      if (part.match(urlRegex)) {
+        return <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-[#c1a461] hover:underline break-all">{part}</a>;
+      }
+      return part;
+    });
+  };
 
   const handleUpload = () => {
     if (!user || !newEvidence.name || !newEvidence.case_id) return;
@@ -65,6 +89,7 @@ const EvidenceVault = () => {
       case_id: newEvidence.case_id,
       name: newEvidence.name,
       type: newEvidence.type,
+      content: newEvidence.content,
       file_url: '#',
       confidentiality: newEvidence.confidentiality,
       uploaded_by: user.name,
@@ -75,8 +100,8 @@ const EvidenceVault = () => {
     legalStore.addEvidence(evi);
     setEvidence(legalStore.getCases().flatMap(c => legalStore.getEvidence(c.id)));
     setShowUploadModal(false);
-    setNewEvidence({ name: '', case_id: '', type: 'Document', confidentiality: 'Normal' });
-    
+    setNewEvidence({ name: '', case_id: '', type: 'Document', content: '', confidentiality: 'Normal' });
+
     legalStore.logAction({
       id: `LOG-${Date.now()}`,
       timestamp: new Date().toISOString(),
@@ -86,6 +111,41 @@ const EvidenceVault = () => {
       target_type: 'Evidence',
       target_id: evi.id,
       metadata: { name: evi.name, case_id: evi.case_id }
+    });
+  };
+
+  const handleUpdate = () => {
+    if (!user || !selectedEviId || !editingEvi.name || !editingEvi.case_id) return;
+
+    const allEvidences = legalStore.getCases().flatMap(c => legalStore.getEvidence(c.id));
+    const evi = allEvidences.find(e => e.id === selectedEviId);
+    if (!evi) return;
+
+    const updated: Evidence = {
+      ...evi,
+      name: editingEvi.name,
+      case_id: editingEvi.case_id,
+      type: editingEvi.type,
+      content: editingEvi.content,
+      confidentiality: editingEvi.confidentiality
+    };
+
+    legalStore.deleteEvidence(evi.id, user.id);
+    legalStore.addEvidence(updated);
+
+    setEvidence(legalStore.getCases().flatMap(c => legalStore.getEvidence(c.id)));
+    setShowEditModal(false);
+    setSelectedEviId(null);
+
+    legalStore.logAction({
+      id: `LOG-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      user_id: user.id,
+      user_name: user.name,
+      action: 'Modification preuve',
+      target_type: 'Evidence',
+      target_id: evi.id,
+      metadata: { name: updated.name }
     });
   };
 
@@ -130,11 +190,21 @@ const EvidenceVault = () => {
             <div className="space-y-6 my-6">
               <div className="space-y-2">
                 <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nom de la Preuve</Label>
-                <Input 
+                <Input
                   value={newEvidence.name}
                   onChange={(e) => setNewEvidence({...newEvidence, name: e.target.value})}
-                  placeholder="EX: ENREGISTREMENT DASHCAM..." 
+                  placeholder="EX: ENREGISTREMENT DASHCAM..."
                   className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Description / Contenu</Label>
+                <Textarea
+                  value={newEvidence.content}
+                  onChange={(e) => setNewEvidence({...newEvidence, content: e.target.value})}
+                  placeholder="DÉCRIVEZ LA PREUVE, AJOUTEZ DES LIENS..."
+                  className="bg-slate-50 border-none rounded-xl min-h-[120px] text-sm font-medium"
                 />
               </div>
 
@@ -213,6 +283,161 @@ const EvidenceVault = () => {
           </DialogContent>
         </Dialog>
 
+        {/* Edit Modal */}
+        <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+          <DialogContent className="max-w-2xl bg-white rounded-[32px] p-10 border-none shadow-2xl overflow-y-auto max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Modifier la Preuve</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-6 my-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nom de la Preuve</Label>
+                <Input
+                  value={editingEvi.name}
+                  onChange={(e) => setEditingEvi({...editingEvi, name: e.target.value})}
+                  className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Description / Contenu</Label>
+                <Textarea
+                  value={editingEvi.content}
+                  onChange={(e) => setEditingEvi({...editingEvi, content: e.target.value})}
+                  placeholder="MODIFIEZ LA DESCRIPTION ICI..."
+                  className="bg-slate-50 border-none rounded-xl min-h-[200px] text-sm font-medium"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</Label>
+                  <Select
+                    value={editingEvi.type}
+                    onValueChange={(val) => setEditingEvi({...editingEvi, type: val})}
+                  >
+                    <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Document">Document</SelectItem>
+                      <SelectItem value="Vidéo">Vidéo</SelectItem>
+                      <SelectItem value="Image">Image</SelectItem>
+                      <SelectItem value="Audio">Audio</SelectItem>
+                      <SelectItem value="Digital">Digital</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Niveau Confidentialité</Label>
+                  <Select
+                    value={editingEvi.confidentiality}
+                    onValueChange={(val) => setEditingEvi({...editingEvi, confidentiality: val as ConfidentialityLevel})}
+                  >
+                    <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Normal">Normal</SelectItem>
+                      <SelectItem value="Confidentiel">Confidentiel</SelectItem>
+                      <SelectItem value="Secret">Secret</SelectItem>
+                      <SelectItem value="Scellé">Scellé</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dossier Assigné</Label>
+                <Select
+                  value={editingEvi.case_id}
+                  onValueChange={(val) => setEditingEvi({...editingEvi, case_id: val})}
+                >
+                  <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
+                    <SelectValue placeholder="Choisir un dossier..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cases.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.id} - {c.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="ghost"
+                onClick={() => setShowEditModal(false)}
+                className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleUpdate}
+                disabled={!editingEvi.name || !editingEvi.case_id}
+                className="bg-[#c1a461] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl shadow-xl shadow-[#c1a461]/10"
+              >
+                Enregistrer les Modifications
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Modal */}
+        <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
+          <DialogContent className="max-w-3xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            {selectedEviId && (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">
+                    {evidence.find(e => e.id === selectedEviId)?.name}
+                  </DialogTitle>
+                  <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                    {evidence.find(e => e.id === selectedEviId)?.type} • Dossier: {evidence.find(e => e.id === selectedEviId)?.case_id}
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="my-8 p-8 bg-slate-50 rounded-2xl border border-slate-100 min-h-[250px]">
+                  <div className="whitespace-pre-wrap text-sm text-slate-700 font-medium leading-relaxed text-left">
+                    {linkify(evidence.find(e => e.id === selectedEviId)?.content || "AUCUNE DESCRIPTION DISPONIBLE.")}
+                  </div>
+                </div>
+
+                <DialogFooter className="flex justify-between items-center w-full">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const evi = evidence.find(e => e.id === selectedEviId);
+                      if (evi) {
+                        setEditingEvi({
+                          name: evi.name,
+                          case_id: evi.case_id,
+                          type: evi.type,
+                          content: evi.content || '',
+                          confidentiality: evi.confidentiality
+                        });
+                        setShowViewModal(false);
+                        setShowEditModal(true);
+                      }
+                    }}
+                    className="text-[10px] font-black uppercase tracking-widest h-10 px-6 gap-2"
+                  >
+                    <FileEdit className="w-4 h-4" /> Modifier
+                  </Button>
+                  <Button
+                    onClick={() => setShowViewModal(false)}
+                    className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-10 px-8 rounded-xl shadow-xl shadow-black/10"
+                  >
+                    Fermer
+                  </Button>
+                </DialogFooter>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <Card className="bg-[#0a0f18] text-white border-none shadow-xl px-8 py-6 rounded-[32px] relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#c1a461] rounded-full blur-[80px] opacity-10 -mr-16 -mt-16" />
@@ -279,9 +504,9 @@ const EvidenceVault = () => {
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {filteredEvidence.map((item, idx) => (
-                  <tr key={idx} className="group hover:bg-slate-50/50 transition-all cursor-pointer">
+                  <tr key={idx} className="group hover:bg-slate-50/50 transition-all cursor-pointer" onClick={() => { setSelectedEviId(item.id); setShowViewModal(true); }}>
                     <td className="px-8 py-6">
-                      <Link to={`/cabinet/intranet/dossiers/${item.case_id}`} className="flex items-center gap-4">
+                      <div className="flex items-center gap-4">
                         <div className="p-3 bg-slate-50 rounded-xl text-slate-400 group-hover:text-[#c1a461] transition-colors">
                           <Fingerprint className="w-5 h-5" />
                         </div>
@@ -289,10 +514,12 @@ const EvidenceVault = () => {
                           <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{item.name}</p>
                           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.id}</p>
                         </div>
-                      </Link>
+                      </div>
                     </td>
-                    <td className="px-8 py-6">
-                      <p className="text-xs font-bold text-slate-600 uppercase tracking-tight">{item.case_id}</p>
+                    <td className="px-8 py-6" onClick={(e) => e.stopPropagation()}>
+                      <Link to={`/cabinet/intranet/dossiers/${item.case_id}`}>
+                        <p className="text-xs font-bold text-slate-600 uppercase tracking-tight hover:text-[#c1a461] transition-colors">{item.case_id}</p>
+                      </Link>
                     </td>
                     <td className="px-8 py-6">
                       <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-200">{item.type}</Badge>

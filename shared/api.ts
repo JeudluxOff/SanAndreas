@@ -85,6 +85,7 @@ export interface Evidence {
   name: string;
   type: string;
   file_url: string;
+  content?: string;
   confidentiality: ConfidentialityLevel;
   uploaded_by: string;
   uploaded_at: string;
