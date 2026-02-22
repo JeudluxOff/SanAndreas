@@ -66,7 +66,7 @@ const DossierDetail = () => {
 
   const dossier = legalStore.getCase(id || '');
   const [localStatus, setLocalStatus] = React.useState<string>(dossier?.status || '');
-  const [docs, setDocs] = React.useState(legalStore.getDocuments(id));
+  const [docs, setDocs] = React.useState(legalStore.getDocuments(id).filter(d => d.status !== 'Archivé'));
   const [evidences, setEvidences] = React.useState(legalStore.getEvidence(id || ''));
   const [tasks, setTasks] = React.useState(legalStore.getTasks(id));
   const hearings = legalStore.getHearings().filter(h => h.case_id === id);
@@ -189,14 +189,14 @@ const DossierDetail = () => {
   const handleArchiveDoc = (docId: string) => {
     if (!id || !user) return;
     legalStore.archiveDocument(docId, user.id);
-    setDocs(legalStore.getDocuments(id));
+    setDocs(legalStore.getDocuments(id).filter(d => d.status !== 'Archivé'));
   };
 
   const handleDeleteDoc = (docId: string) => {
     if (!id || !user) return;
     if (confirm("Supprimer ce document ?")) {
       legalStore.deleteDocument(docId, user.id);
-      setDocs(legalStore.getDocuments(id));
+      setDocs(legalStore.getDocuments(id).filter(d => d.status !== 'Archivé'));
     }
   };
 

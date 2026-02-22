@@ -8,6 +8,7 @@ import LegalPortal from "./pages/cabinet/Portal";
 import LegalBilling from "./pages/cabinet/Billing";
 import LegalAudit from "./pages/cabinet/Audit";
 import LegalDocuments from "./pages/cabinet/Documents";
+import LegalArchives from "./pages/cabinet/Archives";
 import LegalEvidence from "./pages/cabinet/Evidence";
 import LegalPlanning from "./pages/cabinet/Planning";
 import LegalTasks from "./pages/cabinet/Tasks";
@@ -74,6 +75,7 @@ const AppRoutes = () => (
           <Routes>
             <Route path="/" element={<LegalDashboard />} />
             <Route path="/dossiers" element={<LegalDossiers />} />
+            <Route path="/archives" element={<LegalArchives />} />
             <Route path="/dossiers/:id" element={<LegalDossierDetail />} />
             <Route path="/documents" element={<LegalDocuments />} />
             <Route path="/evidence" element={<LegalEvidence />} />

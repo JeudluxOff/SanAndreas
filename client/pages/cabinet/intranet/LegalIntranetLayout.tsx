@@ -1,14 +1,14 @@
 import React, { createContext, useContext } from 'react';
 import { 
-  Scale, 
-  Briefcase, 
-  FileText, 
-  Users, 
-  Calendar, 
-  CreditCard, 
-  MessageSquare, 
-  ShieldCheck, 
-  Activity, 
+  Scale,
+  Briefcase,
+  FileText,
+  Users,
+  Calendar,
+  CreditCard,
+  MessageSquare,
+  ShieldCheck,
+  Activity,
   Settings,
   Bell,
   Search,
@@ -17,7 +17,8 @@ import {
   ArrowLeft,
   Menu,
   X,
-  Zap
+  Zap,
+  Archive
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -67,6 +68,7 @@ const ROLE_COLORS: Record<LegalRole, string> = {
 const MENU_ITEMS = [
   { icon: <Activity className="w-4 h-4" />, label: "Tableau de Bord", path: "/cabinet/intranet", roles: ['Associé', 'Avocat', 'Juriste', 'Secrétaire', 'Comptable', 'Stagiaire', 'Auditeur'] },
   { icon: <Briefcase className="w-4 h-4" />, label: "Dossiers", path: "/cabinet/intranet/dossiers", roles: ['Associé', 'Avocat', 'Juriste', 'Stagiaire'] },
+  { icon: <Archive className="w-4 h-4" />, label: "Archives", path: "/cabinet/intranet/archives", roles: ['Associé', 'Avocat', 'Juriste', 'Secrétaire', 'Auditeur'] },
   { icon: <FileText className="w-4 h-4" />, label: "Documents", path: "/cabinet/intranet/documents", roles: ['Associé', 'Avocat', 'Juriste', 'Stagiaire'] },
   { icon: <ShieldCheck className="w-4 h-4" />, label: "Preuves (Vault)", path: "/cabinet/intranet/evidence", roles: ['Associé', 'Avocat'] },
   { icon: <Zap className="w-4 h-4" />, label: "Tâches", path: "/cabinet/intranet/tasks", roles: ['Associé', 'Avocat', 'Juriste', 'Secrétaire'] },

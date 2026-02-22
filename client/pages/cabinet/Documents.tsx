@@ -56,7 +56,7 @@ import { Link } from 'react-router-dom';
 
 const Documents = () => {
   const { user } = useAuth();
-  const [docs, setDocs] = React.useState(legalStore.getDocuments());
+  const [docs, setDocs] = React.useState(legalStore.getDocuments().filter(d => d.status !== 'Archivé'));
   const [showCreateModal, setShowCreateModal] = React.useState(false);
   const [showSignModal, setShowSignModal] = React.useState(false);
   const [selectedDocId, setSelectedDocId] = React.useState<string | null>(null);
@@ -130,7 +130,7 @@ const Documents = () => {
 
     // Persistent update
     legalStore.updateDocument(updated);
-    setDocs(legalStore.getDocuments());
+    setDocs(legalStore.getDocuments().filter(d => d.status !== 'Archivé'));
 
     legalStore.logAction({
       id: `LOG-${Date.now()}`,
@@ -154,14 +154,14 @@ const Documents = () => {
   const handleArchiveDoc = (id: string) => {
     if (!user) return;
     legalStore.archiveDocument(id, user.id);
-    setDocs(legalStore.getDocuments());
+    setDocs(legalStore.getDocuments().filter(d => d.status !== 'Archivé'));
   };
 
   const handleDeleteDoc = (id: string) => {
     if (!user) return;
     if (confirm("Êtes-vous sûr de vouloir supprimer ce document ?")) {
       legalStore.deleteDocument(id, user.id);
-      setDocs(legalStore.getDocuments());
+      setDocs(legalStore.getDocuments().filter(d => d.status !== 'Archivé'));
     }
   };
 

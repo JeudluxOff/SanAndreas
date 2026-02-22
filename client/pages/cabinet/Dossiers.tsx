@@ -78,7 +78,7 @@ const Dossiers = () => {
     confidentiality: 'Normal',
   });
 
-  const [cases, setCases] = React.useState(legalStore.getCases());
+  const [cases, setCases] = React.useState(legalStore.getCases().filter(c => c.status !== 'Archivé'));
   const [clients, setClients] = React.useState(legalStore.getClients());
 
   const handleQuickAddClient = () => {
@@ -158,14 +158,14 @@ const Dossiers = () => {
   const handleArchiveCase = (id: string) => {
     if (!user) return;
     legalStore.archiveCase(id, user.id);
-    setCases(legalStore.getCases());
+    setCases(legalStore.getCases().filter(c => c.status !== 'Archivé'));
   };
 
   const handleDeleteCase = (id: string) => {
     if (!user) return;
     if (confirm("Êtes-vous sûr de vouloir supprimer ce dossier ? Cette action est irréversible.")) {
       legalStore.deleteCase(id, user.id);
-      setCases(legalStore.getCases());
+      setCases(legalStore.getCases().filter(c => c.status !== 'Archivé'));
     }
   };
 
