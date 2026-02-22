@@ -399,6 +399,15 @@ class LegalStoreManager {
     }
   }
 
+  // Messages
+  getMessages(channelId: string) {
+    return this.data.messages.filter(m => m.channel_id === channelId);
+  }
+  createMessage(msg: Message) {
+    this.data.messages.push(msg);
+    this.save();
+  }
+
   // Audit
   logAction(log: AuditLog) {
     this.data.auditLogs.unshift(log);
