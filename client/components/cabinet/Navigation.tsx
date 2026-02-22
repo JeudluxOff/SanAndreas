@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const Navigation = () => {
+export const Navigation = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const location = useLocation();
   const isHome = location.pathname === '/cabinet';
@@ -132,5 +132,3 @@ const Navigation = () => {
     </nav>
   );
 };
-
-export default Navigation;
