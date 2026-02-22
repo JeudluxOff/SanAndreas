@@ -9,25 +9,140 @@
     "audit_retention_days": 365
   },
   "staff": [
-    { "id": "admin_avocat", "name": "Julian Harrington", "role": "Associé", "email": "j.harrington@hc.sa", "status": "Actif", "joined_at": "2020-01-01", "last_active": "2024-05-24T09:42:00Z" },
-    { "id": "avocat_victoria", "name": "Victoria Cole", "role": "Associée", "email": "v.cole@hc.sa", "status": "Actif", "joined_at": "2020-01-01", "last_active": "2024-05-24T09:42:00Z" },
-    { "id": "avocat_marcus", "name": "Marcus Vane", "role": "Avocat Senior", "email": "m.vane@hc.sa", "status": "Actif", "joined_at": "2021-05-15", "last_active": "2024-05-24T09:42:00Z" },
-    { "id": "avocat_elena", "name": "Elena Rossi", "role": "Avocate", "email": "e.rossi@hc.sa", "status": "Actif", "joined_at": "2022-03-10", "last_active": "2024-05-24T09:42:00Z" },
-    { "id": "staff_thomas", "name": "Thomas Miller", "role": "Comptable", "email": "t.miller@hc.sa", "status": "Actif", "joined_at": "2023-01-05", "last_active": "2024-05-24T09:42:00Z" },
-    { "id": "staff_sarah", "name": "Sarah Jenkins", "role": "Secrétaire", "email": "s.jenkins@hc.sa", "status": "Actif", "joined_at": "2022-11-20", "last_active": "2024-05-24T09:42:00Z" },
-    { "id": "staff_lucas", "name": "Lucas Dupont", "role": "Juriste", "email": "l.dupont@hc.sa", "status": "Actif", "joined_at": "2023-06-01", "last_active": "2024-05-24T09:42:00Z" }
+    {
+      "id": "admin_avocat",
+      "name": "Julian Harrington",
+      "role": "Associé",
+      "email": "j.harrington@hc.sa",
+      "status": "Actif",
+      "joined_at": "2020-01-01",
+      "last_active": "2024-05-24T09:42:00Z"
+    },
+    {
+      "id": "avocat_victoria",
+      "name": "Victoria Cole",
+      "role": "Associée",
+      "email": "v.cole@hc.sa",
+      "status": "Actif",
+      "joined_at": "2020-01-01",
+      "last_active": "2024-05-24T09:42:00Z"
+    },
+    {
+      "id": "avocat_marcus",
+      "name": "Marcus Vane",
+      "role": "Avocat Senior",
+      "email": "m.vane@hc.sa",
+      "status": "Actif",
+      "joined_at": "2021-05-15",
+      "last_active": "2024-05-24T09:42:00Z"
+    },
+    {
+      "id": "avocat_elena",
+      "name": "Elena Rossi",
+      "role": "Avocate",
+      "email": "e.rossi@hc.sa",
+      "status": "Actif",
+      "joined_at": "2022-03-10",
+      "last_active": "2024-05-24T09:42:00Z"
+    },
+    {
+      "id": "staff_thomas",
+      "name": "Thomas Miller",
+      "role": "Comptable",
+      "email": "t.miller@hc.sa",
+      "status": "Actif",
+      "joined_at": "2023-01-05",
+      "last_active": "2024-05-24T09:42:00Z"
+    },
+    {
+      "id": "staff_sarah",
+      "name": "Sarah Jenkins",
+      "role": "Secrétaire",
+      "email": "s.jenkins@hc.sa",
+      "status": "Actif",
+      "joined_at": "2022-11-20",
+      "last_active": "2024-05-24T09:42:00Z"
+    },
+    {
+      "id": "staff_lucas",
+      "name": "Lucas Dupont",
+      "role": "Juriste",
+      "email": "l.dupont@hc.sa",
+      "status": "Actif",
+      "joined_at": "2023-06-01",
+      "last_active": "2024-05-24T09:42:00Z"
+    }
   ],
   "clients": [
-    { "id": "cli-001", "name": "Martin Madrazo", "email": "m.madrazo@lafuente.sa", "type": "Individu", "created_at": "2024-01-15" },
-    { "id": "cli-002", "name": "Union Depository", "email": "contact@ud.sa", "type": "Entreprise", "created_at": "2024-02-20" },
-    { "id": "cli-003", "name": "Thornton Duggan", "email": "t.duggan@diamond.sa", "type": "Individu", "created_at": "2024-03-10" },
-    { "id": "cli-004", "name": "Gouvernement SA", "email": "admin@gov.sa", "type": "Entreprise", "created_at": "2024-01-01" },
-    { "id": "cli-005", "name": "Mairie de Los Santos", "email": "mayor@ls.sa", "type": "Entreprise", "created_at": "2024-01-05" },
-    { "id": "cli-006", "name": "Fleeca Bank", "email": "support@fleeca.sa", "type": "Entreprise", "created_at": "2024-04-12" },
-    { "id": "cli-007", "name": "Ammu-Nation", "email": "sales@ammu-nation.sa", "type": "Entreprise", "created_at": "2024-03-25" },
-    { "id": "cli-008", "name": "LS Customs", "email": "hao@lscustoms.sa", "type": "Entreprise", "created_at": "2024-02-28" },
-    { "id": "cli-009", "name": "Benny's Motorworks", "email": "benny@bennys.sa", "type": "Entreprise", "created_at": "2024-04-05" },
-    { "id": "cli-010", "name": "Ballas Gang", "type": "Individu", "created_at": "2024-05-01" }
+    {
+      "id": "cli-001",
+      "name": "Martin Madrazo",
+      "email": "m.madrazo@lafuente.sa",
+      "type": "Individu",
+      "created_at": "2024-01-15"
+    },
+    {
+      "id": "cli-002",
+      "name": "Union Depository",
+      "email": "contact@ud.sa",
+      "type": "Entreprise",
+      "created_at": "2024-02-20"
+    },
+    {
+      "id": "cli-003",
+      "name": "Thornton Duggan",
+      "email": "t.duggan@diamond.sa",
+      "type": "Individu",
+      "created_at": "2024-03-10"
+    },
+    {
+      "id": "cli-004",
+      "name": "Gouvernement SA",
+      "email": "admin@gov.sa",
+      "type": "Entreprise",
+      "created_at": "2024-01-01"
+    },
+    {
+      "id": "cli-005",
+      "name": "Mairie de Los Santos",
+      "email": "mayor@ls.sa",
+      "type": "Entreprise",
+      "created_at": "2024-01-05"
+    },
+    {
+      "id": "cli-006",
+      "name": "Fleeca Bank",
+      "email": "support@fleeca.sa",
+      "type": "Entreprise",
+      "created_at": "2024-04-12"
+    },
+    {
+      "id": "cli-007",
+      "name": "Ammu-Nation",
+      "email": "sales@ammu-nation.sa",
+      "type": "Entreprise",
+      "created_at": "2024-03-25"
+    },
+    {
+      "id": "cli-008",
+      "name": "LS Customs",
+      "email": "hao@lscustoms.sa",
+      "type": "Entreprise",
+      "created_at": "2024-02-28"
+    },
+    {
+      "id": "cli-009",
+      "name": "Benny's Motorworks",
+      "email": "benny@bennys.sa",
+      "type": "Entreprise",
+      "created_at": "2024-04-05"
+    },
+    {
+      "id": "cli-010",
+      "name": "Ballas Gang",
+      "type": "Individu",
+      "created_at": "2024-05-01"
+    }
   ],
   "cases": [
     {
@@ -39,9 +154,24 @@
       "confidentiality": "Confidentiel",
       "lead_id": "avocat_victoria",
       "members": [
-        { "user_id": "avocat_victoria", "name": "Victoria Cole", "role": "Associée", "avatar": "Victoria" },
-        { "user_id": "avocat_marcus", "name": "Marcus Vane", "role": "Avocat Senior", "avatar": "Marcus" },
-        { "user_id": "avocat_elena", "name": "Elena Rossi", "role": "Avocate", "avatar": "Elena" }
+        {
+          "user_id": "avocat_victoria",
+          "name": "Victoria Cole",
+          "role": "Associée",
+          "avatar": "Victoria"
+        },
+        {
+          "user_id": "avocat_marcus",
+          "name": "Marcus Vane",
+          "role": "Avocat Senior",
+          "avatar": "Marcus"
+        },
+        {
+          "user_id": "avocat_elena",
+          "name": "Elena Rossi",
+          "role": "Avocate",
+          "avatar": "Elena"
+        }
       ],
       "created_at": "2024-05-15T09:00:00Z",
       "updated_at": "2024-05-24T09:42:00Z"
@@ -51,8 +181,115 @@
   "evidence": [],
   "tasks": [],
   "hearings": [],
-  "invoices": [],
-  "auditLogs": [],
+  "invoices": [
+    {
+      "id": "INV-2024-3388",
+      "case_id": "HC-2024-001",
+      "client_id": "cli-001",
+      "amount": 50000,
+      "currency": "SA$",
+      "status": "Payé",
+      "due_date": "2026-03-24T02:13:00.680Z",
+      "created_at": "2026-02-22T02:13:00.680Z",
+      "items": [
+        {
+          "description": "Honoraire",
+          "amount": 50000
+        }
+      ]
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "LOG-1771726386924",
+      "timestamp": "2026-02-22T02:13:06.924Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Harrington",
+      "action": "Facture payée",
+      "target_type": "Invoice",
+      "target_id": "INV-2024-3388",
+      "metadata": {
+        "amount": 50000
+      }
+    },
+    {
+      "id": "LOG-1771726356307",
+      "timestamp": "2026-02-22T02:12:36.307Z",
+      "user_id": "admin_avocat",
+      "user_name": "System",
+      "action": "Suppression du document",
+      "target_type": "Document",
+      "target_id": "HC-2024-5802",
+      "metadata": {
+        "title": "aeraezr"
+      }
+    },
+    {
+      "id": "LOG-1771726343478",
+      "timestamp": "2026-02-22T02:12:23.478Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Harrington",
+      "action": "Changement statut document: Signé",
+      "target_type": "Document",
+      "target_id": "HC-2024-5802"
+    },
+    {
+      "id": "LOG-1771726331371",
+      "timestamp": "2026-02-22T02:12:11.371Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Harrington",
+      "action": "Création document",
+      "target_type": "Document",
+      "target_id": "HC-2024-5802",
+      "metadata": {
+        "title": "aeraezr",
+        "case_id": "HC-2024-001"
+      }
+    },
+    {
+      "id": "LOG-1771726320131",
+      "timestamp": "2026-02-22T02:12:00.131Z",
+      "user_id": "admin_avocat",
+      "user_name": "System",
+      "action": "Suppression du document",
+      "target_type": "Document",
+      "target_id": "HC-2024-5302",
+      "metadata": {
+        "title": "zersdrez"
+      }
+    },
+    {
+      "id": "LOG-1771726312115",
+      "timestamp": "2026-02-22T02:11:52.115Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Harrington",
+      "action": "Changement statut document: Signé",
+      "target_type": "Document",
+      "target_id": "HC-2024-5302"
+    },
+    {
+      "id": "LOG-1771726307807",
+      "timestamp": "2026-02-22T02:11:47.807Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Harrington",
+      "action": "Changement statut document: Validé",
+      "target_type": "Document",
+      "target_id": "HC-2024-5302"
+    },
+    {
+      "id": "LOG-1771726300653",
+      "timestamp": "2026-02-22T02:11:40.653Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Harrington",
+      "action": "Création document",
+      "target_type": "Document",
+      "target_id": "HC-2024-5302",
+      "metadata": {
+        "title": "zersdrez",
+        "case_id": "HC-2024-001"
+      }
+    }
+  ],
   "conflictChecks": [],
   "messages": []
 }
