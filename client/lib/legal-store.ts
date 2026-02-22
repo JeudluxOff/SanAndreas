@@ -365,6 +365,35 @@ class LegalStoreManager {
 
   // Hearings
   getHearings() { return this.data.hearings; }
+  createHearing(h: Hearing) {
+    this.data.hearings.unshift(h);
+    this.save();
+  }
+  updateHearing(updated: Hearing) {
+    const idx = this.data.hearings.findIndex(h => h.id === updated.id);
+    if (idx !== -1) {
+      this.data.hearings[idx] = updated;
+      this.save();
+    }
+  }
+  deleteHearing(id: string, userId: string) {
+    const idx = this.data.hearings.findIndex(h => h.id === id);
+    if (idx !== -1) {
+      const h = this.data.hearings[idx];
+      this.data.hearings.splice(idx, 1);
+      this.save();
+      this.logAction({
+        id: `LOG-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user_id: userId,
+        user_name: 'System',
+        action: 'Suppression d\'audience',
+        target_type: 'Hearing',
+        target_id: id,
+        metadata: { title: h.title }
+      });
+    }
+  }
 
   // Invoices
   getInvoices() { return this.data.invoices; }

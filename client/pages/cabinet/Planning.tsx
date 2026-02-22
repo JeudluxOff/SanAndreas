@@ -15,22 +15,66 @@ import {
   Search,
   Zap,
   UserCheck,
-  Lock
+  Lock,
+  Trash2,
+  CalendarDays
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { format, addDays, startOfWeek, addWeeks, subWeeks, isSameDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { legalStore } from '@/lib/legal-store';
 import { Hearing } from '@shared/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Planning = () => {
+  const { user } = useAuth();
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [view, setView] = React.useState<'week' | 'day'>('week');
-  const hearings = legalStore.getHearings();
+  const [hearings, setHearings] = React.useState(legalStore.getHearings());
+
+  // Modals state
+  const [showCreateModal, setShowCreateModal] = React.useState(false);
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+  const [hearingToDelete, setHearingToDelete] = React.useState<string | null>(null);
+
+  // Form state
+  const [newHearing, setNewHearing] = React.useState({
+    title: '',
+    case_id: '',
+    date: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+    location: '',
+    judge: '',
+    type: 'Pénal'
+  });
+
+  const cases = legalStore.getCases();
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -55,17 +99,186 @@ const Planning = () => {
                 onClick={() => setView('week')}
                 className={cn("h-9 px-4 text-[9px] font-black uppercase tracking-widest rounded-lg", view === 'week' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400")}
               >Semaine</Button>
-              <Button 
-                variant={view === 'day' ? 'default' : 'ghost'} 
+              <Button
+                variant={view === 'day' ? 'default' : 'ghost'}
                 onClick={() => setView('day')}
                 className={cn("h-9 px-4 text-[9px] font-black uppercase tracking-widest rounded-lg", view === 'day' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400")}
               >Jour</Button>
             </div>
-            <Button className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
+            <Button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2"
+            >
               <Plus className="w-4 h-4" /> Nouvel Événement
             </Button>
           </div>
         </div>
+
+        {/* Create Hearing Modal */}
+        <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+          <DialogContent className="max-w-xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Planification d'Événement</DialogTitle>
+              <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                Enregistrez une nouvelle audience ou un rendez-vous client important.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 my-6">
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Intitulé de l'Événement</Label>
+                <Input
+                  value={newHearing.title}
+                  onChange={(e) => setNewHearing({...newHearing, title: e.target.value})}
+                  placeholder="EX: AUDIENCE PRÉLIMINAIRE..."
+                  className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 text-left">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dossier Assigné</Label>
+                  <Select value={newHearing.case_id} onValueChange={(val) => setNewHearing({...newHearing, case_id: val})}>
+                    <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
+                      <SelectValue placeholder="Choisir un dossier..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cases.map(c => (
+                        <SelectItem key={c.id} value={c.id}>{c.id} - {c.title}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2 text-left">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Type d'Événement</Label>
+                  <Select value={newHearing.type} onValueChange={(val) => setNewHearing({...newHearing, type: val})}>
+                    <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Pénal">Pénal</SelectItem>
+                      <SelectItem value="Civil">Civil</SelectItem>
+                      <SelectItem value="Affaires">Affaires</SelectItem>
+                      <SelectItem value="Admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 text-left">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date & Heure</Label>
+                  <Input
+                    type="datetime-local"
+                    value={newHearing.date}
+                    onChange={(e) => setNewHearing({...newHearing, date: e.target.value})}
+                    className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold"
+                  />
+                </div>
+                <div className="space-y-2 text-left">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lieu / Tribunal</Label>
+                  <Input
+                    value={newHearing.location}
+                    onChange={(e) => setNewHearing({...newHearing, location: e.target.value})}
+                    placeholder="EX: COUR SUPÉRIEURE..."
+                    className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Juge en charge</Label>
+                <Input
+                  value={newHearing.judge}
+                  onChange={(e) => setNewHearing({...newHearing, judge: e.target.value})}
+                  placeholder="EX: HON. J. MILLER..."
+                  className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="ghost"
+                onClick={() => setShowCreateModal(false)}
+                className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!user || !newHearing.title || !newHearing.case_id) return;
+                  const h: Hearing = {
+                    id: `HR-${Date.now()}`,
+                    ...newHearing,
+                    status: 'Confirmé'
+                  };
+                  legalStore.createHearing(h);
+
+                  legalStore.logAction({
+                    id: `LOG-${Date.now()}`,
+                    timestamp: new Date().toISOString(),
+                    user_id: user.id,
+                    user_name: user.name,
+                    action: 'Planification Audience',
+                    target_type: 'Hearing',
+                    target_id: h.id,
+                    metadata: { title: h.title, case_id: h.case_id }
+                  });
+
+                  setHearings(legalStore.getHearings());
+                  setShowCreateModal(false);
+                  setNewHearing({
+                    title: '',
+                    case_id: '',
+                    date: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+                    location: '',
+                    judge: '',
+                    type: 'Pénal'
+                  });
+                }}
+                disabled={!newHearing.title || !newHearing.case_id}
+                className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl"
+              >
+                Enregistrer au Planning
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Hearing Confirmation Modal */}
+        <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+          <DialogContent className="max-w-md bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Annuler l'Événement</DialogTitle>
+              <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                Êtes-vous sûr de vouloir supprimer cette audience du planning ?
+              </DialogDescription>
+            </DialogHeader>
+
+            <DialogFooter className="flex-col gap-3 mt-6">
+              <Button
+                onClick={() => {
+                  if (!user || !hearingToDelete) return;
+                  legalStore.deleteHearing(hearingToDelete, user.id);
+                  setHearings(legalStore.getHearings());
+                  setShowDeleteModal(false);
+                  setHearingToDelete(null);
+                }}
+                className="w-full bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest h-12 rounded-xl"
+              >
+                Confirmer l'Annulation
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowDeleteModal(false)}
+                className="w-full text-[10px] font-black text-slate-400 uppercase tracking-widest"
+              >
+                Retour
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Main Calendar View */}
@@ -126,13 +339,13 @@ const Planning = () => {
                             <p className="text-[9px] font-bold text-slate-400 uppercase">{event.type}</p>
                           </div>
                           <div className={cn(
-                            "flex-grow p-6 rounded-[24px] border transition-all duration-500 cursor-pointer hover:shadow-xl hover:-translate-y-1",
+                            "flex-grow p-6 rounded-[24px] border transition-all duration-500 cursor-pointer hover:shadow-xl hover:-translate-y-1 relative group-item",
                             event.type === 'Pénal' ? "bg-red-50/50 border-red-100" : "bg-white shadow-md border-slate-50"
                           )}>
                             <div className="flex justify-between items-start">
                               <div className="space-y-2">
                                 <div className="flex items-center gap-3">
-                                  <Badge className={cn("text-[8px] font-black uppercase px-2 py-0 border-none", 
+                                  <Badge className={cn("text-[8px] font-black uppercase px-2 py-0 border-none",
                                     event.type === 'Pénal' ? "bg-red-600 text-white" : "bg-[#c1a461] text-white"
                                   )}>
                                     {event.type}
@@ -145,10 +358,30 @@ const Planning = () => {
                                   <span className="flex items-center gap-1"><Gavel className="w-3 h-3 text-[#c1a461]" /> {event.judge}</span>
                                 </div>
                               </div>
-                              <Avatar className="h-10 w-10 ring-4 ring-white shadow-lg">
-                                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${event.id}`} />
-                                <AvatarFallback>H</AvatarFallback>
-                              </Avatar>
+                              <div className="flex items-center gap-4">
+                                <Avatar className="h-10 w-10 ring-4 ring-white shadow-lg">
+                                  <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${event.id}`} />
+                                  <AvatarFallback>H</AvatarFallback>
+                                </Avatar>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                                      <MoreVertical className="w-4 h-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="bg-white border-slate-100 rounded-xl shadow-xl p-2 min-w-[150px]">
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setHearingToDelete(event.id);
+                                        setShowDeleteModal(true);
+                                      }}
+                                      className="text-[10px] font-black uppercase tracking-widest text-red-600 hover:text-red-700 p-3 rounded-lg cursor-pointer flex gap-3"
+                                    >
+                                      <Trash2 className="w-4 h-4" /> Annuler l'Audience
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -175,10 +408,15 @@ const Planning = () => {
               </CardHeader>
               <CardContent className="p-0 space-y-6">
                 <div className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-2">
-                  <p className="text-[10px] font-black text-[#c1a461] uppercase tracking-widest">Prochaine Audience</p>
-                  <p className="text-xs font-bold text-white uppercase tracking-tight">
+                  <p className="text-[10px] font-black text-[#c1a461] uppercase tracking-widest text-left">Prochaine Audience</p>
+                  <p className="text-xs font-bold text-white uppercase tracking-tight text-left">
                     {hearings.length > 0 ? hearings[0].title : 'Aucune audience'}
                   </p>
+                  {hearings.length > 0 && (
+                    <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest text-left">
+                      {format(new Date(hearings[0].date), 'dd MMMM HH:mm', { locale: fr })}
+                    </p>
+                  )}
                 </div>
                 <Button className="w-full bg-[#c1a461] hover:bg-[#927843] text-white text-[10px] font-black uppercase h-12 rounded-xl mt-4">
                   Gérer les Notifications
