@@ -380,6 +380,25 @@ class LegalStoreManager {
     }
   }
 
+  deleteInvoice(id: string, userId: string, reason: string) {
+    const idx = this.data.invoices.findIndex(i => i.id === id);
+    if (idx !== -1) {
+      const inv = this.data.invoices[idx];
+      this.data.invoices.splice(idx, 1);
+      this.save();
+      this.logAction({
+        id: `LOG-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user_id: userId,
+        user_name: 'System', // Will be enriched by page
+        action: 'Suppression de facture',
+        target_type: 'Invoice',
+        target_id: id,
+        metadata: { amount: inv.amount, reason }
+      });
+    }
+  }
+
   // Audit
   logAction(log: AuditLog) {
     this.data.auditLogs.unshift(log);

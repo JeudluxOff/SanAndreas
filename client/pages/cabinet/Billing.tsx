@@ -12,7 +12,8 @@ import {
   TrendingUp,
   Zap,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -47,6 +48,9 @@ const Billing = () => {
   const [invoices, setInvoices] = React.useState(legalStore.getInvoices());
   const [searchQuery, setSearchQuery] = React.useState('');
   const [showCreateModal, setShowCreateModal] = React.useState(false);
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+  const [invoiceToDelete, setInvoiceToDelete] = React.useState<string | null>(null);
+  const [deleteReason, setDeleteReason] = React.useState('');
   const [newInvoice, setNewInvoice] = React.useState({
     case_id: '',
     amount: '',
@@ -152,6 +156,29 @@ const Billing = () => {
 
       setInvoices([...legalStore.getInvoices()]);
     }
+  };
+
+  const handleDeleteInvoice = () => {
+    if (!user || !invoiceToDelete || !deleteReason.trim()) return;
+
+    legalStore.deleteInvoice(invoiceToDelete, user.id, deleteReason.trim());
+
+    // Custom log since deleteInvoice in store uses 'System' as default user_name
+    legalStore.logAction({
+      id: `LOG-${Date.now()}-DEL`,
+      timestamp: new Date().toISOString(),
+      user_id: user.id,
+      user_name: user.name,
+      action: 'Suppression Facture (avec motif)',
+      target_type: 'Invoice',
+      target_id: invoiceToDelete,
+      metadata: { reason: deleteReason.trim() }
+    });
+
+    setInvoices(legalStore.getInvoices());
+    setShowDeleteModal(false);
+    setInvoiceToDelete(null);
+    setDeleteReason('');
   };
 
   const filteredInvoices = invoices.filter(inv => {
@@ -386,6 +413,19 @@ const Billing = () => {
                           <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
                             <MoreVertical className="w-5 h-5" />
                           </Button>
+                          <Button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setInvoiceToDelete(item.id);
+                              setShowDeleteModal(true);
+                            }}
+                            variant="ghost"
+                            size="icon"
+                            className="text-slate-300 hover:text-red-600"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -395,6 +435,45 @@ const Billing = () => {
             </table>
           </CardContent>
         </Card>
+
+        {/* Delete Confirmation Modal */}
+        <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+          <DialogContent className="max-w-md bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Supprimer la Facture</DialogTitle>
+              <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                Cette action est irréversible. Un motif de suppression est requis.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 my-6 text-left">
+              <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Motif de suppression</Label>
+              <Input
+                value={deleteReason}
+                onChange={(e) => setDeleteReason(e.target.value)}
+                placeholder="EX: ERREUR DE MONTANT, ANNULATION CLIENT..."
+                className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
+              />
+            </div>
+
+            <DialogFooter className="flex-col gap-3">
+              <Button
+                onClick={handleDeleteInvoice}
+                disabled={!deleteReason.trim()}
+                className="w-full bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest h-12 rounded-xl"
+              >
+                Confirmer la Suppression
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowDeleteModal(false)}
+                className="w-full text-[10px] font-black text-slate-400 uppercase tracking-widest"
+              >
+                Annuler
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
   );
 };
