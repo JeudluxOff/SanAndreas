@@ -23,6 +23,14 @@ export interface CaseMember {
   avatar?: string;
 }
 
+export interface InternalNote {
+  id: string;
+  author_id: string;
+  author_name: string;
+  content: string;
+  timestamp: string;
+}
+
 export interface Case {
   id: string;
   title: string;
@@ -35,6 +43,7 @@ export interface Case {
   members: CaseMember[];
   progression?: number;
   step_description?: string;
+  internal_notes?: InternalNote[];
   created_at: string;
   updated_at: string;
   sealed_at?: string;

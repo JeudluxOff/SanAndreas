@@ -56,7 +56,7 @@ import {
 import { cn } from '@/lib/utils';
 import { legalStore } from '@/lib/legal-store';
 import { useAuth } from '@/contexts/AuthContext';
-import { Case, LegalDocument, Evidence, Task, Hearing, DocumentCategory, ConfidentialityLevel, CaseStatus } from '@shared/api';
+import { Case, LegalDocument, Evidence, Task, Hearing, DocumentCategory, ConfidentialityLevel, CaseStatus, InternalNote } from '@shared/api';
 
 const DossierDetail = () => {
   const { id } = useParams();
@@ -89,6 +89,8 @@ const DossierDetail = () => {
   const [progression, setProgression] = React.useState(dossier?.progression || 0);
   const [stepDescription, setStepDescription] = React.useState(dossier?.step_description || '');
   const [newMember, setNewMember] = React.useState({ user_id: '', name: '', role: '' });
+  const [internalNotes, setInternalNotes] = React.useState<InternalNote[]>(dossier?.internal_notes || []);
+  const [newNote, setNewNote] = React.useState('');
 
   const staff = legalStore.getStaff();
 
@@ -101,6 +103,7 @@ const DossierDetail = () => {
     if (updates.progression !== undefined) setProgression(updates.progression);
     if (updates.step_description !== undefined) setStepDescription(updates.step_description);
     if (updates.members) setMembers(updates.members);
+    if (updates.internal_notes) setInternalNotes(updates.internal_notes);
 
     legalStore.logAction({
       id: `LOG-${Date.now()}`,
@@ -138,6 +141,20 @@ const DossierDetail = () => {
     if (!dossier || dossier.lead_id === userId) return; // Can't remove lead
     const updatedMembers = dossier.members.filter(m => m.user_id !== userId);
     handleUpdateCase({ members: updatedMembers });
+  };
+
+  const handleAddNote = () => {
+    if (!user || !dossier || !newNote.trim()) return;
+    const note: InternalNote = {
+      id: `NOTE-${Date.now()}`,
+      author_id: user.id,
+      author_name: user.name,
+      content: newNote.trim(),
+      timestamp: new Date().toISOString()
+    };
+    const updatedNotes = [...internalNotes, note];
+    handleUpdateCase({ internal_notes: updatedNotes });
+    setNewNote('');
   };
 
   const handleCreateDoc = () => {
@@ -776,12 +793,33 @@ const DossierDetail = () => {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="p-8 space-y-6 max-h-[300px] overflow-y-auto">
-                   <p className="text-[9px] font-bold text-white/30 uppercase text-center py-4">Fin de la conversation</p>
+                   {internalNotes.length > 0 ? internalNotes.map((note, idx) => (
+                      <div key={idx} className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[9px] font-black text-[#c1a461] uppercase tracking-widest">{note.author_name}</span>
+                          <span className="text-[8px] font-bold text-white/20 uppercase">{new Date(note.timestamp).toLocaleDateString()}</span>
+                        </div>
+                        <p className="text-xs font-medium text-white/80 leading-relaxed text-left">{note.content}</p>
+                      </div>
+                   )) : (
+                      <p className="text-[9px] font-bold text-white/30 uppercase text-center py-4">Aucune note interne</p>
+                   )}
+                   <p className="text-[9px] font-bold text-white/10 uppercase text-center py-4 border-t border-white/5">Fin de la conversation</p>
                 </div>
                 <div className="p-6 bg-black/20 border-t border-white/5">
                   <div className="relative group">
-                    <input type="text" placeholder="NOTER..." className="w-full h-12 bg-white/5 border-none rounded-xl pl-6 pr-12 text-[10px] font-bold text-white uppercase placeholder:text-white/20 focus:ring-1 ring-[#c1a461]/50 transition-all" />
-                    <Send className="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#c1a461] cursor-pointer" />
+                    <input
+                      type="text"
+                      placeholder="NOTER..."
+                      value={newNote}
+                      onChange={(e) => setNewNote(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddNote()}
+                      className="w-full h-12 bg-white/5 border-none rounded-xl pl-6 pr-12 text-[10px] font-bold text-white uppercase placeholder:text-white/20 focus:ring-1 ring-[#c1a461]/50 transition-all"
+                    />
+                    <Send
+                      className="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#c1a461] cursor-pointer hover:text-white transition-colors"
+                      onClick={handleAddNote}
+                    />
                   </div>
                 </div>
               </CardContent>
