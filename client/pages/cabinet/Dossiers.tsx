@@ -43,12 +43,16 @@ const Dossiers = () => {
   const [showConflictModal, setShowConflictModal] = React.useState(false);
   const [showCreateModal, setShowCreateModal] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [conflictSearchQuery, setConflictSearchQuery] = React.useState('');
   const [conflictResult, setConflictResult] = React.useState<'none' | 'conflict' | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
 
   // Handle "action=new" from Header
   React.useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('action') === 'new') {
+      // Clear action=new from URL to allow re-triggering from header if needed
+      window.history.replaceState({}, '', location.pathname);
       setShowConflictModal(true);
     }
   }, [location]);
@@ -66,9 +70,9 @@ const Dossiers = () => {
 
   const handleConflictCheck = () => {
     if (!user) return;
-    const check = legalStore.performConflictCheck(searchQuery, user.id);
+    const check = legalStore.performConflictCheck(conflictSearchQuery, user.id);
     setConflictResult(check.result === 'Pass' ? 'none' : 'conflict');
-    
+
     legalStore.logAction({
       id: `LOG-${Date.now()}`,
       timestamp: new Date().toISOString(),
@@ -77,12 +81,17 @@ const Dossiers = () => {
       action: 'Vérification conflit intérêts',
       target_type: 'ConflictCheck',
       target_id: check.id,
-      metadata: { query: searchQuery, result: check.result }
+      metadata: { query: conflictSearchQuery, result: check.result }
     });
   };
 
   const handleCreateCase = () => {
-    if (!user || !newCase.title || !newCase.client_id) return;
+    if (!user) return;
+
+    if (!newCase.title || !newCase.client_id) {
+      setError("Veuillez remplir l'intitulé et sélectionner un client.");
+      return;
+    }
 
     const caseToCreate: Case = {
       id: `HC-2024-${String(cases.length + 1).padStart(3, '0')}`,
@@ -102,7 +111,8 @@ const Dossiers = () => {
     setShowCreateModal(false);
     setShowConflictModal(false);
     setConflictResult(null);
-    setSearchQuery('');
+    setConflictSearchQuery('');
+    setError(null);
     setNewCase({ title: '', client_id: '', type: 'Pénal', confidentiality: 'Normal' });
 
     legalStore.logAction({
@@ -192,8 +202,8 @@ const Dossiers = () => {
                 <div className="relative group">
                   <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-[#c1a461] transition-colors" />
                   <Input
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    value={conflictSearchQuery}
+                    onChange={(e) => setConflictSearchQuery(e.target.value)}
                     placeholder="EX: MARTIN MADRAZO..."
                     className="h-14 bg-slate-50 border-none rounded-2xl pl-12 text-sm font-bold uppercase tracking-widest focus:ring-2 ring-[#c1a461]/20 transition-all"
                   />
@@ -209,8 +219,11 @@ const Dossiers = () => {
                       <p className="text-[10px] font-bold text-emerald-700/60 uppercase tracking-widest mt-1">L'entité n'est pas présente dans nos dossiers actuels. Vous pouvez procéder à la création du dossier.</p>
                     </div>
                   </div>
-                  <Button 
-                    onClick={() => setShowCreateModal(true)}
+                  <Button
+                    onClick={() => {
+                      setShowConflictModal(false);
+                      setShowCreateModal(true);
+                    }}
                     className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest h-12 rounded-xl shadow-lg"
                   >
                     Procéder à la Création
@@ -237,7 +250,7 @@ const Dossiers = () => {
                 onClick={() => {
                   setShowConflictModal(false);
                   setConflictResult(null);
-                  setSearchQuery('');
+                  setConflictSearchQuery('');
                 }}
                 className="text-[10px] font-black text-slate-400 uppercase tracking-widest h-12"
               >
@@ -264,6 +277,11 @@ const Dossiers = () => {
             </DialogHeader>
 
             <div className="space-y-6 my-8">
+              {error && (
+                <div className="p-4 bg-red-50 text-red-600 rounded-xl text-xs font-bold uppercase tracking-widest animate-in fade-in slide-in-from-top duration-300">
+                  {error}
+                </div>
+              )}
               <div className="space-y-3">
                 <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Intitulé du Dossier</Label>
                 <Input
@@ -409,14 +427,20 @@ const Dossiers = () => {
             </table>
             
             {filteredCases.length === 0 && (
-              <div className="p-20 text-center space-y-4">
+              <div className="p-20 text-center space-y-6">
                 <div className="p-6 bg-slate-50 rounded-full w-20 h-20 mx-auto flex items-center justify-center text-slate-200">
                   <FolderOpen className="w-10 h-10" />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Aucun dossier trouvé</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Affinez votre recherche ou vérifiez les filtres.</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Affinez votre recherche ou commencez une nouvelle affaire.</p>
                 </div>
+                <Button
+                  onClick={() => setShowConflictModal(true)}
+                  className="bg-[#c1a461] hover:bg-[#927843] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl shadow-xl shadow-[#c1a461]/10"
+                >
+                  <Plus className="w-4 h-4 mr-2" /> Ouvrir un Dossier
+                </Button>
               </div>
             )}
           </CardContent>
