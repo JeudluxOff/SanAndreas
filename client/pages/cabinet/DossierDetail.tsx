@@ -56,7 +56,7 @@ import {
 import { cn } from '@/lib/utils';
 import { legalStore } from '@/lib/legal-store';
 import { useAuth } from '@/contexts/AuthContext';
-import { Case, LegalDocument, Evidence, Task, Hearing, DocumentCategory, ConfidentialityLevel } from '@shared/api';
+import { Case, LegalDocument, Evidence, Task, Hearing, DocumentCategory, ConfidentialityLevel, CaseStatus } from '@shared/api';
 
 const DossierDetail = () => {
   const { id } = useParams();
@@ -69,6 +69,7 @@ const DossierDetail = () => {
   const [docs, setDocs] = React.useState(legalStore.getDocuments(id).filter(d => d.status !== 'Archivé'));
   const [evidences, setEvidences] = React.useState(legalStore.getEvidence(id || ''));
   const [tasks, setTasks] = React.useState(legalStore.getTasks(id));
+  const [members, setMembers] = React.useState(dossier?.members || []);
   const hearings = legalStore.getHearings().filter(h => h.case_id === id);
   const client = dossier ? legalStore.getClient(dossier.client_id) : null;
   const auditLogs = legalStore.getAuditLogs().filter(log => log.target_id === id);
@@ -77,11 +78,67 @@ const DossierDetail = () => {
   const [showDocModal, setShowDocModal] = React.useState(false);
   const [showEviModal, setShowEviModal] = React.useState(false);
   const [showTaskModal, setShowTaskModal] = React.useState(false);
+  const [showStatusModal, setShowStatusModal] = React.useState(false);
+  const [showProgressionModal, setShowProgressionModal] = React.useState(false);
+  const [showMemberModal, setShowMemberModal] = React.useState(false);
 
   // Form states
   const [newDoc, setNewDoc] = React.useState({ title: '', category: 'Conclusions' as DocumentCategory });
   const [newEvi, setNewEvi] = React.useState({ name: '', type: 'Document', confidentiality: 'Normal' as ConfidentialityLevel });
   const [newTask, setNewTask] = React.useState({ title: '', priority: 'Moyenne' as any });
+  const [progression, setProgression] = React.useState(dossier?.progression || 0);
+  const [stepDescription, setStepDescription] = React.useState(dossier?.step_description || '');
+  const [newMember, setNewMember] = React.useState({ user_id: '', name: '', role: '' });
+
+  const staff = legalStore.getStaff();
+
+  const handleUpdateCase = (updates: Partial<Case>) => {
+    if (!dossier || !user) return;
+    const updatedCase = { ...dossier, ...updates, updated_at: new Date().toISOString() };
+    legalStore.updateCase(updatedCase);
+    // Refresh local state if needed (not all fields have local state)
+    if (updates.status) setLocalStatus(updates.status);
+    if (updates.progression !== undefined) setProgression(updates.progression);
+    if (updates.step_description !== undefined) setStepDescription(updates.step_description);
+    if (updates.members) setMembers(updates.members);
+
+    legalStore.logAction({
+      id: `LOG-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      user_id: user.id,
+      user_name: user.name,
+      action: 'Mise à jour dossier',
+      target_type: 'Case',
+      target_id: dossier.id,
+      metadata: updates
+    });
+  };
+
+  const handleAddMember = () => {
+    if (!dossier || !newMember.user_id) return;
+    const memberExists = members.some(m => m.user_id === newMember.user_id);
+    if (memberExists) return;
+
+    const selectedStaff = staff.find(s => s.id === newMember.user_id);
+    if (!selectedStaff) return;
+
+    const updatedMembers = [...members, {
+      user_id: selectedStaff.id,
+      name: selectedStaff.name,
+      role: selectedStaff.role,
+      avatar: selectedStaff.avatar || selectedStaff.id
+    }];
+
+    handleUpdateCase({ members: updatedMembers });
+    setShowMemberModal(false);
+    setNewMember({ user_id: '', name: '', role: '' });
+  };
+
+  const handleRemoveMember = (userId: string) => {
+    if (!dossier || dossier.lead_id === userId) return; // Can't remove lead
+    const updatedMembers = dossier.members.filter(m => m.user_id !== userId);
+    handleUpdateCase({ members: updatedMembers });
+  };
 
   const handleCreateDoc = () => {
     if (!user || !id || !newDoc.title) return;
@@ -345,7 +402,10 @@ const DossierDetail = () => {
               <>
                 {/* Status & Summary */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <Card className="bg-white border-none shadow-md p-6 rounded-[32px]">
+                  <Card
+                    className="bg-white border-none shadow-md p-6 rounded-[32px] cursor-pointer hover:ring-2 ring-[#c1a461]/20 transition-all"
+                    onClick={() => setShowStatusModal(true)}
+                  >
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Statut Actuel</p>
                     <div className="flex items-center gap-3">
                       <div className={cn("w-2 h-2 rounded-full animate-pulse",
@@ -359,15 +419,18 @@ const DossierDetail = () => {
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Pôle Juridique</p>
                     <p className="text-xl font-black text-slate-900 uppercase tracking-tight">{dossier.type}</p>
                   </Card>
-                  <Card className="bg-[#0a0f18] text-white border-none shadow-xl p-6 rounded-[32px]">
+                  <Card
+                    className="bg-[#0a0f18] text-white border-none shadow-xl p-6 rounded-[32px] cursor-pointer hover:ring-2 ring-[#c1a461]/50 transition-all"
+                    onClick={() => setShowProgressionModal(true)}
+                  >
                     <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2 text-center">Progression</p>
                     <div className="space-y-3">
                        <div className="flex justify-between items-end">
-                         <span className="text-[9px] font-bold text-[#c1a461] uppercase tracking-widest">Étape 3/4</span>
-                         <span className="text-lg font-black tracking-tight">85%</span>
+                         <span className="text-[9px] font-bold text-[#c1a461] uppercase tracking-widest">{stepDescription || 'En cours'}</span>
+                         <span className="text-lg font-black tracking-tight">{progression}%</span>
                        </div>
                        <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                         <div className="h-full bg-[#c1a461]" style={{ width: '85%' }} />
+                         <div className="h-full bg-[#c1a461] transition-all duration-500" style={{ width: `${progression}%` }} />
                        </div>
                     </div>
                   </Card>
@@ -646,11 +709,14 @@ const DossierDetail = () => {
                 <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
                   <Users className="w-4 h-4 text-[#c1a461]" /> Équipe Assignée
                 </CardTitle>
-                <UserPlus className="w-4 h-4 text-slate-300 hover:text-[#c1a461] cursor-pointer transition-colors" />
+                <UserPlus
+                  className="w-4 h-4 text-slate-300 hover:text-[#c1a461] cursor-pointer transition-colors"
+                  onClick={() => setShowMemberModal(true)}
+                />
               </CardHeader>
               <CardContent className="p-8 space-y-6">
-                {dossier.members.map((member, idx) => (
-                  <div key={idx} className="flex items-center gap-4">
+                {members.map((member, idx) => (
+                  <div key={idx} className="flex items-center gap-4 group">
                     <Avatar className="h-10 w-10 ring-2 ring-slate-100">
                       <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.avatar || member.user_id}`} />
                       <AvatarFallback>{member.name[0]}</AvatarFallback>
@@ -659,7 +725,18 @@ const DossierDetail = () => {
                       <p className="text-xs font-black text-slate-900 uppercase tracking-tight">{member.name}</p>
                       <p className="text-[9px] font-bold text-[#c1a461] uppercase tracking-widest">{member.role}</p>
                     </div>
-                    {member.user_id === dossier.lead_id && <Badge className="bg-amber-100 text-amber-700 text-[8px] font-black uppercase px-2 py-0 border-none">LEAD</Badge>}
+                    {member.user_id === dossier.lead_id ? (
+                      <Badge className="bg-amber-100 text-amber-700 text-[8px] font-black uppercase px-2 py-0 border-none">LEAD</Badge>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-slate-300 hover:text-red-600"
+                        onClick={() => handleRemoveMember(member.user_id)}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    )}
                   </div>
                 ))}
                 <Button variant="outline" className="w-full mt-4 border-2 border-slate-900 text-slate-900 font-black uppercase text-[10px] tracking-widest h-12 rounded-xl">
@@ -806,6 +883,107 @@ const DossierDetail = () => {
             </div>
             <DialogFooter>
               <Button onClick={handleCreateTask} className="bg-[#0a0f18] text-white text-[10px] font-black uppercase h-12 px-8 rounded-xl">Créer Tâche</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Status Edit Modal */}
+        <Dialog open={showStatusModal} onOpenChange={setShowStatusModal}>
+          <DialogContent className="max-w-md bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Modifier le Statut</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 my-6">
+              <Select value={localStatus} onValueChange={(val) => handleUpdateCase({ status: val as CaseStatus })}>
+                <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Ouvert">Ouvert</SelectItem>
+                  <SelectItem value="En cours">En cours</SelectItem>
+                  <SelectItem value="En attente">En attente</SelectItem>
+                  <SelectItem value="Clos">Clos</SelectItem>
+                  <SelectItem value="Archivé">Archivé</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setShowStatusModal(false)} className="bg-[#0a0f18] text-white text-[10px] font-black uppercase h-12 px-8 rounded-xl w-full">Terminer</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Progression Edit Modal */}
+        <Dialog open={showProgressionModal} onOpenChange={setShowProgressionModal}>
+          <DialogContent className="max-w-md bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Modifier la Progression</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 my-6">
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pourcentage ({progression}%)</Label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={progression}
+                  onChange={(e) => setProgression(parseInt(e.target.value))}
+                  className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#c1a461]"
+                />
+              </div>
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Libellé de l'étape</Label>
+                <Input
+                  value={stepDescription}
+                  onChange={(e) => setStepDescription(e.target.value)}
+                  placeholder="EX: ÉTAPE 3/4..."
+                  className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                onClick={() => {
+                  handleUpdateCase({ progression, step_description: stepDescription });
+                  setShowProgressionModal(false);
+                }}
+                className="bg-[#c1a461] text-white text-[10px] font-black uppercase h-12 px-8 rounded-xl w-full shadow-xl shadow-[#c1a461]/20"
+              >
+                Mettre à jour
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Member Management Modal */}
+        <Dialog open={showMemberModal} onOpenChange={setShowMemberModal}>
+          <DialogContent className="max-w-md bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Ajouter un Membre</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 my-6">
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Collaborateur</Label>
+                <Select value={newMember.user_id} onValueChange={(val) => setNewMember({ ...newMember, user_id: val })}>
+                  <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
+                    <SelectValue placeholder="Choisir un collaborateur..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {staff.filter(s => !members.some(m => m.user_id === s.id)).map(s => (
+                      <SelectItem key={s.id} value={s.id}>{s.name} — {s.role}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                onClick={handleAddMember}
+                disabled={!newMember.user_id}
+                className="bg-[#0a0f18] text-white text-[10px] font-black uppercase h-12 px-8 rounded-xl w-full"
+              >
+                Ajouter à l'Équipe
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

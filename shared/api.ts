@@ -33,6 +33,8 @@ export interface Case {
   description?: string;
   lead_id: string;
   members: CaseMember[];
+  progression?: number;
+  step_description?: string;
   created_at: string;
   updated_at: string;
   sealed_at?: string;
