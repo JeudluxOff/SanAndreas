@@ -569,7 +569,7 @@ const DossierDetail = () => {
                       </div>
                     </Card>
                   ))}
-                  {evidence.length === 0 && (
+                  {evidences.length === 0 && (
                      <div className="col-span-2 p-10 text-center border-2 border-dashed border-slate-100 rounded-[32px]">
                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Aucune preuve enregistrée</p>
                      </div>
