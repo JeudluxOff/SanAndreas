@@ -19,7 +19,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import LegalIntranetLayout from './intranet/LegalIntranetLayout';
 import { legalStore } from '@/lib/legal-store';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
@@ -40,9 +39,8 @@ const Dashboard = () => {
   const totalBilling = invoices.reduce((acc, inv) => acc + inv.amount, 0);
 
   return (
-    <LegalIntranetLayout>
-      <div className="p-10 space-y-10">
-        {/* Urgent Alerts Bar */}
+    <div className="p-10 space-y-10">
+      {/* Urgent Alerts Bar */}
         <div className="flex gap-4 animate-in slide-in-from-top duration-700">
           <div className="bg-red-50 border border-red-100 rounded-2xl px-6 py-3 flex items-center gap-4 flex-grow shadow-sm">
             <AlertTriangle className="w-5 h-5 text-red-600 animate-pulse" />
@@ -278,8 +276,7 @@ const Dashboard = () => {
             </Card>
           </div>
         </div>
-      </div>
-    </LegalIntranetLayout>
+    </div>
   );
 };
 

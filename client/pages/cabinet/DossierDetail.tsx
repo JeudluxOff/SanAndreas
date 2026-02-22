@@ -29,7 +29,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import LegalIntranetLayout from './intranet/LegalIntranetLayout';
 import { legalStore } from '@/lib/legal-store';
 import { useAuth } from '@/contexts/AuthContext';
 import { Case, LegalDocument, Evidence, Task, Hearing } from '@shared/api';
@@ -73,19 +72,16 @@ const DossierDetail = () => {
   }, [dossier, user, navigate]);
 
   if (!dossier) return (
-    <LegalIntranetLayout>
-      <div className="p-20 text-center">
-        <h2 className="text-2xl font-black uppercase tracking-widest text-slate-400">Dossier non trouvé</h2>
-        <Link to="/cabinet/intranet/dossiers">
-          <Button variant="link" className="text-[#c1a461] uppercase mt-4">Retour aux dossiers</Button>
-        </Link>
-      </div>
-    </LegalIntranetLayout>
+    <div className="p-20 text-center">
+      <h2 className="text-2xl font-black uppercase tracking-widest text-slate-400">Dossier non trouvé</h2>
+      <Link to="/cabinet/intranet/dossiers">
+        <Button variant="link" className="text-[#c1a461] uppercase mt-4">Retour aux dossiers</Button>
+      </Link>
+    </div>
   );
 
   return (
-    <LegalIntranetLayout>
-      <div className="p-10 space-y-8">
+    <div className="p-10 space-y-8">
         {/* Header Navigation */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
@@ -448,7 +444,6 @@ const DossierDetail = () => {
           </div>
         </div>
       </div>
-    </LegalIntranetLayout>
   );
 };
 

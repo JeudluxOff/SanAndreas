@@ -30,7 +30,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import LegalIntranetLayout, { useLegalRBAC } from './intranet/LegalIntranetLayout';
+import { useLegalRBAC } from './intranet/LegalIntranetLayout';
 import { Link } from 'react-router-dom';
 import { legalStore } from '@/lib/legal-store';
 import { useAuth } from '@/contexts/AuthContext';
@@ -112,9 +112,8 @@ const Dossiers = () => {
   );
 
   return (
-    <LegalIntranetLayout>
-      <div className="p-10 space-y-10">
-        <div className="flex justify-between items-end">
+    <div className="p-10 space-y-10">
+      <div className="flex justify-between items-end">
           <div className="space-y-1">
             <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Gestion des Dossiers</h2>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -397,8 +396,7 @@ const Dossiers = () => {
             )}
           </CardContent>
         </Card>
-      </div>
-    </LegalIntranetLayout>
+    </div>
   );
 };
 

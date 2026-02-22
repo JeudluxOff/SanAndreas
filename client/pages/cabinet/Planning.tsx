@@ -22,7 +22,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import LegalIntranetLayout from './intranet/LegalIntranetLayout';
 import { format, addDays, startOfWeek, addWeeks, subWeeks, isSameDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { legalStore } from '@/lib/legal-store';
@@ -41,8 +40,7 @@ const Planning = () => {
   };
 
   return (
-    <LegalIntranetLayout>
-      <div className="p-10 space-y-10">
+    <div className="p-10 space-y-10">
         <div className="flex justify-between items-end">
           <div className="space-y-1 text-left">
             <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Planning & Audiences</h2>
@@ -218,7 +216,6 @@ const Planning = () => {
           </div>
         </div>
       </div>
-    </LegalIntranetLayout>
   );
 };
 

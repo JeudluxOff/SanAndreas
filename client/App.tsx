@@ -35,6 +35,7 @@ import Calendar from "./pages/intranet/Calendar";
 import HR from "./pages/intranet/HR";
 import AuditLogs from "./pages/intranet/AuditLogs";
 import Communication from "./pages/intranet/Communication";
+import LegalIntranetLayout from "./pages/cabinet/intranet/LegalIntranetLayout";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -69,22 +70,24 @@ const AppRoutes = () => (
     } />
     <Route path="/cabinet/intranet/*" element={
       <PermissionRoute permission="lawyer:intranet_access">
-        <Routes>
-          <Route path="/" element={<LegalDashboard />} />
-          <Route path="/dossiers" element={<LegalDossiers />} />
-          <Route path="/dossiers/:id" element={<LegalDossierDetail />} />
-          <Route path="/documents" element={<LegalDocuments />} />
-          <Route path="/evidence" element={<LegalEvidence />} />
-          <Route path="/planning" element={<LegalPlanning />} />
-          <Route path="/billing" element={<LegalBilling />} />
-          <Route path="/communication" element={<LegalCommunication />} />
-          <Route path="/clients" element={<LegalClients />} />
-          <Route path="/workspaces" element={<LegalWorkspaces />} />
-          <Route path="/tasks" element={<LegalTasks />} />
-          <Route path="/audit" element={<LegalAudit />} />
-          <Route path="/admin" element={<LegalAdmin />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <LegalIntranetLayout>
+          <Routes>
+            <Route path="/" element={<LegalDashboard />} />
+            <Route path="/dossiers" element={<LegalDossiers />} />
+            <Route path="/dossiers/:id" element={<LegalDossierDetail />} />
+            <Route path="/documents" element={<LegalDocuments />} />
+            <Route path="/evidence" element={<LegalEvidence />} />
+            <Route path="/planning" element={<LegalPlanning />} />
+            <Route path="/billing" element={<LegalBilling />} />
+            <Route path="/communication" element={<LegalCommunication />} />
+            <Route path="/clients" element={<LegalClients />} />
+            <Route path="/workspaces" element={<LegalWorkspaces />} />
+            <Route path="/tasks" element={<LegalTasks />} />
+            <Route path="/audit" element={<LegalAudit />} />
+            <Route path="/admin" element={<LegalAdmin />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </LegalIntranetLayout>
       </PermissionRoute>
     } />
     <Route path="/gouvernement" element={<Governance />} />

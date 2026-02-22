@@ -40,7 +40,6 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import LegalIntranetLayout from './intranet/LegalIntranetLayout';
 import { legalStore } from '@/lib/legal-store';
 import { useAuth } from '@/contexts/AuthContext';
 import { LegalDocument, DocumentCategory, DocumentStatus } from '@shared/api';
@@ -149,8 +148,7 @@ const Documents = () => {
   );
 
   return (
-    <LegalIntranetLayout>
-      <div className="p-10 space-y-10">
+    <div className="p-10 space-y-10">
         <div className="flex justify-between items-end">
           <div className="space-y-1">
             <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Gestion Documentaire</h2>
@@ -373,7 +371,6 @@ const Documents = () => {
           </CardContent>
         </Card>
       </div>
-    </LegalIntranetLayout>
   );
 };
 

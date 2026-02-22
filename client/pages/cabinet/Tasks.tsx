@@ -20,7 +20,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import LegalIntranetLayout from './intranet/LegalIntranetLayout';
 import { legalStore } from '@/lib/legal-store';
 import { useAuth } from '@/contexts/AuthContext';
 import { Task } from '@shared/api';
@@ -42,8 +41,7 @@ const Tasks = () => {
   );
 
   return (
-    <LegalIntranetLayout>
-      <div className="p-10 space-y-10">
+    <div className="p-10 space-y-10">
         <div className="flex justify-between items-end">
           <div className="space-y-1 text-left">
             <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Gestion des Tâches</h2>
@@ -178,7 +176,6 @@ const Tasks = () => {
           </div>
         </div>
       </div>
-    </LegalIntranetLayout>
   );
 };
 

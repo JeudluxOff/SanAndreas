@@ -25,7 +25,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import LegalIntranetLayout from './intranet/LegalIntranetLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { legalStore } from '@/lib/legal-store';
 
@@ -56,8 +55,7 @@ const Communication = () => {
   };
 
   return (
-    <LegalIntranetLayout>
-      <div className="flex h-[calc(100vh-80px)] overflow-hidden">
+    <div className="flex h-[calc(100vh-80px)] overflow-hidden">
         {/* Chat Sidebar (Channels & DMs) */}
         <div className="w-80 bg-white border-r border-slate-100 flex flex-col shrink-0">
           <div className="p-8 space-y-8">
@@ -219,7 +217,6 @@ const Communication = () => {
           </form>
         </div>
       </div>
-    </LegalIntranetLayout>
   );
 };
 
