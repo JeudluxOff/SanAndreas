@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 import {
   Select,
@@ -63,21 +64,26 @@ const ROLE_COLORS: Record<LegalRole, string> = {
 };
 
 const MENU_ITEMS = [
-  { icon: <Activity className="w-4 h-4" />, label: "Tableau de Bord", path: "/cabinet/intranet" },
-  { icon: <Briefcase className="w-4 h-4" />, label: "Dossiers", path: "/cabinet/intranet/dossiers" },
-  { icon: <FileText className="w-4 h-4" />, label: "Documents", path: "/cabinet/intranet/documents" },
-  { icon: <ShieldCheck className="w-4 h-4" />, label: "Preuves (Vault)", path: "/cabinet/intranet/evidence" },
-  { icon: <Calendar className="w-4 h-4" />, label: "Planning", path: "/cabinet/intranet/planning" },
-  { icon: <CreditCard className="w-4 h-4" />, label: "Facturation", path: "/cabinet/intranet/billing" },
-  { icon: <MessageSquare className="w-4 h-4" />, label: "Communication", path: "/cabinet/intranet/communication" },
-  { icon: <Users className="w-4 h-4" />, label: "Clients", path: "/cabinet/intranet/clients" },
-  { icon: <Lock className="w-4 h-4" />, label: "Audit & Logs", path: "/cabinet/intranet/audit" },
-  { icon: <Settings className="w-4 h-4" />, label: "Administration", path: "/cabinet/intranet/admin" }
+  { icon: <Activity className="w-4 h-4" />, label: "Tableau de Bord", path: "/cabinet/intranet", roles: ['Associé', 'Avocat', 'Juriste', 'Secrétaire', 'Comptable', 'Stagiaire', 'Auditeur'] },
+  { icon: <Briefcase className="w-4 h-4" />, label: "Dossiers", path: "/cabinet/intranet/dossiers", roles: ['Associé', 'Avocat', 'Juriste', 'Stagiaire'] },
+  { icon: <FileText className="w-4 h-4" />, label: "Documents", path: "/cabinet/intranet/documents", roles: ['Associé', 'Avocat', 'Juriste', 'Stagiaire'] },
+  { icon: <ShieldCheck className="w-4 h-4" />, label: "Preuves (Vault)", path: "/cabinet/intranet/evidence", roles: ['Associé', 'Avocat'] },
+  { icon: <Calendar className="w-4 h-4" />, label: "Planning", path: "/cabinet/intranet/planning", roles: ['Associé', 'Avocat', 'Juriste', 'Secrétaire'] },
+  { icon: <CreditCard className="w-4 h-4" />, label: "Facturation", path: "/cabinet/intranet/billing", roles: ['Associé', 'Comptable'] },
+  { icon: <MessageSquare className="w-4 h-4" />, label: "Communication", path: "/cabinet/intranet/communication", roles: ['Associé', 'Avocat', 'Secrétaire'] },
+  { icon: <Users className="w-4 h-4" />, label: "Clients", path: "/cabinet/intranet/clients", roles: ['Associé', 'Avocat', 'Secrétaire'] },
+  { icon: <Lock className="w-4 h-4" />, label: "Audit & Logs", path: "/cabinet/intranet/audit", roles: ['Associé', 'Auditeur'] },
+  { icon: <Settings className="w-4 h-4" />, label: "Administration", path: "/cabinet/intranet/admin", roles: ['Associé'] }
 ];
 
 export const Sidebar = () => {
   const { activeRole } = useLegalRBAC();
+  const { user } = useAuth();
   const location = useLocation();
+
+  const filteredItems = MENU_ITEMS.filter(item =>
+    !item.roles || item.roles.includes(activeRole)
+  );
 
   return (
     <div className="w-64 bg-[#0a0f18] text-white flex flex-col h-screen fixed left-0 top-0 border-r border-white/5 z-50">
@@ -94,7 +100,7 @@ export const Sidebar = () => {
       </div>
 
       <div className="flex-grow overflow-y-auto p-4 space-y-2 py-8">
-        {MENU_ITEMS.map((item, idx) => {
+        {filteredItems.map((item, idx) => {
           const isActive = location.pathname === item.path;
           return (
             <Link
@@ -117,11 +123,11 @@ export const Sidebar = () => {
       <div className="p-6 bg-white/5 m-4 rounded-xl border border-white/5">
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8 ring-2 ring-[#c1a461]/20">
-            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Julian`} />
-            <AvatarFallback>JH</AvatarFallback>
+            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id || 'Julian'}`} />
+            <AvatarFallback>{user?.name?.substring(0, 2).toUpperCase() || 'JH'}</AvatarFallback>
           </Avatar>
           <div className="overflow-hidden">
-            <p className="text-[10px] font-black truncate">Julian Harrington</p>
+            <p className="text-[10px] font-black truncate">{user?.name || 'Julian Harrington'}</p>
             <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-2 py-0 mt-1", ROLE_COLORS[activeRole])}>
               {activeRole}
             </Badge>
@@ -134,6 +140,7 @@ export const Sidebar = () => {
 
 export const Header = () => {
   const { activeRole, setActiveRole } = useLegalRBAC();
+  const { user } = useAuth();
 
   return (
     <header className="h-20 bg-white border-b border-slate-100 sticky top-0 z-40 px-10 flex items-center justify-between shadow-sm">
@@ -158,19 +165,21 @@ export const Header = () => {
       </div>
 
       <div className="flex items-center gap-6">
-        <div className="flex items-center gap-3 mr-4">
-          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Simulation Rôle:</span>
-          <Select value={activeRole} onValueChange={(val) => setActiveRole(val as LegalRole)}>
-            <SelectTrigger className="w-32 h-8 text-[9px] font-black uppercase border-none bg-slate-50">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.keys(ROLE_COLORS).map(role => (
-                <SelectItem key={role} value={role} className="text-[9px] font-black uppercase">{role}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {user?.role === 'admin' && (
+          <div className="flex items-center gap-3 mr-4">
+            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Simulation Rôle:</span>
+            <Select value={activeRole} onValueChange={(val) => setActiveRole(val as LegalRole)}>
+              <SelectTrigger className="w-32 h-8 text-[9px] font-black uppercase border-none bg-slate-50">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(ROLE_COLORS).map(role => (
+                  <SelectItem key={role} value={role} className="text-[9px] font-black uppercase">{role}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         <button className="relative p-2 text-slate-400 hover:text-primary transition-colors">
           <Bell className="w-5 h-5" />
@@ -186,7 +195,12 @@ export const Header = () => {
 };
 
 export default function LegalIntranetLayout({ children }: { children: React.ReactNode }) {
-  const [activeRole, setActiveRole] = React.useState<LegalRole>('Associé');
+  const { user } = useAuth();
+  const [activeRole, setActiveRole] = React.useState<LegalRole>(() => {
+    if (user?.role === 'admin') return 'Associé';
+    if (user?.role === 'avocat') return 'Avocat';
+    return 'Juriste';
+  });
 
   const value = {
     activeRole,

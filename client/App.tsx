@@ -46,6 +46,16 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const PermissionRoute = ({ children, permission }: { children: React.ReactNode, permission: any }) => {
+  const { user, hasPermission, isLoading } = useAuth();
+
+  if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white font-bold">Chargement...</div>;
+  if (!user) return <Navigate to="/login" replace />;
+  if (!hasPermission(permission)) return <Navigate to="/intranet" replace />;
+
+  return <>{children}</>;
+};
+
 const AppRoutes = () => (
   <Routes>
     {/* Public Routes */}
@@ -58,7 +68,7 @@ const AppRoutes = () => (
       </ProtectedRoute>
     } />
     <Route path="/cabinet/intranet/*" element={
-      <ProtectedRoute>
+      <PermissionRoute permission="lawyer:intranet_access">
         <Routes>
           <Route path="/" element={<LegalDashboard />} />
           <Route path="/dossiers" element={<LegalDossiers />} />
@@ -74,7 +84,7 @@ const AppRoutes = () => (
           <Route path="/admin" element={<LegalAdmin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </ProtectedRoute>
+      </PermissionRoute>
     } />
     <Route path="/gouvernement" element={<Governance />} />
     <Route path="/securite" element={<Security />} />
