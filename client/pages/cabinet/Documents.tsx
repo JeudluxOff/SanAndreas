@@ -120,19 +120,9 @@ const Documents = () => {
       });
     }
 
-    // In a real app we'd call an update method in legalStore
-    // For now we use createDocument which unshifts (acts as update in this mock)
-    // Actually let's add an updateDocument to legalStore for clarity if I can, 
-    // but I'll just re-read and replace for now.
-    
-    // (Simulated update)
-    const allDocs = legalStore.getDocuments();
-    const idx = allDocs.findIndex(d => d.id === docId);
-    if (idx !== -1) {
-       allDocs[idx] = updated;
-       localStorage.setItem('hc_legal_store', JSON.stringify({ ...JSON.parse(localStorage.getItem('hc_legal_store')!), documents: allDocs }));
-       setDocs([...allDocs]);
-    }
+    // Persistent update
+    legalStore.updateDocument(updated);
+    setDocs(legalStore.getDocuments());
 
     legalStore.logAction({
       id: `LOG-${Date.now()}`,

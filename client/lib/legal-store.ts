@@ -323,6 +323,13 @@ class LegalStoreManager {
     this.data.documents.unshift(doc);
     this.save();
   }
+  updateDocument(updated: LegalDocument) {
+    const idx = this.data.documents.findIndex(d => d.id === updated.id);
+    if (idx !== -1) {
+      this.data.documents[idx] = updated;
+      this.save();
+    }
+  }
 
   // Evidence
   getEvidence(caseId: string) {
@@ -339,6 +346,17 @@ class LegalStoreManager {
     if (caseId) tasks = tasks.filter(t => t.case_id === caseId);
     if (userId) tasks = tasks.filter(t => t.assigned_to === userId);
     return tasks;
+  }
+  createTask(task: Task) {
+    this.data.tasks.unshift(task);
+    this.save();
+  }
+  updateTask(updated: Task) {
+    const idx = this.data.tasks.findIndex(t => t.id === updated.id);
+    if (idx !== -1) {
+      this.data.tasks[idx] = updated;
+      this.save();
+    }
   }
 
   // Hearings

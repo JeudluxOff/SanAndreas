@@ -19,6 +19,23 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { legalStore } from '@/lib/legal-store';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,6 +46,47 @@ const Tasks = () => {
   const { user } = useAuth();
   const [tasks, setTasks] = React.useState(legalStore.getTasks());
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [showCreateModal, setShowCreateModal] = React.useState(false);
+  const [newTask, setNewTask] = React.useState({
+    title: '',
+    case_id: '',
+    priority: 'Moyenne' as any,
+    assigned_to: ''
+  });
+
+  const cases = legalStore.getCases();
+  const staff = legalStore.getStaff();
+
+  const handleCreate = () => {
+    if (!user || !newTask.title || !newTask.case_id) return;
+
+    const task: Task = {
+      id: `TSK-${Math.floor(Math.random() * 9000) + 1000}`,
+      case_id: newTask.case_id,
+      title: newTask.title,
+      priority: newTask.priority,
+      status: 'Todo',
+      due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      assigned_to: newTask.assigned_to || user.id,
+      created_at: new Date().toISOString()
+    };
+
+    legalStore.createTask(task);
+    setTasks(legalStore.getTasks());
+    setShowCreateModal(false);
+    setNewTask({ title: '', case_id: '', priority: 'Moyenne', assigned_to: '' });
+
+    legalStore.logAction({
+      id: `LOG-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      user_id: user.id,
+      user_name: user.name,
+      action: 'Création tâche',
+      target_type: 'Task',
+      target_id: task.id,
+      metadata: { title: task.title, case_id: task.case_id }
+    });
+  };
 
   const myTasks = tasks.filter(t => t.assigned_to === user?.id);
   const urgentTasks = tasks.filter(t => t.priority === 'Critique' || t.priority === 'Haute');
@@ -53,11 +111,99 @@ const Tasks = () => {
             <Button variant="outline" className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
               <Calendar className="w-4 h-4" /> Vue Calendrier
             </Button>
-            <Button className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
+            <Button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2"
+            >
               <Plus className="w-4 h-4" /> Nouvelle Tâche
             </Button>
           </div>
         </div>
+
+        {/* Create Task Modal */}
+        <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+          <DialogContent className="max-w-xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Nouvelle Tâche Cabinet</DialogTitle>
+              <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                Attribuez des actions prioritaires à un dossier ou un collaborateur.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 my-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Intitulé de la Tâche</Label>
+                <Input
+                  value={newTask.title}
+                  onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+                  placeholder="EX: RÉDACTION ASSIGNATION..."
+                  className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Priorité</Label>
+                  <Select value={newTask.priority} onValueChange={(val) => setNewTask({...newTask, priority: val as any})}>
+                    <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Basse">Basse</SelectItem>
+                      <SelectItem value="Moyenne">Moyenne</SelectItem>
+                      <SelectItem value="Haute">Haute</SelectItem>
+                      <SelectItem value="Critique">Critique</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Assigné à</Label>
+                  <Select value={newTask.assigned_to} onValueChange={(val) => setNewTask({...newTask, assigned_to: val})}>
+                    <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
+                      <SelectValue placeholder="Choisir staff..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {staff.map(s => (
+                        <SelectItem key={s.id} value={s.id}>{s.name} ({s.role})</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dossier Assigné</Label>
+                <Select value={newTask.case_id} onValueChange={(val) => setNewTask({...newTask, case_id: val})}>
+                  <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
+                    <SelectValue placeholder="Choisir un dossier..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cases.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.id} - {c.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="ghost"
+                onClick={() => setShowCreateModal(false)}
+                className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleCreate}
+                disabled={!newTask.title || !newTask.case_id}
+                className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl shadow-xl shadow-black/10"
+              >
+                Créer la Tâche
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {[
