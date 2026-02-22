@@ -39,6 +39,7 @@ import { useLegalRBAC } from './intranet/LegalIntranetLayout';
 import { Link } from 'react-router-dom';
 import { legalStore } from '@/lib/legal-store';
 import { Invoice } from '@shared/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Billing = () => {
   const { user } = useAuth();
