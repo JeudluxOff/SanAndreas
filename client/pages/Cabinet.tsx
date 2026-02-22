@@ -31,7 +31,7 @@ const Navigation = () => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <nav className="fixed w-full z-50 bg-[#0a0f18]/90 backdrop-blur-md border-b border-white/5">
+    <nav className="fixed w-full z-50 bg-[#0a0f18]/90 backdrop-blur-md border-b border-white/5 animate-in fade-in slide-in-from-top duration-700">
       {/* Top Bar: Logo & Actions */}
       <div className="container mx-auto px-6 h-20 flex items-center justify-between border-b border-white/5">
         <div className="flex items-center gap-8">
@@ -120,8 +120,8 @@ const Navigation = () => {
 const Hero = () => (
   <section className="relative min-h-screen flex items-center pt-24 overflow-hidden bg-[#0a0f18]">
     <div className="absolute inset-0 opacity-20 pointer-events-none">
-      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#c1a461] rounded-full blur-[150px]" />
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white rounded-full blur-[150px] opacity-10" />
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#c1a461] rounded-full blur-[150px] animate-in zoom-in-0 duration-1000" />
+      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white rounded-full blur-[150px] opacity-10 animate-in zoom-in-0 duration-1000 delay-200" />
     </div>
     
     <div className="container mx-auto px-6 relative z-10">
@@ -180,10 +180,10 @@ const Expertise = () => {
   ];
 
   return (
-    <section id="expertise" className="py-32 bg-white">
+    <section id="expertise" className="py-32 bg-white overflow-hidden">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-24 items-start">
-          <div className="lg:col-span-5 space-y-10">
+          <div className="lg:col-span-5 space-y-10 animate-in fade-in slide-in-from-left duration-1000">
             <div className="space-y-4">
               <span className="text-[10px] font-black text-[#c1a461] uppercase tracking-[0.5em]">Notre Savoir-Faire</span>
               <h2 className="text-5xl font-black text-[#0a0f18] uppercase tracking-tighter leading-tight">
@@ -211,7 +211,11 @@ const Expertise = () => {
 
           <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-8">
             {expertises.map((exp, idx) => (
-              <Card key={idx} className="group border-none shadow-2xl hover:shadow-[#c1a461]/5 transition-all duration-500 overflow-hidden bg-slate-50 border-t-4 border-transparent hover:border-[#c1a461]">
+              <Card key={idx} className={cn(
+                "group border-none shadow-2xl hover:shadow-[#c1a461]/5 transition-all duration-500 overflow-hidden bg-slate-50 border-t-4 border-transparent hover:border-[#c1a461]",
+                "animate-in fade-in zoom-in-95 duration-700",
+                idx % 2 === 0 ? "slide-in-from-right-12" : "slide-in-from-left-12"
+              )} style={{ animationDelay: `${idx * 150}ms` }}>
                 <CardContent className="p-10 space-y-6">
                   <div className="p-4 bg-white rounded-2xl text-[#c1a461] inline-block shadow-xl group-hover:scale-110 transition-transform duration-500">
                     {exp.icon}
@@ -268,7 +272,7 @@ const Team = () => {
       <div className="absolute top-0 right-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-20 pointer-events-none" />
 
       <div className="container mx-auto px-6 relative z-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-24">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-24 animate-in fade-in slide-in-from-bottom duration-1000">
           <div className="space-y-6">
             <span className="text-[10px] font-black text-[#c1a461] uppercase tracking-[0.5em]">L'Excellence à votre Service</span>
             <h2 className="text-6xl md:text-7xl font-black uppercase tracking-tighter leading-none">
@@ -284,7 +288,7 @@ const Team = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {team.map((member, idx) => (
-            <div key={idx} className="group space-y-10">
+            <div key={idx} className="group space-y-10 animate-in fade-in slide-in-from-bottom duration-700" style={{ animationDelay: `${idx * 200 + 400}ms` }}>
               <div className="relative aspect-[3/4] overflow-hidden rounded-[40px] bg-slate-900 border border-white/5 transition-all duration-700 group-hover:rounded-[20px] group-hover:shadow-2xl group-hover:shadow-[#c1a461]/10">
                 <img
                   src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.seed}&backgroundColor=0a0f18`}
@@ -335,7 +339,7 @@ const Testimonials = () => (
     
     <div className="container mx-auto px-6 relative z-10">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-        <div className="space-y-10">
+        <div className="space-y-10 animate-in fade-in slide-in-from-left duration-1000">
           <div className="space-y-4">
             <span className="text-[10px] font-black text-[#c1a461] uppercase tracking-[0.5em]">Confiance & Excellence</span>
             <h2 className="text-5xl font-black text-[#0a0f18] uppercase tracking-tighter leading-tight">Ils nous ont <br /> confié leur avenir</h2>
@@ -350,7 +354,7 @@ const Testimonials = () => (
           </div>
         </div>
 
-        <div className="relative">
+        <div className="relative animate-in fade-in zoom-in-95 duration-1000 delay-300">
           <Card className="border-none shadow-2xl p-12 bg-white rounded-[40px] relative z-20">
             <CardContent className="p-0 space-y-8">
               <BookOpen className="w-12 h-12 text-[#c1a461] opacity-20" />
