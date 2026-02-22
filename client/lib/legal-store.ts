@@ -136,9 +136,7 @@ class LegalStoreManager {
     this.saveToServer();
     this.notify();
     // Notify governmentStore to refresh its global views that include legal data
-    if ((governmentStore as any).notify) {
-      (governmentStore as any).notify();
-    }
+    governmentStore.notify();
   }
 
   subscribe(listener: () => void) {

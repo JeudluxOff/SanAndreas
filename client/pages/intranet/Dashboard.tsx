@@ -147,7 +147,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="flex items-baseline gap-2">
-                <h3 className="text-3xl font-black text-slate-900">42</h3>
+                <h3 className="text-3xl font-black text-slate-900">{store.getTotalDossiersCount()}</h3>
                 <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
                   <TrendingUp className="w-3 h-3" /> +5
                 </span>
@@ -165,7 +165,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="flex items-baseline gap-2">
-                <h3 className="text-3xl font-black text-slate-900">12</h3>
+                <h3 className="text-3xl font-black text-slate-900">{store.getPendingValidationsCount()}</h3>
                 <span className="text-xs font-bold text-slate-400">En attente</span>
               </div>
               <Progress value={65} className="h-1.5 mt-4" />
@@ -181,8 +181,8 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="flex items-baseline gap-2">
-                <h3 className="text-3xl font-black text-slate-900">156</h3>
-                <span className="text-xs font-bold text-emerald-600">Ce mois</span>
+                <h3 className="text-3xl font-black text-slate-900">{store.getTotalDocumentsCount()}</h3>
+                <span className="text-xs font-bold text-emerald-600">Total</span>
               </div>
               <p className="text-[10px] text-slate-400 mt-2 uppercase font-bold tracking-tighter italic">Total annuel: 1,402</p>
             </CardContent>

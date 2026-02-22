@@ -119,7 +119,7 @@ class GovernmentStoreManager {
     };
   }
 
-  private notify() {
+  public notify() {
     this.listeners.forEach(l => l());
   }
 
@@ -133,7 +133,24 @@ class GovernmentStoreManager {
   }
 
   // Employees
-  getEmployees() { return this.data.employees; }
+  getEmployees() {
+    const govEmployees = this.data.employees;
+
+    // Include Legal Staff from legalStore
+    const legalStaff = legalStore.getStaff().map(s => ({
+      name: s.name,
+      role: s.role,
+      service: 'Cabinet Juridique (JUSTICE)',
+      grade: s.role === 'Associé' ? 'Associé Principal' : 'Auxiliaire de Justice',
+      status: s.status === 'Actif' ? 'En service' : 'Indisponible',
+      email: s.email,
+      joinDate: new Date(s.joined_at).toLocaleDateString(),
+      image: s.avatar ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${s.avatar}` : undefined,
+      description: `Membre du Cabinet Harrington & Cole. Dernière activité: ${new Date(s.last_active).toLocaleString()}`
+    }));
+
+    return [...govEmployees, ...legalStaff];
+  }
   updateEmployees(employees: GovEmployee[]) {
     this.data.employees = employees;
     this.save();
@@ -146,7 +163,23 @@ class GovernmentStoreManager {
   getGlobalAnnouncements() { return this.data.globalAnnouncements; }
 
   // Calendar
-  getCalendarEvents() { return this.data.calendarEvents; }
+  getCalendarEvents() {
+    const govEvents = this.data.calendarEvents;
+
+    // Include Legal Hearings from legalStore
+    const legalEvents = legalStore.getHearings().map((h, i) => ({
+      id: 9000 + i, // Fake IDs for merged calendar
+      time: new Date(h.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      title: `[AUDIENCE] ${h.title}`,
+      type: h.type === 'Pénal' ? 'Justice' : 'Administratif',
+      date: new Date(h.date).toLocaleDateString(),
+      participants: 2,
+      location: h.location,
+      service: 'JUSTICE'
+    }));
+
+    return [...govEvents, ...legalEvents];
+  }
 
   // Messages
   getMessages(channelId: string) {
@@ -226,7 +259,7 @@ class GovernmentStoreManager {
       service_id: Object.keys(this.data.workspaces).find(key => this.data.workspaces[key] === ws)?.toUpperCase()
     })));
 
-    // Include Legal Documents from legalStore
+    // Include Legal Documents and Evidence from legalStore
     const legalDocs = legalStore.getDocuments().map(d => ({
       id: d.id,
       title: d.title,
@@ -241,7 +274,21 @@ class GovernmentStoreManager {
       service_id: 'JUSTICE'
     }));
 
-    return [...govDocs, ...legalDocs];
+    const legalEvidence = legalStore.getCases().flatMap(c => legalStore.getEvidence(c.id)).map(e => ({
+      id: e.id,
+      title: `[PREUVE] ${e.name}`,
+      content: e.content,
+      type: 'Pièce à Conviction',
+      date: new Date(e.uploaded_at).toLocaleDateString(),
+      status: e.confidentiality === 'Scellé' ? 'Scellée' : 'Déposée',
+      author: e.uploaded_by,
+      archived: false,
+      acl: e.confidentiality === 'Scellé' ? ['ADMIN_ONLY'] : [],
+      service_name: 'Cabinet Juridique',
+      service_id: 'JUSTICE'
+    }));
+
+    return [...govDocs, ...legalDocs, ...legalEvidence];
   }
 
   createDocument(serviceId: string, doc: GovDocument) {
@@ -403,6 +450,19 @@ class GovernmentStoreManager {
       ws.dossiers = ws.dossiers.map(d => d.id === dossierId ? { ...d, archived: !d.archived } : d);
       this.save();
     }
+  }
+
+  // Stats Helpers
+  getTotalDossiersCount() {
+    return this.getGlobalDossiers().filter(d => !d.archived).length;
+  }
+
+  getTotalDocumentsCount() {
+    return this.getGlobalDocuments().filter(d => !d.archived).length;
+  }
+
+  getPendingValidationsCount() {
+    return this.getGlobalDocuments().filter(d => d.status === 'À valider' || d.status === 'En relecture').length;
   }
 }
 
