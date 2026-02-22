@@ -40,12 +40,13 @@ const Dossiers = () => {
   const { isAssocié } = useLegalRBAC();
   const { user } = useAuth();
   const location = useLocation();
-  const [showConflictModal, setShowConflictModal] = React.useState(false);
   const [showCreateModal, setShowCreateModal] = React.useState(false);
+  const [showQuickClientModal, setShowQuickClientModal] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [conflictSearchQuery, setConflictSearchQuery] = React.useState('');
   const [conflictResult, setConflictResult] = React.useState<'none' | 'conflict' | null>(null);
   const [error, setError] = React.useState<string | null>(null);
+  const [newClientName, setNewClientName] = React.useState('');
 
   // Handle "action=new" from Header
   React.useEffect(() => {
@@ -56,7 +57,7 @@ const Dossiers = () => {
       setShowConflictModal(true);
     }
   }, [location]);
-  
+
   // Create Case Form State
   const [newCase, setNewCase] = React.useState<Partial<Case>>({
     title: '',
@@ -66,7 +67,22 @@ const Dossiers = () => {
   });
 
   const [cases, setCases] = React.useState(legalStore.getCases());
-  const clients = legalStore.getClients();
+  const [clients, setClients] = React.useState(legalStore.getClients());
+
+  const handleQuickAddClient = () => {
+    if (!newClientName || !user) return;
+    const client: Client = {
+      id: `cli-${Date.now()}`,
+      name: newClientName,
+      type: 'Individu',
+      created_at: new Date().toISOString().split('T')[0]
+    };
+    legalStore.createClient(client);
+    setClients(legalStore.getClients());
+    setNewCase(prev => ({ ...prev, client_id: client.id }));
+    setShowQuickClientModal(false);
+    setNewClientName('');
+  };
 
   const handleConflictCheck = () => {
     if (!user) return;
@@ -293,7 +309,16 @@ const Dossiers = () => {
               </div>
 
               <div className="space-y-3">
-                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Client Assigné</Label>
+                <div className="flex justify-between items-center">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Client Assigné</Label>
+                  <Button
+                    variant="link"
+                    onClick={() => setShowQuickClientModal(true)}
+                    className="text-[9px] font-black text-[#c1a461] uppercase p-0 h-auto"
+                  >
+                    + Nouveau Client
+                  </Button>
+                </div>
                 <Select value={newCase.client_id} onValueChange={(val) => setNewCase({ ...newCase, client_id: val })}>
                   <SelectTrigger className="h-14 bg-slate-50 border-none rounded-2xl px-6 text-sm font-bold uppercase tracking-widest">
                     <SelectValue placeholder="Sélectionner un client..." />
@@ -350,6 +375,42 @@ const Dossiers = () => {
                 className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-10 rounded-xl shadow-xl shadow-black/10"
               >
                 Créer le Dossier
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick Add Client Modal */}
+        <Dialog open={showQuickClientModal} onOpenChange={setShowQuickClientModal}>
+          <DialogContent className="max-w-md bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-black text-slate-900 uppercase tracking-tighter">Ajout Rapide Client</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 my-6">
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nom complet</Label>
+                <Input
+                  value={newClientName}
+                  onChange={(e) => setNewClientName(e.target.value)}
+                  placeholder="EX: MICHEL FONTAINE..."
+                  className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="ghost"
+                onClick={() => setShowQuickClientModal(false)}
+                className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleQuickAddClient}
+                disabled={!newClientName}
+                className="bg-[#c1a461] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl shadow-xl shadow-[#c1a461]/10"
+              >
+                Ajouter Client
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -298,6 +298,10 @@ class LegalStoreManager {
   // Clients
   getClients() { return this.data.clients; }
   getClient(id: string) { return this.data.clients.find(c => c.id === id); }
+  createClient(client: Client) {
+    this.data.clients.unshift(client);
+    this.save();
+  }
 
   // Cases
   getCases() { return this.data.cases; }

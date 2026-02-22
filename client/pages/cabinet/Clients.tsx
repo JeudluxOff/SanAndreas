@@ -21,14 +21,68 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { legalStore } from '@/lib/legal-store';
+import { useAuth } from '@/contexts/AuthContext';
+import { Client } from '@shared/api';
 
 const Clients = () => {
+  const { user } = useAuth();
   const [clients, setClients] = React.useState(legalStore.getClients());
   const [searchQuery, setSearchQuery] = React.useState('');
-  
+  const [showCreateModal, setShowCreateModal] = React.useState(false);
+  const [newClient, setNewClient] = React.useState<Partial<Client>>({
+    name: '',
+    email: '',
+    type: 'Individu'
+  });
+
   const cases = legalStore.getCases();
+
+  const handleCreateClient = () => {
+    if (!newClient.name || !user) return;
+
+    const clientToCreate: Client = {
+      id: `cli-${Date.now()}`,
+      name: newClient.name,
+      email: newClient.email,
+      type: newClient.type as 'Individu' | 'Entreprise',
+      created_at: new Date().toISOString().split('T')[0]
+    };
+
+    legalStore.createClient(clientToCreate);
+    setClients(legalStore.getClients());
+    setShowCreateModal(false);
+    setNewClient({ name: '', email: '', type: 'Individu' });
+
+    legalStore.logAction({
+      id: `LOG-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      user_id: user.id,
+      user_name: user.name,
+      action: 'Création client',
+      target_type: 'Client',
+      target_id: clientToCreate.id,
+      metadata: { name: clientToCreate.name }
+    });
+  };
 
   const filteredClients = clients.filter(c => 
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -48,11 +102,82 @@ const Clients = () => {
             <Button variant="outline" className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
               <Download className="w-4 h-4" /> Exporter CRM
             </Button>
-            <Button className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
+            <Button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2"
+            >
               <Plus className="w-4 h-4" /> Nouveau Client
             </Button>
           </div>
         </div>
+
+        {/* Create Client Modal */}
+        <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+          <DialogContent className="max-w-xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Nouveau Client</DialogTitle>
+              <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                Enregistrez une nouvelle entité dans la base de données du cabinet.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 my-6">
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nom complet ou Raison Sociale</Label>
+                <Input
+                  value={newClient.name}
+                  onChange={(e) => setNewClient({...newClient, name: e.target.value})}
+                  placeholder="EX: JOHN DOE..."
+                  className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 text-left">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</Label>
+                  <Select
+                    value={newClient.type}
+                    onValueChange={(val) => setNewClient({...newClient, type: val as any})}
+                  >
+                    <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Individu">Individu</SelectItem>
+                      <SelectItem value="Entreprise">Entreprise</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2 text-left">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email (Facultatif)</Label>
+                  <Input
+                    value={newClient.email}
+                    onChange={(e) => setNewClient({...newClient, email: e.target.value})}
+                    placeholder="CLIENT@EMAIL.SA"
+                    className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="ghost"
+                onClick={() => setShowCreateModal(false)}
+                className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleCreateClient}
+                disabled={!newClient.name}
+                className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl shadow-xl shadow-black/10"
+              >
+                Créer la Fiche
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {[

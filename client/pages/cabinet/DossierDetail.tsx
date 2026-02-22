@@ -28,25 +28,109 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { legalStore } from '@/lib/legal-store';
 import { useAuth } from '@/contexts/AuthContext';
-import { Case, LegalDocument, Evidence, Task, Hearing } from '@shared/api';
+import { Case, LegalDocument, Evidence, Task, Hearing, DocumentCategory, ConfidentialityLevel } from '@shared/api';
 
 const DossierDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = React.useState('overview');
-  
+
   const dossier = legalStore.getCase(id || '');
   const [localStatus, setLocalStatus] = React.useState<string>(dossier?.status || '');
-  const docs = legalStore.getDocuments(id);
-  const evidence = legalStore.getEvidence(id || '');
-  const tasks = legalStore.getTasks(id);
+  const [docs, setDocs] = React.useState(legalStore.getDocuments(id));
+  const [evidences, setEvidences] = React.useState(legalStore.getEvidence(id || ''));
+  const [tasks, setTasks] = React.useState(legalStore.getTasks(id));
   const hearings = legalStore.getHearings().filter(h => h.case_id === id);
   const client = dossier ? legalStore.getClient(dossier.client_id) : null;
   const auditLogs = legalStore.getAuditLogs().filter(log => log.target_id === id);
+
+  // Modals state
+  const [showDocModal, setShowDocModal] = React.useState(false);
+  const [showEviModal, setShowEviModal] = React.useState(false);
+  const [showTaskModal, setShowTaskModal] = React.useState(false);
+
+  // Form states
+  const [newDoc, setNewDoc] = React.useState({ title: '', category: 'Conclusions' as DocumentCategory });
+  const [newEvi, setNewEvi] = React.useState({ name: '', type: 'Document', confidentiality: 'Normal' as ConfidentialityLevel });
+  const [newTask, setNewTask] = React.useState({ title: '', priority: 'Moyenne' as any });
+
+  const handleCreateDoc = () => {
+    if (!user || !id || !newDoc.title) return;
+    const doc: LegalDocument = {
+      id: `HC-2024-${Math.floor(Math.random() * 9000) + 1000}`,
+      case_id: id,
+      title: newDoc.title,
+      category: newDoc.category,
+      status: 'Brouillon',
+      current_version: 1,
+      versions: [{ version: 1, file_url: '#', created_at: new Date().toISOString(), created_by: user.id }],
+      signatures: [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    legalStore.createDocument(doc);
+    setDocs(legalStore.getDocuments(id));
+    setShowDocModal(false);
+    setNewDoc({ title: '', category: 'Conclusions' });
+  };
+
+  const handleCreateEvi = () => {
+    if (!user || !id || !newEvi.name) return;
+    const evi: Evidence = {
+      id: `EVI-${Date.now()}`,
+      case_id: id,
+      name: newEvi.name,
+      type: newEvi.type,
+      file_url: '#',
+      confidentiality: newEvi.confidentiality,
+      uploaded_by: user.name,
+      uploaded_at: new Date().toISOString(),
+      to_produce_at_hearing: false
+    };
+    legalStore.addEvidence(evi);
+    setEvidences(legalStore.getEvidence(id));
+    setShowEviModal(false);
+    setNewEvi({ name: '', type: 'Document', confidentiality: 'Normal' });
+  };
+
+  const handleCreateTask = () => {
+    if (!user || !id || !newTask.title) return;
+    const task: Task = {
+      id: `TSK-${Date.now()}`,
+      case_id: id,
+      title: newTask.title,
+      priority: newTask.priority,
+      status: 'Todo',
+      due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      assigned_to: user.id,
+      created_at: new Date().toISOString()
+    };
+    legalStore.createTask(task);
+    setTasks(legalStore.getTasks(id));
+    setShowTaskModal(false);
+    setNewTask({ title: '', priority: 'Moyenne' });
+  };
 
   const handleSeal = () => {
     if (!id || !user) return;
@@ -295,9 +379,14 @@ const DossierDetail = () => {
 
             {activeTab === 'documents' && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center text-left">
                   <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Index Documentaire</h3>
-                  <Button className="bg-[#c1a461] text-white text-[10px] font-black uppercase h-10 px-6">+ Nouveau</Button>
+                  <Button
+                    onClick={() => setShowDocModal(true)}
+                    className="bg-[#c1a461] text-white text-[10px] font-black uppercase h-10 px-6"
+                  >
+                    + Nouveau
+                  </Button>
                 </div>
                 <div className="grid grid-cols-1 gap-4">
                   {docs.map((doc, idx) => (
@@ -337,19 +426,22 @@ const DossierDetail = () => {
 
             {activeTab === 'evidence' && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center text-white p-10 rounded-[40px] bg-[#0a0f18] relative overflow-hidden">
+                <div className="flex justify-between items-center text-white p-10 rounded-[40px] bg-[#0a0f18] relative overflow-hidden text-left">
                   <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
                   <div className="relative z-10 space-y-2">
                     <h3 className="text-2xl font-black uppercase tracking-tighter">Evidence Vault Access</h3>
                     <p className="text-white/40 text-xs font-bold uppercase tracking-widest">Zone hautement sécurisée • Chiffrement AES-256</p>
                   </div>
-                  <Button className="relative z-10 bg-[#c1a461] hover:bg-[#927843] text-white text-[10px] font-black uppercase h-12 px-8 rounded-xl shadow-2xl">
+                  <Button
+                    onClick={() => setShowEviModal(true)}
+                    className="relative z-10 bg-[#c1a461] hover:bg-[#927843] text-white text-[10px] font-black uppercase h-12 px-8 rounded-xl shadow-2xl"
+                  >
                     Déposer Preuve
                   </Button>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {evidence.map((evi, idx) => (
+                  {evidences.map((evi, idx) => (
                     <Card key={idx} className="border-none shadow-md hover:shadow-xl transition-all p-8 rounded-[32px] bg-white group">
                       <div className="flex justify-between items-start mb-6">
                         <div className="p-4 bg-slate-50 rounded-2xl text-slate-400 group-hover:text-[#c1a461] transition-colors">
@@ -386,36 +478,62 @@ const DossierDetail = () => {
             )}
 
             {activeTab === 'timeline' && (
-               <Card className="border-none shadow-xl rounded-[32px] bg-white overflow-hidden">
-                 <CardHeader className="p-8 border-b border-slate-50 bg-slate-50/50">
-                    <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
-                      <History className="w-5 h-5 text-[#c1a461]" /> Historique d'Audit & Timeline
-                    </CardTitle>
-                 </CardHeader>
-                 <CardContent className="p-8">
-                    <div className="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
-                       {auditLogs.length > 0 ? auditLogs.map((log, idx) => (
-                         <div key={idx} className="relative pl-10">
-                            <div className="absolute left-0 top-1 w-6 h-6 rounded-full bg-white border-4 border-slate-100 flex items-center justify-center">
-                               <div className="w-1.5 h-1.5 rounded-full bg-[#c1a461]" />
+               <div className="space-y-10">
+                 <div className="flex justify-between items-center text-left">
+                    <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Timeline & Tâches</h3>
+                    <Button
+                      onClick={() => setShowTaskModal(true)}
+                      className="bg-[#0a0f18] text-white text-[10px] font-black uppercase h-10 px-6"
+                    >
+                      + Nouvelle Tâche
+                    </Button>
+                 </div>
+
+                 <div className="grid grid-cols-1 gap-6">
+                    {tasks.map((task, idx) => (
+                      <Card key={idx} className="border-none shadow-md p-6 rounded-[24px] bg-white group">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-6">
+                            <div className={cn("w-1.5 h-10 rounded-full",
+                              task.priority === 'Critique' ? 'bg-red-500' : 'bg-[#c1a461]'
+                            )} />
+                            <div className="text-left">
+                              <p className="text-base font-black text-slate-900 uppercase tracking-tight">{task.title}</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Échéance : {new Date(task.due_date).toLocaleDateString()}</p>
                             </div>
-                            <div className="space-y-1">
-                               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{new Date(log.timestamp).toLocaleString()}</p>
-                               <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{log.action}</p>
-                               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Effectué par : {log.user_name}</p>
-                               {log.metadata && (
-                                  <div className="mt-2 p-3 bg-slate-50 rounded-xl text-[9px] font-mono text-slate-500">
-                                    {JSON.stringify(log.metadata, null, 2)}
-                                  </div>
-                               )}
-                            </div>
-                         </div>
-                       )) : (
-                          <p className="text-center py-10 text-slate-400 text-[10px] uppercase font-black">Aucun log disponible</p>
-                       )}
-                    </div>
-                 </CardContent>
-               </Card>
+                          </div>
+                          <Badge variant="outline" className="text-[9px] font-black uppercase">{task.status}</Badge>
+                        </div>
+                      </Card>
+                    ))}
+                 </div>
+
+                 <Card className="border-none shadow-xl rounded-[32px] bg-white overflow-hidden text-left">
+                   <CardHeader className="p-8 border-b border-slate-50 bg-slate-50/50">
+                      <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+                        <History className="w-5 h-5 text-[#c1a461]" /> Historique d'Audit
+                      </CardTitle>
+                   </CardHeader>
+                   <CardContent className="p-8">
+                      <div className="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
+                         {auditLogs.length > 0 ? auditLogs.map((log, idx) => (
+                           <div key={idx} className="relative pl-10">
+                              <div className="absolute left-0 top-1 w-6 h-6 rounded-full bg-white border-4 border-slate-100 flex items-center justify-center">
+                                 <div className="w-1.5 h-1.5 rounded-full bg-[#c1a461]" />
+                              </div>
+                              <div className="space-y-1">
+                                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{new Date(log.timestamp).toLocaleString()}</p>
+                                 <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{log.action}</p>
+                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Effectué par : {log.user_name}</p>
+                              </div>
+                           </div>
+                         )) : (
+                            <p className="text-center py-10 text-slate-400 text-[10px] uppercase font-black">Aucun log disponible</p>
+                         )}
+                      </div>
+                   </CardContent>
+                 </Card>
+               </div>
             )}
           </div>
 
@@ -436,7 +554,7 @@ const DossierDetail = () => {
                       <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.avatar || member.user_id}`} />
                       <AvatarFallback>{member.name[0]}</AvatarFallback>
                     </Avatar>
-                    <div className="flex-grow">
+                    <div className="flex-grow text-left">
                       <p className="text-xs font-black text-slate-900 uppercase tracking-tight">{member.name}</p>
                       <p className="text-[9px] font-bold text-[#c1a461] uppercase tracking-widest">{member.role}</p>
                     </div>
@@ -457,11 +575,11 @@ const DossierDetail = () => {
                   </CardTitle>
                </CardHeader>
                <CardContent className="p-8 space-y-4">
-                  <div className="space-y-1">
+                  <div className="space-y-1 text-left">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Client Principal</p>
                     <p className="text-lg font-black text-slate-900 uppercase tracking-tighter">{client?.name || 'Inconnu'}</p>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1 text-left">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</p>
                     <p className="text-sm font-bold text-slate-600 uppercase">{client?.type}</p>
                   </div>
@@ -492,6 +610,104 @@ const DossierDetail = () => {
             </Card>
           </div>
         </div>
+
+        {/* Modals */}
+        <Dialog open={showDocModal} onOpenChange={setShowDocModal}>
+          <DialogContent className="max-w-xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Nouveau Document</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 my-6">
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Intitulé</Label>
+                <Input value={newDoc.title} onChange={(e) => setNewDoc({...newDoc, title: e.target.value})} placeholder="EX: CONCLUSIONS PÉNALES..." className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase" />
+              </div>
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Catégorie</Label>
+                <Select value={newDoc.category} onValueChange={(val) => setNewDoc({...newDoc, category: val as any})}>
+                  <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Conclusions">Conclusions</SelectItem>
+                    <SelectItem value="Requête">Requête</SelectItem>
+                    <SelectItem value="Convention">Convention</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={handleCreateDoc} className="bg-[#0a0f18] text-white text-[10px] font-black uppercase h-12 px-8 rounded-xl">Indexer Document</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showEviModal} onOpenChange={setShowEviModal}>
+          <DialogContent className="max-w-xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Dépôt de Preuve</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 my-6">
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nom de la preuve</Label>
+                <Input value={newEvi.name} onChange={(e) => setNewEvi({...newEvi, name: e.target.value})} placeholder="EX: ENREGISTREMENT CCTV..." className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 text-left">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</Label>
+                  <Select value={newEvi.type} onValueChange={(val) => setNewEvi({...newEvi, type: val})}>
+                    <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Vidéo">Vidéo</SelectItem>
+                      <SelectItem value="Audio">Audio</SelectItem>
+                      <SelectItem value="Document">Document</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2 text-left">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Confidentialité</Label>
+                  <Select value={newEvi.confidentiality} onValueChange={(val) => setNewEvi({...newEvi, confidentiality: val as any})}>
+                    <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Normal">Normal</SelectItem>
+                      <SelectItem value="Secret">Secret</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={handleCreateEvi} className="bg-[#c1a461] text-white text-[10px] font-black uppercase h-12 px-8 rounded-xl">Chiffrer & Déposer</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showTaskModal} onOpenChange={setShowTaskModal}>
+          <DialogContent className="max-w-xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Nouvelle Tâche</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 my-6">
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Intitulé</Label>
+                <Input value={newTask.title} onChange={(e) => setNewTask({...newTask, title: e.target.value})} placeholder="EX: RECHERCHE JURISPRUDENCE..." className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase" />
+              </div>
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Priorité</Label>
+                <Select value={newTask.priority} onValueChange={(val) => setNewTask({...newTask, priority: val as any})}>
+                  <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Basse">Basse</SelectItem>
+                    <SelectItem value="Moyenne">Moyenne</SelectItem>
+                    <SelectItem value="Haute">Haute</SelectItem>
+                    <SelectItem value="Critique">Critique</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={handleCreateTask} className="bg-[#0a0f18] text-white text-[10px] font-black uppercase h-12 px-8 rounded-xl">Créer Tâche</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
   );
 };
