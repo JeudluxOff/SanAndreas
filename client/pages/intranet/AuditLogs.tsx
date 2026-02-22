@@ -21,27 +21,14 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-
-interface LogEntry {
-  id: string;
-  timestamp: string;
-  user_id: string;
-  user_name: string;
-  role: string;
-  service_id: string;
-  action: string;
-  metadata?: any;
-}
+import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 
 const AuditLogs = () => {
   const { user, hasPermission, logAction } = useAuth();
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const store = useGovernmentStore();
   const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    const savedLogs = JSON.parse(localStorage.getItem('sa_gov_audit_logs') || '[]');
-    setLogs(savedLogs);
-  }, []);
+  const logs = store.getAuditLogs();
 
   if (!hasPermission('audit:logs_view')) {
     return <Navigate to="/intranet" replace />;

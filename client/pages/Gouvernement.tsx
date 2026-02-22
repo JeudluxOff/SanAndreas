@@ -1,81 +1,37 @@
 import { Layout } from "@/components/Layout";
 import { Users, UserCheck, Shield, Scale, TrendingUp, HeartPulse, MessageSquare, Gavel, ShieldAlert, Landmark, Construction } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 
-const cabinetMembers = [
-  {
-    role: "Gouverneur",
-    name: "Jonathon Miller",
-    image: "/placeholder.svg",
-    description: "Chef de l'exécutif, responsable de la direction politique de l'État et de la sécurité publique.",
-    icon: <UserCheck className="w-5 h-5" />
-  },
-  {
-    role: "Lieutenant-Gouverneur",
-    name: "Sarah Sterling",
-    image: "/placeholder.svg",
-    description: "Présidente du Sénat et conseillère principale sur les réformes législatives et l'économie.",
-    icon: <UserCheck className="w-5 h-5" />
-  },
-  {
-    role: "Secrétaire d'État Général",
-    name: "Arthur Vance",
-    image: "/placeholder.svg",
-    description: "Plus haut responsable juridique de l'État, supervisant le Département de la Justice (DOJ) et garant de la constitutionnalité des lois.",
-    icon: <Scale className="w-5 h-5" />
-  },
-  {
-    role: "Secrétaire à la Sécurité",
-    name: "Marcus Thorne",
-    image: "/placeholder.svg",
-    description: "Liaison officielle entre le gouvernement et les agences LSPD / LSSD / FIB.",
-    icon: <Shield className="w-5 h-5" />
-  },
-  {
-    role: "Press Secretary",
-    name: "Elena Rodriguez",
-    image: "/placeholder.svg",
-    description: "Porte-parole officielle du Gouvernement, responsable de la communication avec les médias et de la transparence de l'administration.",
-    icon: <MessageSquare className="w-5 h-5" />
-  },
-  {
-    role: "Secrétaire à la Santé et Service Humain",
-    name: "Dr. Julian Frost",
-    image: "/placeholder.svg",
-    description: "Superviseur des services SAMS, des programmes de santé publique et de l'assistance sociale à travers l'État.",
-    icon: <HeartPulse className="w-5 h-5" />
-  },
-  {
-    role: "Secrétaire à la Justice",
-    name: "Thomas 'Tommy' Vercetti",
-    image: "/placeholder.svg",
-    description: "Responsable de l'application des lois, de la poursuite des crimes et de la protection des droits civils.",
-    icon: <Gavel className="w-5 h-5" />
-  },
-  {
-    role: "Secrétaire à la Sécurité Intérieure",
-    name: "Jackson 'Jax' Teller",
-    image: "/placeholder.svg",
-    description: "Coordination de la lutte contre le terrorisme, de la cybersécurité et de la gestion des catastrophes majeures.",
-    icon: <ShieldAlert className="w-5 h-5" />
-  },
-  {
-    role: "Secrétaire au Trésor et au Commerce",
-    name: "Franklin Clinton",
-    image: "/placeholder.svg",
-    description: "Gestion des politiques économiques, du commerce international et du développement des entreprises locales.",
-    icon: <Landmark className="w-5 h-5" />
-  },
-  {
-    role: "Secrétaire au Travail",
-    name: "Lamar Davis",
-    image: "/placeholder.svg",
-    description: "Protection des droits des travailleurs, promotion de l'emploi et régulation du marché du travail.",
-    icon: <Construction className="w-5 h-5" />
-  }
-];
+const roleToIcon: Record<string, any> = {
+  "Gouverneur": <UserCheck className="w-5 h-5" />,
+  "Lieutenant-Gouverneur": <UserCheck className="w-5 h-5" />,
+  "Secrétaire d'État Général": <Scale className="w-5 h-5" />,
+  "Secrétaire à la Sécurité": <Shield className="w-5 h-5" />,
+  "Press Secretary": <MessageSquare className="w-5 h-5" />,
+  "Secrétaire à la Santé": <HeartPulse className="w-5 h-5" />,
+  "Secrétaire Justice": <Gavel className="w-5 h-5" />,
+  "Secrétaire S.I.": <ShieldAlert className="w-5 h-5" />,
+  "Secrétaire Trésor": <Landmark className="w-5 h-5" />,
+  "Secrétaire Travail": <Construction className="w-5 h-5" />
+};
 
 export default function Gouvernement() {
+  const store = useGovernmentStore();
+  const employees = store.getEmployees();
+
+  // Filtrer pour n'afficher que le cabinet (rôles de haut niveau)
+  const cabinetMembers = employees.filter(e =>
+    ["Gouverneur", "Lieutenant-Gouverneur", "Cabinet", "Secrétaire"].includes(e.grade) ||
+    ["Gouverneur", "Press Secretary", "Lieutenant-Gouverneur"].includes(e.role)
+  ).map(e => ({
+    role: e.role,
+    name: e.name,
+    image: "/placeholder.svg",
+    description: `Membre officiel du Gouvernement de San Andreas au sein du service ${e.service}.`,
+    icon: roleToIcon[e.role] || <UserCheck className="w-5 h-5" />
+  }));
+
   return (
     <Layout>
       <div className="bg-primary py-24 text-white relative overflow-hidden">

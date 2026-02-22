@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { governmentStore } from '@/lib/government-store';
 
 export type Role =
   | 'gouverneur'
@@ -155,6 +156,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [emergencyMode, setEmergencyMode] = useState(false);
 
   useEffect(() => {
+    return governmentStore.subscribe(() => {
+      setEmergencyMode(governmentStore.getEmergencyMode());
+    });
+  }, []);
+
+  useEffect(() => {
     const savedUser = localStorage.getItem('sa_gov_user');
     const savedEmergency = localStorage.getItem('sa_gov_emergency_mode');
 
@@ -307,7 +314,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logAction = (action: string, metadata?: any) => {
-    const logs = JSON.parse(localStorage.getItem('sa_gov_audit_logs') || '[]');
     const newLog = {
       id: Date.now().toString(),
       timestamp: new Date().toISOString(),
@@ -318,9 +324,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       action,
       metadata
     };
-    logs.unshift(newLog);
-    // Keep only last 1000 logs
-    localStorage.setItem('sa_gov_audit_logs', JSON.stringify(logs.slice(0, 1000)));
+    governmentStore.logAction(newLog);
   };
 
   const logout = () => {
@@ -340,7 +344,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const toggleEmergencyMode = () => {
     const newMode = !emergencyMode;
     setEmergencyMode(newMode);
-    localStorage.setItem('sa_gov_emergency_mode', String(newMode));
+    governmentStore.setEmergencyMode(newMode);
     logAction(newMode ? 'Activation Protocole Urgence' : 'Désactivation Protocole Urgence');
   };
 

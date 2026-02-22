@@ -46,22 +46,15 @@ import {
 import { cn } from "@/lib/utils";
 
 import { useAuth, Permission, ServiceID } from "@/contexts/AuthContext";
-
-const documents = [
-  { id: 'DEC-24-0042', title: 'Décret sur la régulation des commerces', type: 'Décret', status: 'Signé', author: 'Arthur Vance', date: '22 Mai 2024', service_id: 'CABINET', service_name: 'Cabinet', acl: [] },
-  { id: 'ARR-24-1102', title: 'Arrêté préfectoral zone de sécurité', type: 'Arrêté', status: 'En relecture', author: 'Jackson Teller', date: '21 Mai 2024', service_id: 'SECURITE_PUBLIQUE', service_name: 'Sécurité', acl: [] },
-  { id: 'RAP-24-0892', title: 'Rapport trimestriel économique Q1', type: 'Rapport', status: 'Brouillon', author: 'Elena Rodriguez', date: '19 Mai 2024', service_id: 'TRESOR_COMMERCE', service_name: 'Économie', acl: ['sec_etat'] },
-  { id: 'MAN-24-0012', title: 'Mandat d\'arrêt #SA-99', type: 'Mandat', status: 'Exécuté', author: 'Thomas Vercetti', date: '15 Mai 2024', service_id: 'JUSTICE', service_name: 'Justice', acl: ['sec_securite'] },
-  { id: 'LIC-24-0556', title: 'Licence commerciale #884', type: 'Licence', status: 'Publié', author: 'Lamar Davis', date: '12 Mai 2024', service_id: 'TRESOR_COMMERCE', service_name: 'Commerce', acl: [] },
-  { id: 'DOS-24-0142', title: 'Dossier Judiciaire Vercetti', type: 'Dossier', status: 'Archivé', author: 'System', date: '10 Mai 2024', service_id: 'JUSTICE', service_name: 'Justice', acl: [] },
-  { id: 'DEC-24-0041', title: 'Décret sur les subventions SAMS', type: 'Décret', status: 'Signé', author: 'Arthur Vance', date: '08 Mai 2024', service_id: 'CABINET', service_name: 'Cabinet', acl: [] },
-  { id: 'COM-24-0001', title: 'Note de service RH #01', type: 'RH', status: 'Publié', author: 'Lamar Davis', date: '05 Mai 2024', service_id: 'ADMINISTRATION_GENERALE', service_name: 'RH', acl: [] },
-];
+import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 
 const Documents = () => {
   const { user, hasPermission, logAction } = useAuth();
+  const store = useGovernmentStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
+
+  const documents = store.getGlobalDocuments();
 
   const filteredDocs = documents.filter(doc => {
     const matchesSearch = (doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

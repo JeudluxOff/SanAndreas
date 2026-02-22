@@ -12,64 +12,23 @@ import { cn } from "@/lib/utils";
 import { useState, useRef, useEffect } from "react";
 import { format, addDays, subDays, isSameDay, startOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
-
-const MOCK_EVENTS = [
-  {
-    id: 1,
-    time: '09:00 - 10:30',
-    title: 'Briefing Sécurité Hebdomadaire',
-    service: 'SECURITE_PUBLIQUE',
-    location: 'Salle de Crise - Cabinet',
-    participants: 8,
-    type: 'critical',
-    date: new Date()
-  },
-  {
-    id: 2,
-    time: '11:00 - 12:00',
-    title: 'Comité de Direction Sanitaire',
-    service: 'SANTE_HUMAINS',
-    location: 'Visioconférence',
-    participants: 12,
-    type: 'internal',
-    date: new Date()
-  },
-  {
-    id: 3,
-    time: '14:30 - 16:00',
-    title: 'Réunion Budgétaire - T2',
-    service: 'TRESOR_COMMERCE',
-    location: 'Sénat - Bureau 12',
-    participants: 5,
-    type: 'official',
-    date: addDays(new Date(), 1)
-  },
-  {
-    id: 4,
-    time: '16:30 - 17:30',
-    title: 'Point Presse Officiel',
-    service: 'COMMUNICATION',
-    location: 'Salle de Presse - RdC',
-    participants: 25,
-    type: 'public',
-    date: addDays(new Date(), -1)
-  },
-  {
-    id: 5,
-    time: '10:00 - 11:00',
-    title: 'Revue de Protocole',
-    service: 'CABINET',
-    location: 'Bureau du Gouverneur',
-    participants: 3,
-    type: 'internal',
-    date: addDays(new Date(), 2)
-  }
-];
+import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 
 export default function Calendar() {
   const { user, hasPermission, emergencyMode, toggleEmergencyMode } = useAuth();
+  const store = useGovernmentStore();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const scrollerRef = useRef<HTMLDivElement>(null);
+
+  const MOCK_EVENTS = store.getCalendarEvents().map(e => ({
+    ...e,
+    id: Math.random(),
+    time: e.time,
+    date: new Date(), // Simulé pour aujourd'hui dans ce contexte
+    participants: 5,
+    location: "Salle de réunion",
+    service: e.type.toUpperCase()
+  }));
 
   // Generate a range of dates for the scroller (15 days before, 30 days after)
   const startDate = subDays(new Date(), 15);

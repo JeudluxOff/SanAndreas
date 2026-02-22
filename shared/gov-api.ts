@@ -43,7 +43,10 @@ export interface GovDocument {
   title: string;
   type: string;
   date: string;
+  status: string;
+  author: string;
   archived: boolean;
+  acl: string[];
 }
 
 export interface GovDossier {
@@ -51,6 +54,7 @@ export interface GovDossier {
   title: string;
   status: string;
   archived: boolean;
+  acl: string[];
 }
 
 export interface GovEmployee {
@@ -78,10 +82,42 @@ export interface GovCalendarEvent {
   type: string;
 }
 
+export interface GovMessage {
+  id: string;
+  channel_id: string;
+  sender_id: string;
+  sender_name: string;
+  sender_role: string;
+  content: string;
+  timestamp: string;
+}
+
+export interface GovAuditLog {
+  id: string;
+  timestamp: string;
+  user_id: string;
+  user_name: string;
+  role: string;
+  service_id: string;
+  action: string;
+  metadata?: any;
+}
+
+export interface GovEconomyStat {
+  label: string;
+  value: string;
+  trend: string;
+  status: string;
+}
+
 export interface GovernmentStore {
   workspaces: Record<string, GovWorkspace>;
   employees: GovEmployee[];
   globalAnnouncements: GovAnnouncement[];
   calendarEvents: GovCalendarEvent[];
   notifications: GovNotification[];
+  messages: GovMessage[];
+  auditLogs: GovAuditLog[];
+  economyStats: GovEconomyStat[];
+  emergencyMode: boolean;
 }

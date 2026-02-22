@@ -21,12 +21,12 @@
         { "id": 1, "title": "Rappel : Réunion Hebdomadaire", "text": "Présence obligatoire de tous les membres demain à 9h.", "date": "Il y a 2h", "author": "Arthur V." }
       ],
       "documents": [
-        { "id": "DOC-CAB-001", "title": "Plan Stratégique 2024", "type": "PDF", "date": "15 Mai", "archived": false },
-        { "id": "DOC-CAB-002", "title": "Protocole Crise", "type": "DOCX", "date": "10 Mai", "archived": false }
+        { "id": "DEC-24-0042", "title": "Décret sur la régulation des commerces", "type": "Décret", "date": "22 Mai 2024", "status": "Signé", "author": "Arthur Vance", "archived": false, "acl": [] },
+        { "id": "DEC-24-0041", "title": "Décret sur les subventions SAMS", "type": "Décret", "date": "08 Mai 2024", "status": "Signé", "author": "Arthur Vance", "archived": false, "acl": [] }
       ],
       "dossiers": [
-        { "id": "DOS-CAB-88", "title": "Réforme Constitutionnelle", "status": "En cours", "archived": false },
-        { "id": "DOS-CAB-92", "title": "Budget État T3", "status": "À valider", "archived": false }
+        { "id": "DOS-CAB-88", "title": "Réforme Constitutionnelle", "status": "En cours", "archived": false, "acl": [] },
+        { "id": "DOS-CAB-92", "title": "Budget État T3", "status": "À valider", "archived": false, "acl": [] }
       ]
     },
     "securite_publique": {
@@ -50,12 +50,11 @@
         { "id": 1, "title": "Alerte : Manifestation prévue", "text": "Déploiement préventif aux alentours de la Mairie.", "date": "Il y a 1h", "author": "Jackson T." }
       ],
       "documents": [
-        { "id": "DOC-SEC-442", "title": "Inventaire Arsenal LSPD", "type": "XLSX", "date": "20 Mai", "archived": false },
-        { "id": "DOC-SEC-445", "title": "Carte Patrouilles", "type": "IMG", "date": "18 Mai", "archived": false }
+        { "id": "ARR-24-1102", "title": "Arrêté préfectoral zone de sécurité", "type": "Arrêté", "date": "21 Mai 2024", "status": "En relecture", "author": "Jackson Teller", "archived": false, "acl": [] }
       ],
       "dossiers": [
-        { "id": "DOS-SEC-1024", "title": "Opération Clean Street", "status": "En cours", "archived": false },
-        { "id": "DOS-SEC-1056", "title": "Achat Véhicules Intervention", "status": "Clos", "archived": false }
+        { "id": "DOS-SEC-1024", "title": "Opération Clean Street", "status": "En cours", "archived": false, "acl": [] },
+        { "id": "DOS-SEC-1056", "title": "Achat Véhicules Intervention", "status": "Clos", "archived": false, "acl": [] }
       ]
     },
     "justice": {
@@ -159,7 +158,7 @@
     }
   },
   "employees": [
-    { "name": "Arthur Vance", "role": "Gouverneur", "service": "Cabinet", "grade": "Exécutif", "status": "En service", "email": "a.vance@sa.gov", "joinDate": "Jan 2024" },
+    { "name": "Arthur Vance", "role": "Gouverneur", "service: ":"Cabinet", "grade": "Exécutif", "status": "En service", "email": "a.vance@sa.gov", "joinDate": "Jan 2024" },
     { "name": "Elena Rodriguez", "role": "Press Secretary", "service": "Cabinet", "grade": "Cabinet", "status": "En service", "email": "e.rodriguez@sa.gov", "joinDate": "Fév 2024" },
     { "name": "Jackson Teller", "role": "Secrétaire Sécurité", "service": "LSPD/LSSD", "grade": "Secrétaire", "status": "Hors service", "email": "j.teller@sa.gov", "joinDate": "Mar 2024" },
     { "name": "Thomas Vercetti", "role": "Secrétaire Justice", "service": "Justice", "grade": "Secrétaire", "status": "En service", "email": "t.vercetti@sa.gov", "joinDate": "Mar 2024" },
@@ -168,19 +167,28 @@
     { "name": "Julian Frost", "role": "Secrétaire Santé", "service": "Santé & Social", "grade": "Secrétaire", "status": "En service", "email": "j.frost@sa.gov", "joinDate": "Jan 2024" }
   ],
   "globalAnnouncements": [
-    { "id": 1, "title": "Note de Service #24-05", "text": "Nouvelles consignes pour la rédaction des décrets officiels.", "date": "Hier" },
+    { "id": 1, "title": "Note de Service #24-05", "text: ":"Nouvelles consignes pour la rédaction des décrets officiels.", "date": "Hier" },
     { "id": 2, "title": "Maintenance Système", "text": "L'intranet sera indisponible dimanche de 02h à 04h.", "date": "19 Mai" }
   ],
   "calendarEvents": [
     { "time": "09:00", "title": "Briefing Sécurité", "type": "securite" },
     { "time": "11:30", "title": "Réunion Budget 2025", "type": "economie" },
     { "time": "14:00", "title": "Audience Publique", "type": "justice" },
-    { "time": "16:30", "title": "Point Presse Gouverneur", "type": "cabinet" }
+    { "time": "16:30", "title": "Point Presse Gouverneur", "type: ":"cabinet" }
   ],
   "notifications": [
-    { "id": 1, "type": "validation", "text": "Décret #SA-2024-042 en attente de signature", "time": "il y a 2h", "priority": "high", "service_id": "CABINET" },
+    { "id": 1, "type: ":"validation", "text": "Décret #SA-2024-042 en attente de signature", "time": "il y a 2h", "priority": "high", "service_id": "CABINET" },
     { "id": 2, "type": "assignment", "text": "Nouveau dossier judiciaire assigné #JD-8941", "time": "il y a 5h", "priority": "medium", "service_id": "JUSTICE" },
     { "id": 3, "type": "meeting", "text": "Réunion de cabinet demain à 09:00", "time": "il y a 1j", "priority": "low", "service_id": "CABINET" },
     { "id": 4, "type": "system", "text": "Mise à jour des protocoles de sécurité", "time": "il y a 2j", "priority": "medium", "service_id": "SECURITE_PUBLIQUE" }
-  ]
+  ],
+  "messages": [],
+  "auditLogs": [],
+  "economyStats": [
+    { "label": "PIB de l'État", "value": "$4.2B", "trend": "+2.4%", "status": "up" },
+    { "label": "Taux de Chômage", "value": "3.8%", "trend": "-0.5%", "status": "down" },
+    { "label": "Inflation Annuelle", "value": "2.1%", "trend": "+0.1%", "status": "up" },
+    { "label": "Dette Publique", "value": "$1.2B", "trend": "-1.2%", "status": "down" }
+  ],
+  "emergencyMode": false
 }

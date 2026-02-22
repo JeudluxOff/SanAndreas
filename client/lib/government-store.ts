@@ -6,7 +6,9 @@ import {
   GovAnnouncement, 
   GovDocument, 
   GovDossier,
-  GovNotification
+  GovNotification,
+  GovMessage,
+  GovAuditLog
 } from '@shared/gov-api';
 
 const STORE_KEY = 'gov_intranet_store';
@@ -17,7 +19,10 @@ const INITIAL_DATA: GovernmentStore = {
   employees: [],
   globalAnnouncements: [],
   calendarEvents: [],
-  notifications: []
+  notifications: [],
+  messages: [],
+  auditLogs: [],
+  emergencyMode: false
 };
 
 class GovernmentStoreManager {
@@ -112,7 +117,38 @@ class GovernmentStoreManager {
   // Calendar
   getCalendarEvents() { return this.data.calendarEvents; }
 
-  // Generic helpers for workspace items
+  // Messages
+  getMessages(channelId: string) {
+    return this.data.messages.filter(m => m.channel_id === channelId);
+  }
+  createMessage(msg: GovMessage) {
+    this.data.messages.push(msg);
+    this.save();
+  }
+
+  // Audit
+  getAuditLogs() { return this.data.auditLogs; }
+  logAction(log: GovAuditLog) {
+    this.data.auditLogs.unshift(log);
+    this.save();
+  }
+
+  // Emergency Mode
+  getEmergencyMode() { return this.data.emergencyMode; }
+  setEmergencyMode(mode: boolean) {
+    this.data.emergencyMode = mode;
+    this.save();
+  }
+
+  // Documents
+  getGlobalDocuments() {
+    return Object.values(this.data.workspaces).flatMap(ws => (ws.documents || []).map(d => ({
+      ...d,
+      service_name: ws.name,
+      service_id: Object.keys(this.data.workspaces).find(key => this.data.workspaces[key] === ws)?.toUpperCase()
+    })));
+  }
+
   createDocument(serviceId: string, doc: GovDocument) {
     const ws = this.getWorkspace(serviceId);
     if (ws) {
@@ -135,6 +171,28 @@ class GovernmentStoreManager {
       ws.documents = ws.documents.filter(d => d.id !== docId);
       this.save();
     }
+  }
+
+  // Dossiers
+  getGlobalDossiers() {
+    return Object.values(this.data.workspaces).flatMap(ws => (ws.dossiers || []).map(d => ({
+      ...d,
+      service_name: ws.name,
+      service_id: Object.keys(this.data.workspaces).find(key => this.data.workspaces[key] === ws)?.toUpperCase()
+    })));
+  }
+
+  getDossier(id: string) {
+    for (const [wsKey, ws] of Object.entries(this.data.workspaces)) {
+      const dossier = ws.dossiers?.find(d => d.id === id);
+      if (dossier) return {
+        ...dossier,
+        service_name: ws.name,
+        service_id: wsKey.toUpperCase(),
+        owner: ws.staff?.[0]?.name || "Responsable Service"
+      };
+    }
+    return null;
   }
 
   createDossier(serviceId: string, dossier: GovDossier) {

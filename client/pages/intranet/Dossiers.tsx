@@ -22,19 +22,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useAuth, ServiceID } from "@/contexts/AuthContext";
-
-const mockDossiers = [
-  { id: 'SA-2024-0142', title: 'Plan d\'Urbanisme Los Santos 2024', status: 'En cours', priority: 'Haute', service_id: 'CABINET' as ServiceID, service_name: 'Cabinet', date: '12 Avr 2024', confidential: true, acl: ['sec_etat'] },
-  { id: 'JD-2024-0894', title: 'Procédure Vercetti vs État', status: 'À valider', priority: 'Critique', service_id: 'JUSTICE' as ServiceID, service_name: 'Justice', date: '18 Mai 2024', confidential: true, acl: ['sec_securite'] },
-  { id: 'SEC-2024-0012', title: 'Rapport Sécurité Hebdomadaire', status: 'Archivé', priority: 'Moyenne', service_id: 'SECURITE_PUBLIQUE' as ServiceID, service_name: 'Sécurité', date: '15 Mai 2024', confidential: false, acl: [] },
-  { id: 'ECO-2024-0556', title: 'Subvention Entreprise #88', status: 'Publié', priority: 'Basse', service_id: 'TRESOR_COMMERCE' as ServiceID, service_name: 'Économie', date: '12 Mai 2024', confidential: false, acl: [] },
-  { id: 'SAN-2024-0021', title: 'Audit Hôpitaux Publics', status: 'En cours', priority: 'Haute', service_id: 'SANTE_HUMAINS' as ServiceID, service_name: 'Santé', date: '20 Mai 2024', confidential: false, acl: [] },
-  { id: 'INT-2024-0005', title: 'Contre-espionnage Zone Nord', status: 'En cours', priority: 'Critique', service_id: 'SECURITE_INTERIEURE' as ServiceID, service_name: 'Sécurité Intérieure', date: '21 Mai 2024', confidential: true, acl: ['governor'] },
-];
+import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 
 const Dossiers = () => {
   const { user, hasPermission, logAction } = useAuth();
+  const store = useGovernmentStore();
   const [searchTerm, setSearchTerm] = useState("");
+
+  const mockDossiers = store.getGlobalDossiers();
 
   const filteredDossiers = mockDossiers.filter(dossier => {
     const matchesSearch = (dossier.title.toLowerCase().includes(searchTerm.toLowerCase()) || 

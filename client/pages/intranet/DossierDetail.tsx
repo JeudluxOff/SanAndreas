@@ -31,48 +31,39 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
 import { useAuth, Permission, ServiceID } from "@/contexts/AuthContext";
+import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 
 const DossierDetail = () => {
   const { user, hasPermission, logAction, canAccessService } = useAuth();
   const { id } = useParams<{ id: string }>();
+  const store = useGovernmentStore();
 
-  // Mock data for a single dossier
+  const dossierData = store.getDossier(id || "");
+
+  if (!dossierData) return null;
+
+  // Adapt store data to local UI structure if needed, or use directly
   const dossier = {
-    id: "SA-2024-0142",
-    title: "Plan d'Urbanisme Intégré - Los Santos 2024-2030",
-    status: "En cours",
-    priority: "Haute",
+    ...dossierData,
+    priority: "Haute", // Store could be enhanced with priority later
     creationDate: "12 Avril 2024",
     deadline: "30 Juin 2024",
-    service_id: "CABINET" as ServiceID,
-    service_name: "Cabinet du Gouverneur",
-    owner: "Arthur Vance",
-    is_confidential: true,
-    description: "Révision complète du plan d'urbanisme pour la zone sud de Los Santos, incluant la revitalisation des quais et l'amélioration des infrastructures de transport en commun. Ce dossier nécessite une coordination avec les services de Sécurité Publique pour les nouveaux accès d'urgence.",
+    owner: dossierData.owner,
+    is_confidential: dossierData.status === "Confidentiel",
+    description: "Dossier gouvernemental officiel synchronisé.",
     progress: 65,
-    acl: ['sec_etat', 'sec_securite'],
     participants: [
       { id: 'governor', name: "Arthur Vance", role: "Gouverneur" },
-      { id: 'press', name: "Lamar Davis", role: "Press Secretary" },
-      { id: 'sec_securite', name: "Jackson Teller", role: "Secrétaire Sécurité" }
+      { id: 'press', name: "Lamar Davis", role: "Press Secretary" }
     ],
-    documents: [
-      { id: "DEC-24-0042", title: "Décret d'Urbanisme Préliminaire", status: "Signé", date: "15 Mai 2024" },
-      { id: "RAP-24-1021", title: "Rapport d'Impact Environnemental", status: "À valider", date: "20 Mai 2024" },
-      { id: "MAP-24-0001", title: "Plans Topographiques Phase 1", status: "Brouillon", date: "22 Mai 2024" }
-    ],
+    documents: store.getGlobalDocuments().filter(d => d.id.startsWith('DOC')), // Simplified link
     timeline: [
-      { date: "22 Mai, 14:30", user: "Arthur Vance", action: "Ajout du document 'Plans Topographiques Phase 1'", type: "file" },
-      { date: "20 Mai, 09:15", user: "Jackson Teller", action: "Validation des protocoles de sécurité", type: "check" },
-      { date: "18 Mai, 11:00", user: "Lamar Davis", action: "Note interne: Problème d'accès zone portuaire", type: "note" },
-      { date: "15 Mai, 16:45", user: "Arthur Vance", action: "Signature du Décret d'Urbanisme", type: "sign" },
-      { date: "12 Avril, 08:00", user: "System", action: "Création du dossier", type: "system" }
+      { date: "22 Mai, 14:30", user: dossierData.owner, action: "Synchronisation effectuée", type: "system" }
     ]
   };
 
   const canView = user?.role === 'gouverneur' ||
                   dossier.service_id === user?.service_id ||
-                  dossier.participants.some(p => p.id === user?.id) ||
                   (user?.id && dossier.acl.includes(user.id));
 
   if (!canView) {

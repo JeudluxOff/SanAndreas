@@ -42,7 +42,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, ServiceID } from "@/contexts/AuthContext";
+import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 
 const allChannels = [
   { id: 'general', name: 'annonces-officielles', type: 'announcement', icon: <Volume2 className="w-4 h-4" />, service_id: 'CABINET' as ServiceID },
@@ -61,15 +62,9 @@ const directMessages = [
   { id: 'sec_justice', name: 'Thomas Vercetti', role: 'Secrétaire Justice', status: 'online' },
 ];
 
-const messages = [
-  { id: 1, user: 'Arthur Vance', role: 'Gouverneur', text: 'Bonjour à tous, une réunion de cabinet est prévue à 14h00 pour discuter du plan d\'urbanisme.', time: '09:15', isMe: false },
-  { id: 2, user: 'Elena Rodriguez', role: 'Lt-Gouv', text: 'Bien reçu, je prépare le communiqué de presse préliminaire.', time: '09:20', isMe: false },
-  { id: 3, user: 'James Marshall', role: 'Sec. État', text: 'Coordination administrative en cours avec tous les services.', time: '09:25', isMe: false },
-  { id: 4, user: 'Moi', role: 'Secrétaire', text: 'J\'ai mis à jour les dossiers correspondants sur l\'intranet.', time: '09:30', isMe: true },
-];
-
 const Communication = () => {
   const { user, canAccessService, hasPermission, logAction, updateStatus } = useAuth();
+  const store = useGovernmentStore();
 
   const statusColors = {
     available: 'bg-emerald-500',
@@ -92,17 +87,36 @@ const Communication = () => {
   const [activeChannel, setActiveChannel] = useState(visibleChannels[0]);
   const [message, setMessage] = useState("");
 
+  const messages = store.getMessages(activeChannel.id).map(m => ({
+    id: m.id,
+    user: m.sender_name,
+    role: m.sender_role,
+    text: m.content,
+    time: new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    isMe: m.sender_id === user?.id
+  }));
+
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (!message.trim() || !user) return;
 
     if (activeChannel.type === 'announcement' && !hasPermission('communication:announcements_post')) {
       alert("Vous n'avez pas l'autorisation de poster dans le salon des annonces officielles.");
       return;
     }
 
+    const newMessage = {
+      id: `MSG-${Date.now()}`,
+      channel_id: activeChannel.id,
+      sender_id: user.id,
+      sender_name: user.name,
+      sender_role: user.role,
+      content: message.trim(),
+      timestamp: new Date().toISOString()
+    };
+
+    store.createMessage(newMessage);
     logAction('Envoi de message', { channel: activeChannel.name });
-    // Mock sending message
     setMessage("");
   };
 
