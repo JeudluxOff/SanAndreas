@@ -304,6 +304,26 @@ class GovernmentStoreManager {
         owner: ws.staff?.[0]?.name || "Responsable Service"
       };
     }
+
+    // Check Legal Store
+    const legalCase = legalStore.getCase(id);
+    if (legalCase) {
+      return {
+        id: legalCase.id,
+        title: legalCase.title,
+        status: legalCase.status,
+        archived: legalCase.status === 'Archivé',
+        acl: [],
+        priority: 'Normale',
+        creationDate: new Date(legalCase.created_at).toLocaleDateString(),
+        description: legalCase.description,
+        progress: legalCase.progression || 0,
+        service_name: 'Cabinet Juridique',
+        service_id: 'JUSTICE',
+        owner: 'Victoria Cole'
+      };
+    }
+
     return null;
   }
 

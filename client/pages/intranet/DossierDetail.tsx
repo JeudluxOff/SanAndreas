@@ -32,6 +32,9 @@ import { cn } from "@/lib/utils";
 
 import { useAuth, Permission, ServiceID } from "@/contexts/AuthContext";
 import { useGovernmentStore } from "@/hooks/useGovernmentStore";
+import { legalStore } from "@/lib/legal-store";
+import { Evidence } from "@shared/api";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 const DossierDetail = () => {
   const { user, hasPermission, logAction, canAccessService } = useAuth();
@@ -39,8 +42,12 @@ const DossierDetail = () => {
   const store = useGovernmentStore();
 
   const dossierData = store.getDossier(id || "");
+  const [selectedEviId, setSelectedEviId] = useState<string | null>(null);
+  const [showEviModal, setShowEviModal] = useState(false);
 
   if (!dossierData) return null;
+
+  const legalEvidence = id ? legalStore.getEvidence(id) : [];
 
   // Adapt store data to local UI structure if needed, or use directly
   const dossier = {
@@ -54,6 +61,7 @@ const DossierDetail = () => {
     progress: dossierData.progress || 0,
     participants: dossierData.participants || [],
     documents: store.getGlobalDocuments().filter(d => d.id.startsWith('DOC')), // Simplified link
+    evidence: legalEvidence,
     timeline: [
       { date: "22 Mai, 14:30", user: dossierData.owner, action: "Synchronisation effectuée", type: "system" }
     ]
@@ -193,9 +201,9 @@ const DossierDetail = () => {
                 <TabsTrigger value="notes" className="font-bold uppercase text-[10px] tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white">
                   Notes Internes
                 </TabsTrigger>
-                <TabsTrigger value="attachments" className="font-bold uppercase text-[10px] tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white">
-                  Pièces Jointes
-                </TabsTrigger>
+              <TabsTrigger value="attachments" className="font-bold uppercase text-[10px] tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white">
+                Pièces Jointes / Preuves ({dossier.evidence.length})
+              </TabsTrigger>
               </TabsList>
               
               <TabsContent value="documents" className="mt-4">
@@ -256,10 +264,58 @@ const DossierDetail = () => {
               </TabsContent>
 
               <TabsContent value="attachments" className="mt-4">
-                <Card className="border-none shadow-md p-6 flex flex-col items-center justify-center text-slate-400 py-12">
-                  <Paperclip className="w-12 h-12 mb-4 opacity-20" />
-                  <p className="font-bold uppercase tracking-widest text-xs mb-2">Aucune pièce jointe</p>
-                  <Button variant="outline" size="sm" className="font-bold uppercase text-[9px]">Téléverser</Button>
+                <Card className="border-none shadow-md overflow-hidden">
+                  <div className="divide-y divide-slate-100">
+                    {dossier.evidence.map((evi) => (
+                      <div key={evi.id} className="p-4 hover:bg-slate-50 transition-all flex flex-col gap-4 group cursor-pointer" onClick={() => { setSelectedEviId(evi.id); setShowEviModal(true); }}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
+                              <Paperclip className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 uppercase group-hover:text-primary transition-colors">{evi.name}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-[10px] font-mono text-primary font-bold tracking-widest">{evi.id}</span>
+                                <span className="w-1 h-1 rounded-full bg-slate-300" />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase">{evi.type}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                             {evi.images && evi.images.length > 0 && (
+                               <div className="flex -space-x-2">
+                                 {evi.images.slice(0, 3).map((img, i) => (
+                                   <div key={i} className="w-6 h-6 rounded-full border-2 border-white overflow-hidden bg-slate-100">
+                                      <img src={img} alt="" className="w-full h-full object-cover" />
+                                   </div>
+                                 ))}
+                                 {evi.images.length > 3 && (
+                                   <div className="w-6 h-6 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[8px] font-bold text-slate-600">
+                                     +{evi.images.length - 3}
+                                   </div>
+                                 )}
+                               </div>
+                             )}
+                             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 group-hover:text-primary" onClick={(e) => { e.stopPropagation(); window.open(evi.file_url, '_blank'); }}>
+                               <Download className="w-4 h-4" />
+                             </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {dossier.evidence.length === 0 && (
+                      <div className="p-10 flex flex-col items-center justify-center text-slate-400 py-12">
+                        <Paperclip className="w-12 h-12 mb-4 opacity-20" />
+                        <p className="font-bold uppercase tracking-widest text-xs mb-2">Aucune pièce jointe / preuve</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4 bg-slate-50 border-t border-slate-100">
+                    <Button variant="outline" className="w-full border-dashed border-2 border-slate-200 font-bold uppercase text-[10px] tracking-widest hover:border-primary hover:text-primary hover:bg-white transition-all">
+                      <Plus className="w-4 h-4 mr-2" /> Attacher une preuve
+                    </Button>
+                  </div>
                 </Card>
               </TabsContent>
             </Tabs>
@@ -370,6 +426,62 @@ const DossierDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Evidence View Modal */}
+      <Dialog open={showEviModal} onOpenChange={setShowEviModal}>
+        <DialogContent className="max-w-4xl bg-white rounded-3xl p-8 border-none shadow-2xl overflow-y-auto max-h-[90vh]">
+          {selectedEviId && (
+            <>
+              <DialogHeader className="flex flex-row items-center justify-between space-y-0 text-left border-b pb-6">
+                <div className="space-y-1">
+                  <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">
+                    {dossier.evidence.find(e => e.id === selectedEviId)?.name}
+                  </DialogTitle>
+                  <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    #{selectedEviId} • {dossier.evidence.find(e => e.id === selectedEviId)?.type}
+                  </DialogDescription>
+                </div>
+                <Badge className="bg-amber-600 text-white font-black uppercase tracking-widest px-3 py-1 text-[9px]">
+                  {dossier.evidence.find(e => e.id === selectedEviId)?.confidentiality}
+                </Badge>
+              </DialogHeader>
+
+              <div className="my-8 p-8 bg-slate-50 rounded-2xl border border-slate-100 min-h-[150px] space-y-6">
+                <div className="whitespace-pre-wrap text-sm text-slate-700 font-medium leading-relaxed text-left">
+                  {linkify(dossier.evidence.find(e => e.id === selectedEviId)?.content || "AUCUNE DESCRIPTION DISPONIBLE.")}
+                </div>
+
+                {dossier.evidence.find(e => e.id === selectedEviId)?.images && (dossier.evidence.find(e => e.id === selectedEviId)?.images?.length || 0) > 0 && (
+                  <div className="grid grid-cols-2 gap-4 mt-6">
+                    {dossier.evidence.find(e => e.id === selectedEviId)?.images?.map((img, i) => (
+                      <div key={i} className="relative group rounded-xl overflow-hidden aspect-video border border-slate-200 shadow-sm">
+                        <img src={img} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Button variant="ghost" size="icon" className="text-white" onClick={() => window.open(img, '_blank')}>
+                            <Eye className="w-5 h-5" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <DialogFooter className="flex justify-between items-center w-full">
+                <Button variant="outline" size="sm" className="font-bold uppercase text-[10px] tracking-widest h-10 px-6 gap-2">
+                  <Download className="w-4 h-4" /> Télécharger
+                </Button>
+                <Button
+                  onClick={() => setShowEviModal(false)}
+                  className="bg-primary text-white font-bold uppercase text-[10px] tracking-widest h-10 px-8 rounded-xl"
+                >
+                  Fermer
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </IntranetLayout>
   );
 };

@@ -91,7 +91,7 @@ const DossierDetail = () => {
 
   // Form states
   const [newDoc, setNewDoc] = React.useState({ title: '', category: 'Conclusions' as DocumentCategory, content: '' });
-  const [newEvi, setNewEvi] = React.useState({ name: '', type: 'Document', content: '', confidentiality: 'Normal' as ConfidentialityLevel });
+  const [newEvi, setNewEvi] = React.useState({ name: '', type: 'Document', content: '', images: [] as string[], confidentiality: 'Normal' as ConfidentialityLevel });
   const [newTask, setNewTask] = React.useState({ title: '', priority: 'Moyenne' as any });
   const [progression, setProgression] = React.useState(dossier?.progression || 0);
   const [stepDescription, setStepDescription] = React.useState(dossier?.step_description || '');
@@ -205,6 +205,7 @@ const DossierDetail = () => {
       name: newEvi.name,
       type: newEvi.type,
       content: newEvi.content,
+      images: newEvi.images,
       file_url: '#',
       confidentiality: newEvi.confidentiality,
       uploaded_by: user.name,
@@ -213,7 +214,7 @@ const DossierDetail = () => {
     };
     store.addEvidence(evi);
     setShowEviModal(false);
-    setNewEvi({ name: '', type: 'Document', content: '', confidentiality: 'Normal' });
+    setNewEvi({ name: '', type: 'Document', content: '', images: [], confidentiality: 'Normal' });
   };
 
   const handleCreateTask = () => {
@@ -921,6 +922,54 @@ const DossierDetail = () => {
                   className="bg-slate-50 border-none rounded-xl min-h-[150px] text-sm font-medium"
                 />
               </div>
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Photos / Images (URLs)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="https://..."
+                    className="bg-slate-50 border-none rounded-xl h-12 text-sm"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const val = (e.target as HTMLInputElement).value;
+                        if (val) {
+                          setNewEvi({...newEvi, images: [...newEvi.images, val]});
+                          (e.target as HTMLInputElement).value = '';
+                        }
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    onClick={(e) => {
+                      const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                      if (input.value) {
+                        setNewEvi({...newEvi, images: [...newEvi.images, input.value]});
+                        input.value = '';
+                      }
+                    }}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-600 h-12 px-4 rounded-xl"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {newEvi.images.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {newEvi.images.map((img, i) => (
+                      <div key={i} className="relative group">
+                        <img src={img} alt="" className="w-16 h-16 object-cover rounded-lg border border-slate-200" />
+                        <button
+                          onClick={() => setNewEvi({...newEvi, images: newEvi.images.filter((_, idx) => idx !== i)})}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2 text-left">
                   <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</Label>
@@ -1041,10 +1090,25 @@ const DossierDetail = () => {
                   </DialogDescription>
                 </DialogHeader>
 
-                <div className="my-8 p-8 bg-slate-50 rounded-2xl border border-slate-100 min-h-[200px]">
+                <div className="my-8 p-8 bg-slate-50 rounded-2xl border border-slate-100 min-h-[200px] space-y-6">
                   <div className="whitespace-pre-wrap text-sm text-slate-700 font-medium leading-relaxed text-left">
                     {linkify(evidences.find(e => e.id === selectedEviId)?.content || "AUCUNE DESCRIPTION DISPONIBLE.")}
                   </div>
+
+                  {evidences.find(e => e.id === selectedEviId)?.images && (evidences.find(e => e.id === selectedEviId)?.images?.length || 0) > 0 && (
+                    <div className="grid grid-cols-2 gap-4 mt-6">
+                      {evidences.find(e => e.id === selectedEviId)?.images?.map((img, i) => (
+                        <div key={i} className="relative group rounded-xl overflow-hidden aspect-video border border-slate-200 shadow-sm">
+                          <img src={img} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Button variant="ghost" size="icon" className="text-white" onClick={() => window.open(img, '_blank')}>
+                              <Eye className="w-5 h-5" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <DialogFooter>

@@ -16,7 +16,9 @@ import {
   ChevronRight,
   Zap,
   Clock,
-  FileEdit
+  FileEdit,
+  Image as ImageIcon,
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -58,6 +60,7 @@ const EvidenceVault = () => {
     case_id: '',
     type: 'Document',
     content: '',
+    images: [] as string[],
     confidentiality: 'Normal' as ConfidentialityLevel
   });
   const [editingEvi, setEditingEvi] = React.useState({
@@ -65,6 +68,7 @@ const EvidenceVault = () => {
     case_id: '',
     type: 'Document',
     content: '',
+    images: [] as string[],
     confidentiality: 'Normal' as ConfidentialityLevel
   });
 
@@ -90,6 +94,7 @@ const EvidenceVault = () => {
       name: newEvidence.name,
       type: newEvidence.type,
       content: newEvidence.content,
+      images: newEvidence.images,
       file_url: '#',
       confidentiality: newEvidence.confidentiality,
       uploaded_by: user.name,
@@ -100,7 +105,7 @@ const EvidenceVault = () => {
     legalStore.addEvidence(evi);
     setEvidence(legalStore.getCases().flatMap(c => legalStore.getEvidence(c.id)));
     setShowUploadModal(false);
-    setNewEvidence({ name: '', case_id: '', type: 'Document', content: '', confidentiality: 'Normal' });
+    setNewEvidence({ name: '', case_id: '', type: 'Document', content: '', images: [], confidentiality: 'Normal' });
 
     legalStore.logAction({
       id: `LOG-${Date.now()}`,
@@ -127,6 +132,7 @@ const EvidenceVault = () => {
       case_id: editingEvi.case_id,
       type: editingEvi.type,
       content: editingEvi.content,
+      images: editingEvi.images,
       confidentiality: editingEvi.confidentiality
     };
 
@@ -206,6 +212,54 @@ const EvidenceVault = () => {
                   placeholder="DÉCRIVEZ LA PREUVE, AJOUTEZ DES LIENS..."
                   className="bg-slate-50 border-none rounded-xl min-h-[120px] text-sm font-medium"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Photos / Images (URLs)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="https://..."
+                    className="bg-slate-50 border-none rounded-xl h-12 text-sm"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const val = (e.target as HTMLInputElement).value;
+                        if (val) {
+                          setNewEvidence({...newEvidence, images: [...newEvidence.images, val]});
+                          (e.target as HTMLInputElement).value = '';
+                        }
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    onClick={(e) => {
+                      const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                      if (input.value) {
+                        setNewEvidence({...newEvidence, images: [...newEvidence.images, input.value]});
+                        input.value = '';
+                      }
+                    }}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-600 h-12 px-4 rounded-xl"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {newEvidence.images.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {newEvidence.images.map((img, i) => (
+                      <div key={i} className="relative group">
+                        <img src={img} alt="" className="w-16 h-16 object-cover rounded-lg border border-slate-200" />
+                        <button
+                          onClick={() => setNewEvidence({...newEvidence, images: newEvidence.images.filter((_, idx) => idx !== i)})}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -310,6 +364,54 @@ const EvidenceVault = () => {
                 />
               </div>
 
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Photos / Images (URLs)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="https://..."
+                    className="bg-slate-50 border-none rounded-xl h-12 text-sm"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const val = (e.target as HTMLInputElement).value;
+                        if (val) {
+                          setEditingEvi({...editingEvi, images: [...editingEvi.images, val]});
+                          (e.target as HTMLInputElement).value = '';
+                        }
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    onClick={(e) => {
+                      const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                      if (input.value) {
+                        setEditingEvi({...editingEvi, images: [...editingEvi.images, input.value]});
+                        input.value = '';
+                      }
+                    }}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-600 h-12 px-4 rounded-xl"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {editingEvi.images.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {editingEvi.images.map((img, i) => (
+                      <div key={i} className="relative group">
+                        <img src={img} alt="" className="w-16 h-16 object-cover rounded-lg border border-slate-200" />
+                        <button
+                          onClick={() => setEditingEvi({...editingEvi, images: editingEvi.images.filter((_, idx) => idx !== i)})}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</Label>
@@ -399,10 +501,25 @@ const EvidenceVault = () => {
                   </DialogDescription>
                 </DialogHeader>
 
-                <div className="my-8 p-8 bg-slate-50 rounded-2xl border border-slate-100 min-h-[250px]">
+                <div className="my-8 p-8 bg-slate-50 rounded-2xl border border-slate-100 min-h-[250px] space-y-6">
                   <div className="whitespace-pre-wrap text-sm text-slate-700 font-medium leading-relaxed text-left">
                     {linkify(evidence.find(e => e.id === selectedEviId)?.content || "AUCUNE DESCRIPTION DISPONIBLE.")}
                   </div>
+
+                  {evidence.find(e => e.id === selectedEviId)?.images && (evidence.find(e => e.id === selectedEviId)?.images?.length || 0) > 0 && (
+                    <div className="grid grid-cols-2 gap-4 mt-6">
+                      {evidence.find(e => e.id === selectedEviId)?.images?.map((img, i) => (
+                        <div key={i} className="relative group rounded-xl overflow-hidden aspect-video border border-slate-200 shadow-sm">
+                          <img src={img} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Button variant="ghost" size="icon" className="text-white" onClick={() => window.open(img, '_blank')}>
+                              <Eye className="w-5 h-5" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <DialogFooter className="flex justify-between items-center w-full">
@@ -416,6 +533,7 @@ const EvidenceVault = () => {
                           case_id: evi.case_id,
                           type: evi.type,
                           content: evi.content || '',
+                          images: evi.images || [],
                           confidentiality: evi.confidentiality
                         });
                         setShowViewModal(false);
@@ -512,7 +630,14 @@ const EvidenceVault = () => {
                         </div>
                         <div>
                           <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{item.name}</p>
-                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.id}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.id}</p>
+                            {item.images && item.images.length > 0 && (
+                              <Badge variant="outline" className="text-[7px] font-black uppercase h-4 px-1 gap-1 border-amber-200 text-amber-600 bg-amber-50">
+                                <ImageIcon className="w-2.5 h-2.5" /> {item.images.length} PHOTO{item.images.length > 1 ? 'S' : ''}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </td>
