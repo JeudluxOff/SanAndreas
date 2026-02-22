@@ -42,11 +42,15 @@ const Dossiers = () => {
   const location = useLocation();
   const [showCreateModal, setShowCreateModal] = React.useState(false);
   const [showQuickClientModal, setShowQuickClientModal] = React.useState(false);
+  const [showConflictModal, setShowConflictModal] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [conflictSearchQuery, setConflictSearchQuery] = React.useState('');
   const [conflictResult, setConflictResult] = React.useState<'none' | 'conflict' | null>(null);
   const [error, setError] = React.useState<string | null>(null);
-  const [newClientName, setNewClientName] = React.useState('');
+  const [newClient, setNewClient] = React.useState<Partial<Client>>({
+    name: '',
+    type: 'Individu'
+  });
 
   // Handle "action=new" from Header
   React.useEffect(() => {
@@ -70,18 +74,18 @@ const Dossiers = () => {
   const [clients, setClients] = React.useState(legalStore.getClients());
 
   const handleQuickAddClient = () => {
-    if (!newClientName || !user) return;
+    if (!newClient.name || !user) return;
     const client: Client = {
       id: `cli-${Date.now()}`,
-      name: newClientName,
-      type: 'Individu',
+      name: newClient.name,
+      type: (newClient.type as 'Individu' | 'Entreprise') || 'Individu',
       created_at: new Date().toISOString().split('T')[0]
     };
     legalStore.createClient(client);
     setClients(legalStore.getClients());
     setNewCase(prev => ({ ...prev, client_id: client.id }));
     setShowQuickClientModal(false);
-    setNewClientName('');
+    setNewClient({ name: '', type: 'Individu' });
   };
 
   const handleConflictCheck = () => {
@@ -172,6 +176,13 @@ const Dossiers = () => {
               <Filter className="w-4 h-4" /> Filtrer
             </Button>
             <Button
+              onClick={() => setShowQuickClientModal(true)}
+              variant="outline"
+              className="border-[#c1a461] text-[#c1a461] text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2"
+            >
+              <Plus className="w-4 h-4" /> Nouveau Client
+            </Button>
+            <Button
               onClick={() => setShowConflictModal(true)}
               className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2"
             >
@@ -235,16 +246,29 @@ const Dossiers = () => {
                       <p className="text-[10px] font-bold text-emerald-700/60 uppercase tracking-widest mt-1">L'entité n'est pas présente dans nos dossiers actuels. Vous pouvez procéder à la création du dossier.</p>
                     </div>
                   </div>
-                  <Button
-                    onClick={() => {
-                      setShowConflictModal(false);
-                      setShowCreateModal(true);
-                    }}
-                    className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest h-12 rounded-xl shadow-lg"
-                  >
-                    Procéder à la Création
-                  </Button>
-                </div>
+                    <div className="flex gap-4 mt-4">
+                      <Button
+                        onClick={() => {
+                          setShowConflictModal(false);
+                          setShowCreateModal(true);
+                        }}
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest h-12 rounded-xl shadow-lg"
+                      >
+                        Procéder à la Création
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setNewClient({ ...newClient, name: conflictSearchQuery });
+                          setShowConflictModal(false);
+                          setShowQuickClientModal(true);
+                        }}
+                        variant="outline"
+                        className="flex-1 border-emerald-200 text-emerald-700 font-black uppercase text-[10px] tracking-widest h-12 rounded-xl"
+                      >
+                        Ajouter Client uniquement
+                      </Button>
+                    </div>
+                  </div>
               )}
 
               {conflictResult === 'conflict' && (
@@ -390,11 +414,26 @@ const Dossiers = () => {
               <div className="space-y-2 text-left">
                 <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nom complet</Label>
                 <Input
-                  value={newClientName}
-                  onChange={(e) => setNewClientName(e.target.value)}
+                  value={newClient.name}
+                  onChange={(e) => setNewClient({ ...newClient, name: e.target.value })}
                   placeholder="EX: MICHEL FONTAINE..."
                   className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
                 />
+              </div>
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</Label>
+                <Select
+                  value={newClient.type}
+                  onValueChange={(val) => setNewClient({ ...newClient, type: val as any })}
+                >
+                  <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Individu">Individu</SelectItem>
+                    <SelectItem value="Entreprise">Entreprise</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <DialogFooter>
@@ -407,7 +446,7 @@ const Dossiers = () => {
               </Button>
               <Button
                 onClick={handleQuickAddClient}
-                disabled={!newClientName}
+                disabled={!newClient.name}
                 className="bg-[#c1a461] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl shadow-xl shadow-[#c1a461]/10"
               >
                 Ajouter Client
