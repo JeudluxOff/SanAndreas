@@ -261,6 +261,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           name: 'Administrateur Système',
           service_name: 'Services Techniques',
           grade: 'Administrateur Global'
+        },
+        'admin_avocat': {
+          role: 'admin',
+          service_id: 'JUSTICE',
+          name: 'Julian Harrington',
+          service_name: 'Harrington & Cole',
+          grade: 'Associé Fondateur & Admin'
         }
       };
 
