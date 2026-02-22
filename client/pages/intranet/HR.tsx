@@ -39,22 +39,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-
-const employees = [
-  { name: "Arthur Vance", role: "Gouverneur", service: "Cabinet", grade: "Exécutif", status: "En service", email: "a.vance@sa.gov", joinDate: "Jan 2024" },
-  { name: "Elena Rodriguez", role: "Press Secretary", service: "Cabinet", grade: "Cabinet", status: "En service", email: "e.rodriguez@sa.gov", joinDate: "Fév 2024" },
-  { name: "Jackson Teller", role: "Secrétaire Sécurité", service: "LSPD/LSSD", grade: "Secrétaire", status: "Hors service", email: "j.teller@sa.gov", joinDate: "Mar 2024" },
-  { name: "Thomas Vercetti", role: "Secrétaire Justice", service: "Justice", grade: "Secrétaire", status: "En service", email: "t.vercetti@sa.gov", joinDate: "Mar 2024" },
-  { name: "Franklin Clinton", role: "Secrétaire Trésor", service: "Économie", grade: "Secrétaire", status: "En service", email: "f.clinton@sa.gov", joinDate: "Avr 2024" },
-  { name: "Lamar Davis", role: "Secrétaire Travail", service: "Commerce", grade: "Cabinet", status: "En service", email: "l.davis@sa.gov", joinDate: "Mai 2024" },
-  { name: "Julian Frost", role: "Secrétaire Santé", service: "Santé & Social", grade: "Secrétaire", status: "En service", email: "j.frost@sa.gov", joinDate: "Jan 2024" },
-];
+import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 
 const HR = () => {
   const { user, hasPermission, logAction } = useAuth();
+  const store = useGovernmentStore();
   const canManageUsers = hasPermission('admin:users_manage');
   const canManageRoles = hasPermission('admin:roles_manage');
   const [searchTerm, setSearchTerm] = useState("");
+
+  const employees = store.getEmployees();
 
   const statusLabels: Record<string, string> = {
     available: 'En service',

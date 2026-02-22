@@ -30,9 +30,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { UserStatus } from "@/contexts/AuthContext";
+import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 
 const Dashboard = () => {
   const { user, hasPermission, logAction, updateStatus, emergencyMode } = useAuth();
+  const store = useGovernmentStore();
 
   if (!user) return null;
 
@@ -50,21 +52,24 @@ const Dashboard = () => {
     offline: 'Hors service'
   };
 
-  const notifications = [
-    { id: 1, type: 'validation', text: 'Décret #SA-2024-042 en attente de signature', time: 'il y a 2h', priority: 'high', service_id: 'CABINET' },
-    { id: 2, type: 'assignment', text: 'Nouveau dossier judiciaire assigné #JD-8941', time: 'il y a 5h', priority: 'medium', service_id: 'JUSTICE' },
-    { id: 3, type: 'meeting', text: 'Réunion de cabinet demain à 09:00', time: 'il y a 1j', priority: 'low', service_id: 'CABINET' },
-    { id: 4, type: 'system', text: 'Mise à jour des protocoles de sécurité', time: 'il y a 2j', priority: 'medium', service_id: 'SECURITE_PUBLIQUE' },
-  ];
+  const notifications = store.getNotifications();
+  const announcements = store.getGlobalAnnouncements();
+  const calendarEvents = store.getCalendarEvents();
 
-  const recentFiles = [
-    { id: 'SA-2024-0142', title: 'Plan d\'Urbanisme Los Santos', status: 'En cours', service: 'Urbanisme', date: '20 Mai 2024', service_id: 'CABINET', acl: [] },
-    { id: 'JD-2024-0894', title: 'Procédure Vercetti vs État', status: 'À valider', service: 'Justice', date: '18 Mai 2024', service_id: 'JUSTICE', acl: ['sec_securite'] },
-    { id: 'SEC-2024-0012', title: 'Rapport Sécurité Hebdomadaire', status: 'Archivé', service: 'LSPD', date: '15 Mai 2024', service_id: 'SECURITE_PUBLIQUE', acl: [] },
-    { id: 'ECO-2024-0556', title: 'Subvention Entreprise #88', status: 'Publié', service: 'Économie', date: '12 Mai 2024', service_id: 'TRESOR_COMMERCE', acl: [] },
-  ];
+  const workspaces = store.getWorkspaces();
+  const allRecentFiles = Object.entries(workspaces).flatMap(([wsId, ws]) =>
+    (ws.dossiers || []).map(d => ({
+      id: d.id,
+      title: d.title,
+      status: d.status,
+      service: ws.name,
+      date: '2024',
+      service_id: wsId.toUpperCase(),
+      acl: [] as string[]
+    }))
+  ).filter(d => d.status !== 'Archivé');
 
-  const filteredFiles = recentFiles.filter(file => {
+  const filteredFiles = allRecentFiles.filter(file => {
     const isGovernor = user?.role === 'gouverneur';
     const isOwner = file.service_id === user?.service_id;
     const inACL = user?.id && file.acl.includes(user.id);
@@ -76,18 +81,6 @@ const Dashboard = () => {
     const isSameService = n.service_id === user?.service_id;
     return isGovernor || isSameService;
   });
-
-  const announcements = [
-    { id: 1, title: 'Note de Service #24-05', text: 'Nouvelles consignes pour la rédaction des décrets officiels.', date: 'Hier' },
-    { id: 2, title: 'Maintenance Système', text: 'L\'intranet sera indisponible dimanche de 02h à 04h.', date: '19 Mai' },
-  ];
-
-  const calendarEvents = [
-    { time: '09:00', title: 'Briefing Sécurité', type: 'securite' },
-    { time: '11:30', title: 'Réunion Budget 2025', type: 'economie' },
-    { time: '14:00', title: 'Audience Publique', type: 'justice' },
-    { time: '16:30', title: 'Point Presse Gouverneur', type: 'cabinet' },
-  ];
 
   return (
     <IntranetLayout>

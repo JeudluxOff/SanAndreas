@@ -53,181 +53,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { useAuth, ServiceID, Permission } from "@/contexts/AuthContext";
-
-// Initial mock data
-const INITIAL_WORKSPACES: Record<string, any> = {
-  cabinet: {
-    name: "Cabinet du Gouverneur",
-    icon: <ShieldCheck className="w-8 h-8" />,
-    color: "bg-primary",
-    members: 12,
-    activeDossiers: 8,
-    description: "Centre névralgique du gouvernement. Gestion des décrets, de la stratégie politique et des relations institutionnelles.",
-    procedures: ["Rédaction d'un décret", "Protocole de signature", "Liaison inter-agences"],
-    staff: [
-      { name: "Arthur Vance", role: "Gouverneur", role_short: "Gov", status: 'available' },
-      { name: "Elena Rodriguez", role: "Lieutenant-Gouverneur", role_short: "Lt-Gov", status: 'busy' },
-      { name: "Jean Dupont", role: "Chef de Cabinet", role_short: "Chef", status: 'away' }
-    ],
-    tasks: [
-      { id: 1, title: "Rédaction Décret Urbanisme", status: "in_progress", priority: "high", due: "Demain" },
-      { id: 2, title: "Préparation Conférence de Presse", status: "pending", priority: "medium", due: "26 Mai" }
-    ],
-    announcements: [
-      { id: 1, title: "Rappel : Réunion Hebdomadaire", text: "Présence obligatoire de tous les membres demain à 9h.", date: "Il y a 2h", author: "Arthur V." }
-    ],
-    documents: [
-      { id: "DOC-CAB-001", title: "Plan Stratégique 2024", type: "PDF", date: "15 Mai", archived: false },
-      { id: "DOC-CAB-002", title: "Protocole Crise", type: "DOCX", date: "10 Mai", archived: false }
-    ],
-    dossiers: [
-      { id: "DOS-CAB-88", title: "Réforme Constitutionnelle", status: "En cours", archived: false },
-      { id: "DOS-CAB-92", title: "Budget État T3", status: "À valider", archived: false }
-    ]
-  },
-  securite_publique: {
-    name: "Sécurité Publique (LSPD/LSSD)",
-    icon: <ShieldAlert className="w-8 h-8" />,
-    color: "bg-emerald-700",
-    members: 85,
-    activeDossiers: 154,
-    description: "Coordination des forces de l'ordre, gestion des budgets de sécurité et élaboration des plans de réponse aux urgences.",
-    procedures: ["Rapport d'incident", "Demande de renforts", "Protocole d'intervention"],
-    staff: [
-      { name: "Jackson Teller", role: "Secrétaire Sécurité", role_short: "Sec", status: 'available' },
-      { name: "Marcus Wright", role: "Commandant LSPD", role_short: "Cmd", status: 'busy' },
-      { name: "Sarah Miller", role: "Shérif LSSD", role_short: "Shr", status: 'available' }
-    ],
-    tasks: [
-      { id: 1, title: "Déploiement Patrouilles Sud", status: "completed", priority: "high", due: "Terminé" },
-      { id: 2, title: "Révision Budget Munitions", status: "in_progress", priority: "medium", due: "30 Mai" }
-    ],
-    announcements: [
-      { id: 1, title: "Alerte : Manifestation prévue", text: "Déploiement préventif aux alentours de la Mairie.", date: "Il y a 1h", author: "Jackson T." }
-    ],
-    documents: [
-      { id: "DOC-SEC-442", title: "Inventaire Arsenal LSPD", type: "XLSX", date: "20 Mai", archived: false },
-      { id: "DOC-SEC-445", title: "Carte Patrouilles", type: "IMG", date: "18 Mai", archived: false }
-    ],
-    dossiers: [
-      { id: "DOS-SEC-1024", title: "Opération Clean Street", status: "En cours", archived: false },
-      { id: "DOS-SEC-1056", title: "Achat Véhicules Intervention", status: "Clos", archived: false }
-    ]
-  },
-  justice: {
-    name: "Département de la Justice",
-    icon: <Gavel className="w-8 h-8" />,
-    color: "bg-amber-600",
-    members: 24,
-    activeDossiers: 89,
-    description: "Gestion du système judiciaire, des parquets et de l'administration pénitentiaire. Rédaction du Code Pénal.",
-    procedures: ["Dépôt de plainte État", "Mandat judiciaire", "Rapport d'audition"],
-    staff: [
-      { name: "Thomas Vercetti", role: "Secrétaire Justice", role_short: "Sec", status: 'available' },
-      { name: "Harvey Dent", role: "Procureur", role_short: "Proc", status: 'away' }
-    ],
-    tasks: [
-      { id: 1, title: "Rédaction nouveau Code Pénal", status: "in_progress", priority: "critical", due: "15 Juin" }
-    ],
-    announcements: [],
-    documents: [],
-    dossiers: []
-  },
-  sante_humains: {
-    name: "Santé & Services Humains",
-    icon: <HeartPulse className="w-8 h-8" />,
-    color: "bg-red-600",
-    members: 42,
-    activeDossiers: 30,
-    description: "Gestion de la santé publique, des services sociaux et des protocoles d'urgence médicale (SAMS).",
-    procedures: ["Aide sociale", "Licence médicale", "Rapport épidémiologique"],
-    staff: [
-      { name: "Julian Frost", role: "Secrétaire Santé", role_short: "Sec", status: 'available' }
-    ],
-    tasks: [],
-    announcements: [],
-    documents: [],
-    dossiers: []
-  },
-  securite_interieure: {
-    name: "Sécurité Intérieure",
-    icon: <Lock className="w-8 h-8" />,
-    color: "bg-slate-700",
-    members: 15,
-    activeDossiers: 12,
-    description: "Contre-espionnage, protection des infrastructures critiques et gestion des menaces intérieures.",
-    procedures: ["Habilitation Secret-Défense", "Surveillance zone", "Note de renseignement"],
-    staff: [
-      { name: "Sarah Connor", role: "Secrétaire S.I.", role_short: "Sec", status: 'available' }
-    ],
-    tasks: [],
-    announcements: [],
-    documents: [],
-    dossiers: []
-  },
-  tresor_commerce: {
-    name: "Trésor & Commerce",
-    icon: <TrendingUp className="w-8 h-8" />,
-    color: "bg-blue-600",
-    members: 18,
-    activeDossiers: 45,
-    description: "Gestion des finances publiques, régulation du commerce et développement des entreprises de San Andreas.",
-    procedures: ["Octroi de licence", "Demande de subvention", "Rapport fiscal"],
-    staff: [
-      { name: "Franklin Clinton", role: "Secrétaire Trésor", role_short: "Sec", status: 'available' }
-    ],
-    tasks: [],
-    announcements: [],
-    documents: [],
-    dossiers: []
-  },
-  communication: {
-    name: "Bureau de la Communication",
-    icon: <MessageSquare className="w-8 h-8" />,
-    color: "bg-purple-600",
-    members: 8,
-    activeDossiers: 5,
-    description: "Gestion de l'image du gouvernement, relations presse et diffusion des communiqués officiels.",
-    procedures: ["Communiqué de presse", "Briefing média", "Journal Officiel"],
-    staff: [
-      { name: "Lamar Davis", role: "Press Secretary", role_short: "Press", status: 'available' }
-    ],
-    tasks: [],
-    announcements: [],
-    documents: [],
-    dossiers: []
-  },
-  administration_generale: {
-    name: "Administration Générale",
-    icon: <Briefcase className="w-8 h-8" />,
-    color: "bg-slate-800",
-    members: 30,
-    activeDossiers: 20,
-    description: "Coordination inter-services, gestion des ressources humaines et logistique gouvernementale.",
-    procedures: ["Formulaire embauche", "Demande matériel", "Ordre de mission"],
-    staff: [
-      { name: "James Marshall", role: "Secrétaire d'État", role_short: "Sec", status: 'available' }
-    ],
-    tasks: [],
-    announcements: [],
-    documents: [],
-    dossiers: []
-  }
-};
+import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 
 const Workspace = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
   const { user, canAccessService, hasPermission, logAction, emergencyMode } = useAuth();
+  const store = useGovernmentStore();
   const [activeTab, setActiveTab] = React.useState("overview");
-  const [allWorkspaces, setAllWorkspaces] = React.useState(INITIAL_WORKSPACES);
 
-  const currentWorkspace = allWorkspaces[serviceId?.toLowerCase() || ''] || INITIAL_WORKSPACES.cabinet;
-  const [tasks, setTasks] = React.useState(currentWorkspace.tasks || []);
+  const currentWorkspace = store.getWorkspace(serviceId || 'cabinet');
+  const tasks = currentWorkspace?.tasks || [];
 
-  // Sync tasks when switching service
-  React.useEffect(() => {
-    setTasks(currentWorkspace.tasks || []);
-  }, [currentWorkspace.name]);
+  if (!currentWorkspace) return null;
 
   // States for modals
   const [isDocumentModalOpen, setIsDocumentModalOpen] = React.useState(false);
@@ -267,7 +104,7 @@ const Workspace = () => {
   }
 
   const handleCreateDocument = () => {
-    if (!docTitle) return;
+    if (!docTitle || !serviceId) return;
 
     const newDoc = {
       id: `DOC-${upperServiceId}-${Math.floor(Math.random() * 999)}`,
@@ -277,13 +114,7 @@ const Workspace = () => {
       archived: false
     };
 
-    setAllWorkspaces(prev => ({
-      ...prev,
-      [serviceId?.toLowerCase() || '']: {
-        ...currentWorkspace,
-        documents: [newDoc, ...(currentWorkspace.documents || [])]
-      }
-    }));
+    store.createDocument(serviceId, newDoc);
 
     setDocTitle("");
     setIsDocumentModalOpen(false);
@@ -291,17 +122,9 @@ const Workspace = () => {
   };
 
   const handleUpdateDocument = () => {
-    if (!docTitle || !editingDoc) return;
+    if (!docTitle || !editingDoc || !serviceId) return;
 
-    setAllWorkspaces(prev => ({
-      ...prev,
-      [serviceId?.toLowerCase() || '']: {
-        ...currentWorkspace,
-        documents: currentWorkspace.documents.map((doc: any) =>
-          doc.id === editingDoc.id ? { ...doc, title: docTitle, type: docType } : doc
-        )
-      }
-    }));
+    store.updateDocument(serviceId, { ...editingDoc, title: docTitle, type: docType });
 
     setDocTitle("");
     setEditingDoc(null);
@@ -310,18 +133,13 @@ const Workspace = () => {
   };
 
   const handleDeleteDocument = (docId: string) => {
-    setAllWorkspaces(prev => ({
-      ...prev,
-      [serviceId?.toLowerCase() || '']: {
-        ...currentWorkspace,
-        documents: currentWorkspace.documents.filter((doc: any) => doc.id !== docId)
-      }
-    }));
+    if (!serviceId) return;
+    store.deleteDocument(serviceId, docId);
     logAction(`Suppression du document ID : ${docId}`);
   };
 
   const handleCreateDossier = () => {
-    if (!dossierTitle) return;
+    if (!dossierTitle || !serviceId) return;
 
     const newDossier = {
       id: `DOS-${upperServiceId}-${Math.floor(Math.random() * 9999)}`,
@@ -330,13 +148,7 @@ const Workspace = () => {
       archived: false
     };
 
-    setAllWorkspaces(prev => ({
-      ...prev,
-      [serviceId?.toLowerCase() || '']: {
-        ...currentWorkspace,
-        dossiers: [newDossier, ...(currentWorkspace.dossiers || [])]
-      }
-    }));
+    store.createDossier(serviceId, newDossier);
 
     setDossierTitle("");
     setIsDossierModalOpen(false);
@@ -344,17 +156,9 @@ const Workspace = () => {
   };
 
   const handleUpdateDossier = () => {
-    if (!dossierTitle || !editingDossier) return;
+    if (!dossierTitle || !editingDossier || !serviceId) return;
 
-    setAllWorkspaces(prev => ({
-      ...prev,
-      [serviceId?.toLowerCase() || '']: {
-        ...currentWorkspace,
-        dossiers: currentWorkspace.dossiers.map((dos: any) =>
-          dos.id === editingDossier.id ? { ...dos, title: dossierTitle } : dos
-        )
-      }
-    }));
+    store.updateDossier(serviceId, { ...editingDossier, title: dossierTitle });
 
     setDossierTitle("");
     setEditingDossier(null);
@@ -363,37 +167,23 @@ const Workspace = () => {
   };
 
   const handleDeleteDossier = (dosId: string) => {
-    setAllWorkspaces(prev => ({
-      ...prev,
-      [serviceId?.toLowerCase() || '']: {
-        ...currentWorkspace,
-        dossiers: currentWorkspace.dossiers.filter((dos: any) => dos.id !== dosId)
-      }
-    }));
+    if (!serviceId) return;
+    store.deleteDossier(serviceId, dosId);
     logAction(`Suppression du dossier ID : ${dosId}`);
   };
 
   const handleCreateTask = () => {
-    if (!taskTitle) return;
+    if (!taskTitle || !serviceId) return;
 
     const newTask = {
-      id: tasks.length + 1,
+      id: Date.now(),
       title: taskTitle,
       status: "pending",
       priority: taskPriority,
       due: taskDue || "À définir"
     };
 
-    const updatedTasks = [newTask, ...tasks];
-    setTasks(updatedTasks);
-
-    setAllWorkspaces(prev => ({
-      ...prev,
-      [serviceId?.toLowerCase() || '']: {
-        ...currentWorkspace,
-        tasks: updatedTasks
-      }
-    }));
+    store.createTask(serviceId, newTask);
 
     setTaskTitle("");
     setTaskDue("");
@@ -403,20 +193,9 @@ const Workspace = () => {
   };
 
   const handleUpdateTask = () => {
-    if (!taskTitle || !editingTask) return;
+    if (!taskTitle || !editingTask || !serviceId) return;
 
-    const updatedTasks = tasks.map((t: any) =>
-      t.id === editingTask.id ? { ...t, title: taskTitle, priority: taskPriority, due: taskDue || t.due } : t
-    );
-    setTasks(updatedTasks);
-
-    setAllWorkspaces(prev => ({
-      ...prev,
-      [serviceId?.toLowerCase() || '']: {
-        ...currentWorkspace,
-        tasks: updatedTasks
-      }
-    }));
+    store.updateTask(serviceId, { ...editingTask, title: taskTitle, priority: taskPriority, due: taskDue || editingTask.due });
 
     setTaskTitle("");
     setTaskDue("");
@@ -426,59 +205,25 @@ const Workspace = () => {
   };
 
   const handleDeleteTask = (taskId: number) => {
-    const updatedTasks = tasks.filter((t: any) => t.id !== taskId);
-    setTasks(updatedTasks);
-    setAllWorkspaces(prev => ({
-      ...prev,
-      [serviceId?.toLowerCase() || '']: {
-        ...currentWorkspace,
-        tasks: updatedTasks
-      }
-    }));
+    if (!serviceId) return;
+    store.deleteTask(serviceId, taskId);
     logAction(`Suppression de la tâche ID : ${taskId}`);
   };
 
   const handleToggleTaskStatus = (taskId: number) => {
-    const updatedTasks = tasks.map((t: any) => {
-      if (t.id === taskId) {
-        const nextStatus = t.status === 'completed' ? 'pending' : (t.status === 'pending' ? 'in_progress' : 'completed');
-        return { ...t, status: nextStatus };
-      }
-      return t;
-    });
-    setTasks(updatedTasks);
-    setAllWorkspaces(prev => ({
-      ...prev,
-      [serviceId?.toLowerCase() || '']: {
-        ...currentWorkspace,
-        tasks: updatedTasks
-      }
-    }));
+    if (!serviceId) return;
+    store.toggleTaskStatus(serviceId, taskId);
   };
 
   const handleArchiveDocument = (docId: string) => {
-    setAllWorkspaces(prev => ({
-      ...prev,
-      [serviceId?.toLowerCase() || '']: {
-        ...currentWorkspace,
-        documents: currentWorkspace.documents.map((doc: any) =>
-          doc.id === docId ? { ...doc, archived: !doc.archived } : doc
-        )
-      }
-    }));
+    if (!serviceId) return;
+    store.archiveDocument(serviceId, docId);
     logAction(`Archivage/Désarchivage du document ID : ${docId}`);
   };
 
   const handleArchiveDossier = (dosId: string) => {
-    setAllWorkspaces(prev => ({
-      ...prev,
-      [serviceId?.toLowerCase() || '']: {
-        ...currentWorkspace,
-        dossiers: currentWorkspace.dossiers.map((dos: any) =>
-          dos.id === dosId ? { ...dos, archived: !dos.archived } : dos
-        )
-      }
-    }));
+    if (!serviceId) return;
+    store.archiveDossier(serviceId, dosId);
     logAction(`Archivage/Désarchivage du dossier ID : ${dosId}`);
   };
 
@@ -543,7 +288,14 @@ const Workspace = () => {
           <div className="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
           <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
             <div className="p-4 bg-white/20 backdrop-blur-md rounded-2xl">
-              {currentWorkspace.icon}
+              {currentWorkspace.name === "Cabinet du Gouverneur" && <ShieldCheck className="w-8 h-8" />}
+              {currentWorkspace.name === "Sécurité Publique (LSPD/LSSD)" && <ShieldAlert className="w-8 h-8" />}
+              {currentWorkspace.name === "Département de la Justice" && <Gavel className="w-8 h-8" />}
+              {currentWorkspace.name === "Santé & Services Humains" && <HeartPulse className="w-8 h-8" />}
+              {currentWorkspace.name === "Sécurité Intérieure" && <Lock className="w-8 h-8" />}
+              {currentWorkspace.name === "Trésor & Commerce" && <TrendingUp className="w-8 h-8" />}
+              {currentWorkspace.name === "Bureau de la Communication" && <MessageSquare className="w-8 h-8" />}
+              {currentWorkspace.name === "Administration Générale" && <Briefcase className="w-8 h-8" />}
             </div>
             <div className="text-center md:text-left space-y-2">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">

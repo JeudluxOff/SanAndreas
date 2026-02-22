@@ -7,6 +7,7 @@ import { handleDemo } from "./routes/demo";
 
 const SHARED_LOCATIONS_PATH = path.resolve(process.cwd(), "shared", "locations.json");
 const SHARED_LEGAL_PATH = path.resolve(process.cwd(), "shared", "legal-data.json");
+const SHARED_GOVERNMENT_PATH = path.resolve(process.cwd(), "shared", "government-data.json");
 
 export function createServer() {
   const app = express();
@@ -43,6 +44,30 @@ export function createServer() {
       const data = req.body;
       fs.writeFileSync(SHARED_LEGAL_PATH, JSON.stringify(data, null, 2));
       res.json({ message: "Legal data saved successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Government Data persistence
+  app.get("/api/government", (_req, res) => {
+    try {
+      if (fs.existsSync(SHARED_GOVERNMENT_PATH)) {
+        const data = fs.readFileSync(SHARED_GOVERNMENT_PATH, "utf-8");
+        res.json(JSON.parse(data));
+      } else {
+        res.status(404).json({ error: "Government data not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/government", (req, res) => {
+    try {
+      const data = req.body;
+      fs.writeFileSync(SHARED_GOVERNMENT_PATH, JSON.stringify(data, null, 2));
+      res.json({ message: "Government data saved successfully" });
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
     }

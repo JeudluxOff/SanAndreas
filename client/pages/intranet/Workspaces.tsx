@@ -1,6 +1,7 @@
 import { IntranetLayout } from "@/components/IntranetLayout";
 import { Link } from "react-router-dom";
 import { useAuth, ServiceID } from "@/contexts/AuthContext";
+import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -96,6 +97,8 @@ const workspaces = [
 
 export default function Workspaces() {
   const { user, canAccessService } = useAuth();
+  const store = useGovernmentStore();
+  const workspacesData = store.getWorkspaces();
 
   return (
     <IntranetLayout>
@@ -108,13 +111,13 @@ export default function Workspaces() {
               Répertoire des Services Gouvernementaux
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3">
              <div className="relative">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                <input 
-                  type="text" 
-                  placeholder="Rechercher un service..." 
+                <input
+                  type="text"
+                  placeholder="Rechercher un service..."
                   className="pl-9 h-10 w-64 bg-white border border-slate-200 rounded-lg text-sm font-medium focus:ring-primary focus:border-primary outline-none transition-all shadow-sm"
                 />
              </div>
@@ -127,7 +130,10 @@ export default function Workspaces() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {workspaces.map((workspace) => {
             const hasAccess = canAccessService(workspace.id);
-            
+            const dynamicData = workspacesData[workspace.id.toLowerCase()];
+            const membersCount = dynamicData?.members || workspace.members;
+            const activeTasksCount = dynamicData?.tasks?.filter(t => t.status !== 'completed').length || workspace.activeTasks;
+
             return (
               <Card key={workspace.id} className={cn(
                 "group relative overflow-hidden border-2 transition-all duration-300",
@@ -146,13 +152,13 @@ export default function Workspaces() {
                     {workspace.description}
                   </CardDescription>
                 </CardHeader>
-                
+
                 <CardContent className="px-6 pb-6 relative z-10 flex flex-wrap gap-2">
                    <Badge variant="secondary" className="bg-slate-100 text-[9px] font-black uppercase tracking-widest text-slate-500 py-1">
-                      <Users className="w-3 h-3 mr-1" /> {workspace.members} Membres
+                      <Users className="w-3 h-3 mr-1" /> {membersCount} Membres
                    </Badge>
                    <Badge variant="secondary" className="bg-slate-100 text-[9px] font-black uppercase tracking-widest text-slate-500 py-1">
-                      <Briefcase className="w-3 h-3 mr-1" /> {workspace.activeTasks} Tâches
+                      <Briefcase className="w-3 h-3 mr-1" /> {activeTasksCount} Tâches
                    </Badge>
                 </CardContent>
 

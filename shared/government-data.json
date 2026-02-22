@@ -1,0 +1,186 @@
+{
+  "workspaces": {
+    "cabinet": {
+      "name": "Cabinet du Gouverneur",
+      "icon": "ShieldCheck",
+      "color": "bg-primary",
+      "members": 12,
+      "activeDossiers": 8,
+      "description": "Centre névralgique du gouvernement. Gestion des décrets, de la stratégie politique et des relations institutionnelles.",
+      "procedures": ["Rédaction d'un décret", "Protocole de signature", "Liaison inter-agences"],
+      "staff": [
+        { "name": "Arthur Vance", "role": "Gouverneur", "role_short": "Gov", "status": "available" },
+        { "name": "Elena Rodriguez", "role": "Lieutenant-Gouverneur", "role_short": "Lt-Gov", "status": "busy" },
+        { "name": "Jean Dupont", "role": "Chef de Cabinet", "role_short": "Chef", "status": "away" }
+      ],
+      "tasks": [
+        { "id": 1, "title": "Rédaction Décret Urbanisme", "status": "in_progress", "priority": "high", "due": "Demain" },
+        { "id": 2, "title": "Préparation Conférence de Presse", "status": "pending", "priority": "medium", "due": "26 Mai" }
+      ],
+      "announcements": [
+        { "id": 1, "title": "Rappel : Réunion Hebdomadaire", "text": "Présence obligatoire de tous les membres demain à 9h.", "date": "Il y a 2h", "author": "Arthur V." }
+      ],
+      "documents": [
+        { "id": "DOC-CAB-001", "title": "Plan Stratégique 2024", "type": "PDF", "date": "15 Mai", "archived": false },
+        { "id": "DOC-CAB-002", "title": "Protocole Crise", "type": "DOCX", "date": "10 Mai", "archived": false }
+      ],
+      "dossiers": [
+        { "id": "DOS-CAB-88", "title": "Réforme Constitutionnelle", "status": "En cours", "archived": false },
+        { "id": "DOS-CAB-92", "title": "Budget État T3", "status": "À valider", "archived": false }
+      ]
+    },
+    "securite_publique": {
+      "name": "Sécurité Publique (LSPD/LSSD)",
+      "icon": "ShieldAlert",
+      "color": "bg-emerald-700",
+      "members": 85,
+      "activeDossiers": 154,
+      "description": "Coordination des forces de l'ordre, gestion des budgets de sécurité et élaboration des plans de réponse aux urgences.",
+      "procedures": ["Rapport d'incident", "Demande de renforts", "Protocole d'intervention"],
+      "staff": [
+        { "name": "Jackson Teller", "role": "Secrétaire Sécurité", "role_short": "Sec", "status": "available" },
+        { "name": "Marcus Wright", "role": "Commandant LSPD", "role_short": "Cmd", "status": "busy" },
+        { "name": "Sarah Miller", "role": "Shérif LSSD", "role_short": "Shr", "status": "available" }
+      ],
+      "tasks": [
+        { "id": 1, "title": "Déploiement Patrouilles Sud", "status": "completed", "priority": "high", "due": "Terminé" },
+        { "id": 2, "title": "Révision Budget Munitions", "status": "in_progress", "priority": "medium", "due": "30 Mai" }
+      ],
+      "announcements": [
+        { "id": 1, "title": "Alerte : Manifestation prévue", "text": "Déploiement préventif aux alentours de la Mairie.", "date": "Il y a 1h", "author": "Jackson T." }
+      ],
+      "documents": [
+        { "id": "DOC-SEC-442", "title": "Inventaire Arsenal LSPD", "type": "XLSX", "date": "20 Mai", "archived": false },
+        { "id": "DOC-SEC-445", "title": "Carte Patrouilles", "type": "IMG", "date": "18 Mai", "archived": false }
+      ],
+      "dossiers": [
+        { "id": "DOS-SEC-1024", "title": "Opération Clean Street", "status": "En cours", "archived": false },
+        { "id": "DOS-SEC-1056", "title": "Achat Véhicules Intervention", "status": "Clos", "archived": false }
+      ]
+    },
+    "justice": {
+      "name": "Département de la Justice",
+      "icon": "Gavel",
+      "color": "bg-amber-600",
+      "members": 24,
+      "activeDossiers": 89,
+      "description": "Gestion du système judiciaire, des parquets et de l'administration pénitentiaire. Rédaction du Code Pénal.",
+      "procedures": ["Dépôt de plainte État", "Mandat judiciaire", "Rapport d'audition"],
+      "staff": [
+        { "name": "Thomas Vercetti", "role": "Secrétaire Justice", "role_short": "Sec", "status": "available" },
+        { "name": "Harvey Dent", "role": "Procureur", "role_short": "Proc", "status": "away" }
+      ],
+      "tasks": [
+        { "id": 1, "title": "Rédaction nouveau Code Pénal", "status": "in_progress", "priority": "critical", "due": "15 Juin" }
+      ],
+      "announcements": [],
+      "documents": [],
+      "dossiers": []
+    },
+    "sante_humains": {
+      "name": "Santé & Services Humains",
+      "icon": "HeartPulse",
+      "color": "bg-red-600",
+      "members": 42,
+      "activeDossiers": 30,
+      "description": "Gestion de la santé publique, des services sociaux et des protocoles d'urgence médicale (SAMS).",
+      "procedures": ["Aide sociale", "Licence médicale", "Rapport épidémiologique"],
+      "staff": [
+        { "name": "Julian Frost", "role": "Secrétaire Santé", "role_short": "Sec", "status": "available" }
+      ],
+      "tasks": [],
+      "announcements": [],
+      "documents": [],
+      "dossiers": []
+    },
+    "securite_interieure": {
+      "name": "Sécurité Intérieure",
+      "icon": "Lock",
+      "color": "bg-slate-700",
+      "members": 15,
+      "activeDossiers": 12,
+      "description": "Contre-espionnage, protection des infrastructures critiques et gestion des menaces intérieures.",
+      "procedures": ["Habilitation Secret-Défense", "Surveillance zone", "Note de renseignement"],
+      "staff": [
+        { "name": "Sarah Connor", "role": "Secrétaire S.I.", "role_short": "Sec", "status": "available" }
+      ],
+      "tasks": [],
+      "announcements": [],
+      "documents": [],
+      "dossiers": []
+    },
+    "tresor_commerce": {
+      "name": "Trésor & Commerce",
+      "icon": "TrendingUp",
+      "color": "bg-blue-600",
+      "members": 18,
+      "activeDossiers": 45,
+      "description": "Gestion des finances publiques, régulation du commerce et développement des entreprises de San Andreas.",
+      "procedures": ["Octroi de licence", "Demande de subvention", "Rapport fiscal"],
+      "staff": [
+        { "name": "Franklin Clinton", "role": "Secrétaire Trésor", "role_short": "Sec", "status": "available" }
+      ],
+      "tasks": [],
+      "announcements": [],
+      "documents": [],
+      "dossiers": []
+    },
+    "communication": {
+      "name": "Bureau de la Communication",
+      "icon": "MessageSquare",
+      "color": "bg-purple-600",
+      "members": 8,
+      "activeDossiers": 5,
+      "description": "Gestion de l'image du gouvernement, relations presse et diffusion des communiqués officiels.",
+      "procedures": ["Communiqué de presse", "Briefing média", "Journal Officiel"],
+      "staff": [
+        { "name": "Lamar Davis", "role": "Press Secretary", "role_short": "Press", "status": "available" }
+      ],
+      "tasks": [],
+      "announcements": [],
+      "documents": [],
+      "dossiers": []
+    },
+    "administration_generale": {
+      "name": "Administration Générale",
+      "icon": "Briefcase",
+      "color": "bg-slate-800",
+      "members": 30,
+      "activeDossiers": 20,
+      "description": "Coordination inter-services, gestion des ressources humaines et logistique gouvernementale.",
+      "procedures": ["Formulaire embauche", "Demande matériel", "Ordre de mission"],
+      "staff": [
+        { "name": "James Marshall", "role": "Secrétaire d'État", "role_short": "Sec", "status": "available" }
+      ],
+      "tasks": [],
+      "announcements": [],
+      "documents": [],
+      "dossiers": []
+    }
+  },
+  "employees": [
+    { "name": "Arthur Vance", "role": "Gouverneur", "service": "Cabinet", "grade": "Exécutif", "status": "En service", "email": "a.vance@sa.gov", "joinDate": "Jan 2024" },
+    { "name": "Elena Rodriguez", "role": "Press Secretary", "service": "Cabinet", "grade": "Cabinet", "status": "En service", "email": "e.rodriguez@sa.gov", "joinDate": "Fév 2024" },
+    { "name": "Jackson Teller", "role": "Secrétaire Sécurité", "service": "LSPD/LSSD", "grade": "Secrétaire", "status": "Hors service", "email": "j.teller@sa.gov", "joinDate": "Mar 2024" },
+    { "name": "Thomas Vercetti", "role": "Secrétaire Justice", "service": "Justice", "grade": "Secrétaire", "status": "En service", "email": "t.vercetti@sa.gov", "joinDate": "Mar 2024" },
+    { "name": "Franklin Clinton", "role": "Secrétaire Trésor", "service": "Économie", "grade": "Secrétaire", "status": "En service", "email": "f.clinton@sa.gov", "joinDate": "Avr 2024" },
+    { "name": "Lamar Davis", "role": "Secrétaire Travail", "service": "Commerce", "grade": "Cabinet", "status": "En service", "email": "l.davis@sa.gov", "joinDate": "Mai 2024" },
+    { "name": "Julian Frost", "role": "Secrétaire Santé", "service": "Santé & Social", "grade": "Secrétaire", "status": "En service", "email": "j.frost@sa.gov", "joinDate": "Jan 2024" }
+  ],
+  "globalAnnouncements": [
+    { "id": 1, "title": "Note de Service #24-05", "text": "Nouvelles consignes pour la rédaction des décrets officiels.", "date": "Hier" },
+    { "id": 2, "title": "Maintenance Système", "text": "L'intranet sera indisponible dimanche de 02h à 04h.", "date": "19 Mai" }
+  ],
+  "calendarEvents": [
+    { "time": "09:00", "title": "Briefing Sécurité", "type": "securite" },
+    { "time": "11:30", "title": "Réunion Budget 2025", "type": "economie" },
+    { "time": "14:00", "title": "Audience Publique", "type": "justice" },
+    { "time": "16:30", "title": "Point Presse Gouverneur", "type": "cabinet" }
+  ],
+  "notifications": [
+    { "id": 1, "type": "validation", "text": "Décret #SA-2024-042 en attente de signature", "time": "il y a 2h", "priority": "high", "service_id": "CABINET" },
+    { "id": 2, "type": "assignment", "text": "Nouveau dossier judiciaire assigné #JD-8941", "time": "il y a 5h", "priority": "medium", "service_id": "JUSTICE" },
+    { "id": 3, "type": "meeting", "text": "Réunion de cabinet demain à 09:00", "time": "il y a 1j", "priority": "low", "service_id": "CABINET" },
+    { "id": 4, "type": "system", "text": "Mise à jour des protocoles de sécurité", "time": "il y a 2j", "priority": "medium", "service_id": "SECURITE_PUBLIQUE" }
+  ]
+}

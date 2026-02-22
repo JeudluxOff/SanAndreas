@@ -23,7 +23,9 @@ import {
   ShieldAlert
 } from 'lucide-react';
 import { useAuth, Role, Permission, ServiceID, UserStatus } from '@/contexts/AuthContext';
+import { useGovernmentStore } from '@/hooks/useGovernmentStore';
 import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -69,8 +71,17 @@ const workspaceServices: { id: ServiceID, label: string, color: string }[] = [
 export function IntranetLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { user, logout, hasPermission, canAccessService, updateStatus, emergencyMode, toggleEmergencyMode } = useAuth();
+  const store = useGovernmentStore();
+  const [isSyncing, setIsSyncing] = React.useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    return store.subscribe(() => {
+      setIsSyncing(true);
+      setTimeout(() => setIsSyncing(false), 1000);
+    });
+  }, [store]);
 
   if (!user) return null;
 
@@ -366,10 +377,13 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
               <div className={cn("h-8 w-px mx-1 hidden sm:block", emergencyMode ? "bg-red-800" : "bg-slate-200")} />
               <div className="hidden sm:flex flex-col text-right">
                 <span className={cn("text-xs font-bold leading-none", emergencyMode ? "text-white" : "text-slate-900")}>{user.service_name}</span>
-                <span className={cn(
-                  "text-[10px] font-bold uppercase tracking-tighter mt-1",
-                  emergencyMode ? "text-red-400" : "text-slate-500"
-                )}>Secteur: {user.role.replace(/_/g, ' ')}</span>
+                <div className="flex items-center justify-end gap-1.5 mt-1">
+                  <RefreshCw className={cn("w-2.5 h-2.5", isSyncing ? "animate-spin text-primary" : "text-slate-400")} />
+                  <span className={cn(
+                    "text-[10px] font-bold uppercase tracking-tighter",
+                    emergencyMode ? "text-red-400" : "text-slate-500"
+                  )}>Secteur: {user.role.replace(/_/g, ' ')}</span>
+                </div>
               </div>
               <Badge variant="outline" className={cn(
                 "font-bold ml-2 transition-colors",
