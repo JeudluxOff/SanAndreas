@@ -32,6 +32,15 @@ import { legalStore } from '@/lib/legal-store';
 const Admin = () => {
   const { isAssocié, canAudit } = useLegalRBAC();
   const logs = legalStore.getAuditLogs();
+  const staff = legalStore.getStaff();
+  const settings = legalStore.getSettings();
+
+  const [searchTerm, setSearchTerm] = React.useState('');
+
+  const filteredStaff = staff.filter(s =>
+    s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.role.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (!isAssocié && !canAudit) {
     return (
@@ -71,9 +80,9 @@ const Admin = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {[
-            { label: "Membres Cabinet", value: 12, icon: <Users className="w-5 h-5" />, color: "text-[#c1a461]", bg: "bg-[#c1a461]/5" },
-            { label: "Canaux Actifs", value: 8, icon: <Activity className="w-5 h-5" />, color: "text-blue-600", bg: "bg-blue-50" },
+            { label: "Membres Cabinet", value: staff.length, icon: <Users className="w-5 h-5" />, color: "text-[#c1a461]", bg: "bg-[#c1a461]/5" },
             { label: "Audit Logs", value: logs.length, icon: <ShieldCheck className="w-5 h-5" />, color: "text-emerald-600", bg: "bg-emerald-50" },
+            { label: "Dossiers Scellés", value: legalStore.getCases().filter(c => c.status === 'Scellé').length, icon: <Lock className="w-5 h-5" />, color: "text-blue-600", bg: "bg-blue-50" },
             { label: "Stockage Vault", value: "84%", icon: <Server className="w-5 h-5" />, color: "text-red-600", bg: "bg-red-50" }
           ].map((stat, idx) => (
             <Card key={idx} className="bg-white border-none shadow-md px-6 py-5 flex items-center gap-5 rounded-2xl">
@@ -91,30 +100,41 @@ const Admin = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
             <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between bg-slate-50/50">
-              <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight">Gestion des Équipes</CardTitle>
-              <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-200">12 Membres</Badge>
+              <div className="text-left">
+                <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight">Gestion des Équipes</CardTitle>
+                <CardDescription className="text-[10px] font-bold uppercase tracking-widest mt-1">Annuaire interne et gestion des accès</CardDescription>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="RECHERCHER..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="bg-white border-slate-200 border rounded-lg pl-9 text-[9px] font-bold uppercase tracking-widest h-9 w-48"
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="p-0">
               <div className="divide-y divide-slate-50">
-                {[
-                  { name: "Julian Harrington", role: "Associé", access: "Total", status: "Actif" },
-                  { name: "Victoria Cole", role: "Associée", access: "Total", status: "Actif" },
-                  { name: "Marcus Vane", role: "Avocat Senior", access: "Élevé", status: "Actif" },
-                  { name: "Elena Rossi", role: "Avocate", access: "Standard", status: "Actif" },
-                  { name: "Thomas Miller", role: "Comptable", access: "Finance", status: "Actif" }
-                ].map((user, idx) => (
-                  <div key={idx} className="p-6 flex items-center justify-between group hover:bg-slate-50 transition-all cursor-pointer">
+                {filteredStaff.map((member) => (
+                  <div key={member.id} className="p-6 flex items-center justify-between group hover:bg-slate-50 transition-all cursor-pointer">
                     <div className="flex items-center gap-4">
                       <Avatar className="h-10 w-10 ring-2 ring-transparent group-hover:ring-[#c1a461]/20 transition-all">
-                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} />
+                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.name}`} />
+                        <AvatarFallback>{member.name[0]}</AvatarFallback>
                       </Avatar>
                       <div className="text-left">
-                        <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{user.name}</p>
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{user.role}</p>
+                        <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{member.name}</p>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{member.role} • {member.email}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-6">
-                       <Badge className="bg-slate-100 text-slate-600 text-[8px] font-black uppercase tracking-widest px-3 py-1">Accès: {user.access}</Badge>
+                       <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-3 py-1",
+                         member.status === 'Actif' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'
+                       )}>{member.status}</Badge>
                        <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
                          <MoreVertical className="w-5 h-5" />
                        </Button>
@@ -156,15 +176,23 @@ const Admin = () => {
               <div className="p-3 bg-blue-50 rounded-2xl w-fit">
                  <Globe className="w-6 h-6 text-blue-600" />
               </div>
-              <div className="space-y-2 text-left">
-                <h3 className="text-lg font-black uppercase text-slate-900 tracking-tighter">Infrastructure Cloud</h3>
-                <p className="text-slate-400 text-xs font-medium leading-relaxed uppercase tracking-tight">
-                  Serveurs localisés à San Andreas. Bande passante illimitée. Monitoring actif 24/7.
-                </p>
-              </div>
-              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                 <span className="text-slate-400">Latence: 12ms</span>
-                 <span className="text-emerald-600">Disponibilité: 99.9%</span>
+              <div className="space-y-4 text-left">
+                <h3 className="text-lg font-black uppercase text-slate-900 tracking-tighter">Information du Cabinet</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center border-b border-slate-50 pb-2">
+                    <span className="text-[10px] font-black text-slate-400 uppercase">Cabinet</span>
+                    <span className="text-xs font-bold text-slate-900 uppercase">{settings.name}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-b border-slate-50 pb-2">
+                    <span className="text-[10px] font-black text-slate-400 uppercase">TVA</span>
+                    <span className="text-xs font-bold text-slate-900 uppercase">{settings.vat_number}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-slate-400 uppercase">Retention Audit</span>
+                    <span className="text-xs font-bold text-slate-900 uppercase">{settings.audit_retention_days} jours</span>
+                  </div>
+                </div>
+                <Button variant="outline" className="w-full border-slate-200 text-[9px] font-black uppercase tracking-widest h-10">Modifier les paramètres</Button>
               </div>
             </Card>
           </div>

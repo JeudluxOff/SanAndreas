@@ -146,3 +146,25 @@ export interface Message {
   timestamp: string;
   attachments?: string[];
 }
+
+export interface StaffMember {
+  id: string;
+  name: string;
+  role: LegalRole;
+  email: string;
+  status: 'Actif' | 'Inactif' | 'Suspendu';
+  joined_at: string;
+  last_active: string;
+  avatar?: string;
+}
+
+export interface CabinetSettings {
+  name: string;
+  address: string;
+  logo?: string;
+  vat_number: string;
+  iban: string;
+  phone: string;
+  admin_id: string;
+  audit_retention_days: number;
+}

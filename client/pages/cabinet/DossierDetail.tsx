@@ -40,12 +40,45 @@ const DossierDetail = () => {
   const [activeTab, setActiveTab] = React.useState('overview');
   
   const dossier = legalStore.getCase(id || '');
+  const [localStatus, setLocalStatus] = React.useState<string>(dossier?.status || '');
   const docs = legalStore.getDocuments(id);
   const evidence = legalStore.getEvidence(id || '');
   const tasks = legalStore.getTasks(id);
   const hearings = legalStore.getHearings().filter(h => h.case_id === id);
   const client = dossier ? legalStore.getClient(dossier.client_id) : null;
   const auditLogs = legalStore.getAuditLogs().filter(log => log.target_id === id);
+
+  const handleSeal = () => {
+    if (!id || !user) return;
+    legalStore.sealCase(id, user.id);
+    setLocalStatus('Scellé');
+    legalStore.logAction({
+      id: `LOG-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      user_id: user.id,
+      user_name: user.name,
+      action: 'Scellement Dossier',
+      target_type: 'Case',
+      target_id: id,
+      metadata: { reason: 'Demande manuelle de scellement' }
+    });
+  };
+
+  const handleClose = () => {
+    if (!id || !user) return;
+    legalStore.closeCase(id, user.id);
+    setLocalStatus('Clos');
+    legalStore.logAction({
+      id: `LOG-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      user_id: user.id,
+      user_name: user.name,
+      action: 'Clôture Dossier',
+      target_type: 'Case',
+      target_id: id,
+      metadata: { reason: 'Affaire terminée' }
+    });
+  };
 
   // Security check for Sealed cases
   React.useEffect(() => {
@@ -106,10 +139,23 @@ const DossierDetail = () => {
           </div>
           
           <div className="flex gap-4">
-            {dossier.status !== 'Scellé' && (
-               <Button variant="outline" className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-12 px-6 gap-2">
+            {localStatus !== 'Scellé' && localStatus !== 'Clos' && (
+               <Button
+                onClick={handleSeal}
+                variant="outline"
+                className="border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest h-12 px-6 gap-2 hover:bg-red-50"
+               >
                  <Lock className="w-4 h-4" /> Sceller Dossier
                </Button>
+            )}
+            {localStatus !== 'Clos' && (
+              <Button
+                onClick={handleClose}
+                variant="outline"
+                className="border-slate-200 text-slate-900 text-[10px] font-black uppercase tracking-widest h-12 px-6 gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Clôturer Dossier
+              </Button>
             )}
             <Button className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 gap-2 shadow-xl shadow-black/10">
               Actions Dossier <MoreVertical className="w-4 h-4" />
@@ -155,8 +201,11 @@ const DossierDetail = () => {
                   <Card className="bg-white border-none shadow-md p-6 rounded-[32px]">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Statut Actuel</p>
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-[#c1a461] animate-pulse" />
-                      <p className="text-xl font-black text-slate-900 uppercase tracking-tight">{dossier.status}</p>
+                      <div className={cn("w-2 h-2 rounded-full animate-pulse",
+                        localStatus === 'Clos' ? 'bg-slate-400' :
+                        localStatus === 'Scellé' ? 'bg-red-600' : 'bg-[#c1a461]'
+                      )} />
+                      <p className="text-xl font-black text-slate-900 uppercase tracking-tight">{localStatus}</p>
                     </div>
                   </Card>
                   <Card className="bg-white border-none shadow-md p-6 rounded-[32px]">

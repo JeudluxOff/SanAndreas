@@ -49,6 +49,8 @@ const Documents = () => {
   const { user } = useAuth();
   const [docs, setDocs] = React.useState(legalStore.getDocuments());
   const [showCreateModal, setShowCreateModal] = React.useState(false);
+  const [showSignModal, setShowSignModal] = React.useState(false);
+  const [selectedDocId, setSelectedDocId] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [newDoc, setNewDoc] = React.useState({
     title: '',
@@ -140,6 +142,14 @@ const Documents = () => {
       target_type: 'Document',
       target_id: docId
     });
+  };
+
+  const handleSign = () => {
+    if (selectedDocId) {
+      handleUpdateStatus(selectedDocId, 'Signé');
+      setShowSignModal(false);
+      setSelectedDocId(null);
+    }
   };
 
   const filteredDocs = docs.filter(d => 
@@ -247,6 +257,51 @@ const Documents = () => {
           </DialogContent>
         </Dialog>
 
+        {/* Digital Signature Modal */}
+        <Dialog open={showSignModal} onOpenChange={setShowSignModal}>
+          <DialogContent className="max-w-xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Signature Électronique Certifiée</DialogTitle>
+              <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                En signant, vous apposez votre sceau numérique HC-SIG-2024.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-8 my-8">
+              <div className="p-10 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[24px] flex flex-col items-center justify-center space-y-4">
+                 <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Zone de signature manuelle ou tampon</div>
+                 <FileSignature className="w-12 h-12 text-slate-200" />
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Identité du Signataire</p>
+                <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`} />
+                  </Avatar>
+                  <p className="text-sm font-bold text-slate-900 uppercase">{user?.name} — {user?.role}</p>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="ghost"
+                onClick={() => setShowSignModal(false)}
+                className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleSign}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase tracking-widest h-12 px-10 rounded-xl shadow-xl shadow-emerald-600/10"
+              >
+                Signer & Sceller le PDF
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {[
             { label: "En Brouillon", value: docs.filter(d => d.status === 'Brouillon').length, icon: <Zap className="w-5 h-5" />, color: "text-amber-600", bg: "bg-amber-50" },
@@ -346,10 +401,15 @@ const Documents = () => {
                             </Button>
                           )}
                           {item.status === 'Validé' && (
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleUpdateStatus(item.id, 'Signé'); }}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setSelectedDocId(item.id);
+                                setShowSignModal(true);
+                              }}
                               className="text-slate-300 hover:text-emerald-600"
                             >
                               <FileSignature className="w-4 h-4" />

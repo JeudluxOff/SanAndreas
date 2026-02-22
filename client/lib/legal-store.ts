@@ -11,7 +11,9 @@ import {
   Message,
   CaseType,
   CaseStatus,
-  ConfidentialityLevel
+  ConfidentialityLevel,
+  StaffMember,
+  CabinetSettings
 } from '@shared/api';
 
 const STORE_KEY = 'hc_legal_store';
@@ -27,9 +29,29 @@ interface LegalStore {
   auditLogs: AuditLog[];
   conflictChecks: ConflictCheck[];
   messages: Message[];
+  staff: StaffMember[];
+  settings: CabinetSettings;
 }
 
 const INITIAL_DATA: LegalStore = {
+  settings: {
+    name: 'Harrington & Cole',
+    address: '15, Rue de la Paix, Los Santos',
+    vat_number: 'SA-FR-123456789',
+    iban: 'SA00 1234 5678 9012 3456 7890 123',
+    phone: '+SA 555-0199',
+    admin_id: 'admin_avocat',
+    audit_retention_days: 365
+  },
+  staff: [
+    { id: 'admin_avocat', name: 'Julian Harrington', role: 'Associé', email: 'j.harrington@hc.sa', status: 'Actif', joined_at: '2020-01-01', last_active: new Date().toISOString() },
+    { id: 'avocat_victoria', name: 'Victoria Cole', role: 'Associée', email: 'v.cole@hc.sa', status: 'Actif', joined_at: '2020-01-01', last_active: new Date().toISOString() },
+    { id: 'avocat_marcus', name: 'Marcus Vane', role: 'Avocat Senior', email: 'm.vane@hc.sa', status: 'Actif', joined_at: '2021-05-15', last_active: new Date().toISOString() },
+    { id: 'avocat_elena', name: 'Elena Rossi', role: 'Avocate', email: 'e.rossi@hc.sa', status: 'Actif', joined_at: '2022-03-10', last_active: new Date().toISOString() },
+    { id: 'staff_thomas', name: 'Thomas Miller', role: 'Comptable', email: 't.miller@hc.sa', status: 'Actif', joined_at: '2023-01-05', last_active: new Date().toISOString() },
+    { id: 'staff_sarah', name: 'Sarah Jenkins', role: 'Secrétaire', email: 's.jenkins@hc.sa', status: 'Actif', joined_at: '2022-11-20', last_active: new Date().toISOString() },
+    { id: 'staff_lucas', name: 'Lucas Dupont', role: 'Juriste', email: 'l.dupont@hc.sa', status: 'Actif', joined_at: '2023-06-01', last_active: new Date().toISOString() }
+  ],
   clients: [
     { id: 'cli-001', name: 'Martin Madrazo', email: 'm.madrazo@lafuente.sa', type: 'Individu', created_at: '2024-01-15' },
     { id: 'cli-002', name: 'Union Depository', email: 'contact@ud.sa', type: 'Entreprise', created_at: '2024-02-20' },
@@ -350,6 +372,65 @@ class LegalStoreManager {
     this.data.conflictChecks.unshift(check);
     this.save();
     return check;
+  }
+
+  // Staff
+  getStaff() { return this.data.staff; }
+  addStaff(member: StaffMember) {
+    this.data.staff.push(member);
+    this.save();
+  }
+  updateStaff(member: StaffMember) {
+    const idx = this.data.staff.findIndex(s => s.id === member.id);
+    if (idx !== -1) {
+      this.data.staff[idx] = member;
+      this.save();
+    }
+  }
+
+  // Settings
+  getSettings() { return this.data.settings; }
+  updateSettings(settings: CabinetSettings) {
+    this.data.settings = settings;
+    this.save();
+  }
+
+  // Case Actions
+  sealCase(id: string, userId: string) {
+    const dossier = this.getCase(id);
+    if (dossier) {
+      dossier.status = 'Scellé';
+      dossier.confidentiality = 'Scellé';
+      dossier.sealed_at = new Date().toISOString();
+      dossier.sealed_by = userId;
+      this.updateCase(dossier);
+      this.logAction({
+        id: `LOG-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user_id: userId,
+        user_name: 'System', // Will be enriched by page
+        action: 'Scellement du dossier',
+        target_type: 'Case',
+        target_id: id
+      });
+    }
+  }
+
+  closeCase(id: string, userId: string) {
+    const dossier = this.getCase(id);
+    if (dossier) {
+      dossier.status = 'Clos';
+      this.updateCase(dossier);
+      this.logAction({
+        id: `LOG-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user_id: userId,
+        user_name: 'System',
+        action: 'Clôture du dossier',
+        target_type: 'Case',
+        target_id: id
+      });
+    }
   }
 }
 

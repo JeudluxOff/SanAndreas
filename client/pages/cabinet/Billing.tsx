@@ -17,6 +17,23 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useLegalRBAC } from './intranet/LegalIntranetLayout';
 import { Link } from 'react-router-dom';
@@ -25,8 +42,16 @@ import { Invoice } from '@shared/api';
 
 const Billing = () => {
   const { isAssocié, canBill } = useLegalRBAC();
-  const invoices = legalStore.getInvoices();
+  const [invoices, setInvoices] = React.useState(legalStore.getInvoices());
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [showCreateModal, setShowCreateModal] = React.useState(false);
+  const [newInvoice, setNewInvoice] = React.useState({
+    case_id: '',
+    amount: '',
+    description: ''
+  });
+
+  const cases = legalStore.getCases();
 
   if (!isAssocié && !canBill) {
     return (
@@ -48,6 +73,41 @@ const Billing = () => {
   const totalInvoiced = invoices.reduce((acc, inv) => acc + inv.amount, 0);
   const totalPending = invoices.filter(i => i.status !== 'Payé').reduce((acc, inv) => acc + inv.amount, 0);
   const totalPaid = invoices.filter(i => i.status === 'Payé').reduce((acc, inv) => acc + inv.amount, 0);
+
+  const handleCreateInvoice = () => {
+    if (!newInvoice.case_id || !newInvoice.amount) return;
+    const caseObj = legalStore.getCase(newInvoice.case_id);
+    if (!caseObj) return;
+
+    const inv: Invoice = {
+      id: `INV-2024-${Math.floor(Math.random() * 9000) + 1000}`,
+      case_id: newInvoice.case_id,
+      client_id: caseObj.client_id,
+      amount: Number(newInvoice.amount),
+      currency: 'SA$',
+      status: 'Envoyé',
+      due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      created_at: new Date().toISOString(),
+      items: [{ description: newInvoice.description || 'Honoraires juridiques', amount: Number(newInvoice.amount) }]
+    };
+
+    // Simulated store update
+    const allInvoices = [...legalStore.getInvoices(), inv];
+    localStorage.setItem('hc_legal_store', JSON.stringify({ ...JSON.parse(localStorage.getItem('hc_legal_store')!), invoices: allInvoices }));
+    setInvoices(allInvoices);
+    setShowCreateModal(false);
+    setNewInvoice({ case_id: '', amount: '', description: '' });
+  };
+
+  const handleMarkAsPaid = (id: string) => {
+    const allInvoices = legalStore.getInvoices();
+    const idx = allInvoices.findIndex(i => i.id === id);
+    if (idx !== -1) {
+      allInvoices[idx].status = 'Payé';
+      localStorage.setItem('hc_legal_store', JSON.stringify({ ...JSON.parse(localStorage.getItem('hc_legal_store')!), invoices: allInvoices }));
+      setInvoices([...allInvoices]);
+    }
+  };
 
   const filteredInvoices = invoices.filter(inv => {
     const client = legalStore.getClient(inv.client_id);
@@ -72,11 +132,81 @@ const Billing = () => {
             <Button variant="outline" className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
               <Download className="w-4 h-4" /> Rapport Financier
             </Button>
-            <Button className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
+            <Button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2"
+            >
               <Plus className="w-4 h-4" /> Nouvelle Facture
             </Button>
           </div>
         </div>
+
+        {/* Create Invoice Modal */}
+        <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+          <DialogContent className="max-w-xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Émission de Facture</DialogTitle>
+              <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                Générez une demande d'honoraires pour un dossier spécifique.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 my-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dossier Assigné</Label>
+                <Select value={newInvoice.case_id} onValueChange={(val) => setNewInvoice({...newInvoice, case_id: val})}>
+                  <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
+                    <SelectValue placeholder="Choisir un dossier..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cases.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.id} - {c.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Montant (SA$)</Label>
+                  <Input
+                    type="number"
+                    value={newInvoice.amount}
+                    onChange={(e) => setNewInvoice({...newInvoice, amount: e.target.value})}
+                    placeholder="0.00"
+                    className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Libellé</Label>
+                  <Input
+                    value={newInvoice.description}
+                    onChange={(e) => setNewInvoice({...newInvoice, description: e.target.value})}
+                    placeholder="Honoraires..."
+                    className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="ghost"
+                onClick={() => setShowCreateModal(false)}
+                className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleCreateInvoice}
+                disabled={!newInvoice.case_id || !newInvoice.amount}
+                className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl"
+              >
+                Générer la Facture
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <Card className="bg-white border-none shadow-md px-8 py-6 flex items-center gap-6 rounded-[32px]">
@@ -169,8 +299,18 @@ const Billing = () => {
                           {item.status}
                         </Badge>
                       </td>
-                      <td className="px-8 py-6">
-                        <div className="flex gap-2">
+                      <td className="px-8 py-6 text-right">
+                        <div className="flex gap-2 justify-end">
+                          {item.status !== 'Payé' && (
+                            <Button
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleMarkAsPaid(item.id); }}
+                              variant="ghost"
+                              size="icon"
+                              className="text-slate-300 hover:text-emerald-600"
+                            >
+                              <FileCheck className="w-4 h-4" />
+                            </Button>
+                          )}
                           <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
                             <Download className="w-4 h-4" />
                           </Button>
