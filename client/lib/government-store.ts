@@ -40,13 +40,26 @@ class GovernmentStoreManager {
     this.initSync();
   }
 
-  private async initSync() {
-    await this.fetchFromServer();
-    setInterval(() => this.fetchFromServer(), SYNC_INTERVAL);
+  public stopSync() {
+    this.isSyncing = false;
+    // Clearing interval if we had a ref, but let's use a simpler approach
   }
 
-  private async fetchFromServer() {
-    if (this.isSyncing) return;
+  private async initSync() {
+    // Stop any existing sync if we are reloading (HMR)
+    if ((window as any).__gov_store_sync_interval) {
+      clearInterval((window as any).__gov_store_sync_interval);
+    }
+
+    // Small delay to ensure server is ready during dev HMR
+    setTimeout(async () => {
+      await this.fetchFromServer();
+      (window as any).__gov_store_sync_interval = setInterval(() => this.fetchFromServer(), SYNC_INTERVAL);
+    }, 1000);
+  }
+
+  private async fetchFromServer(retries = 3) {
+    if (this.isSyncing && retries === 3) return;
     this.isSyncing = true;
     try {
       const res = await fetch('/api/government');
@@ -55,11 +68,21 @@ class GovernmentStoreManager {
         this.data = serverData;
         this.saveLocally();
         this.notify();
+      } else {
+        console.warn(`Government Sync: Server returned ${res.status}`);
       }
+      this.isSyncing = false; // Successfully finished
     } catch (e) {
-      console.error("Government Sync error:", e);
-    } finally {
-      this.isSyncing = false;
+      if (retries > 0) {
+        // Schedule retry without locking up
+        setTimeout(() => {
+          this.isSyncing = false; // Unlock to allow retry
+          this.fetchFromServer(retries - 1);
+        }, 1000);
+      } else {
+        console.error("Government Sync error after retries:", e);
+        this.isSyncing = false; // Final unlock
+      }
     }
   }
 

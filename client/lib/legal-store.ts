@@ -74,12 +74,20 @@ class LegalStoreManager {
   }
 
   private async initSync() {
-    await this.fetchFromServer();
-    setInterval(() => this.fetchFromServer(), SYNC_INTERVAL);
+    // Stop any existing sync if we are reloading (HMR)
+    if ((window as any).__legal_store_sync_interval) {
+      clearInterval((window as any).__legal_store_sync_interval);
+    }
+
+    // Small delay to ensure server is ready during dev HMR
+    setTimeout(async () => {
+      await this.fetchFromServer();
+      (window as any).__legal_store_sync_interval = setInterval(() => this.fetchFromServer(), SYNC_INTERVAL);
+    }, 1000);
   }
 
-  private async fetchFromServer() {
-    if (this.isSyncing) return;
+  private async fetchFromServer(retries = 3) {
+    if (this.isSyncing && retries === 3) return;
     this.isSyncing = true;
     try {
       const res = await fetch('/api/legal');
@@ -89,11 +97,20 @@ class LegalStoreManager {
         this.data = serverData;
         this.saveLocally();
         this.notify();
+      } else {
+        console.warn(`Legal Sync: Server returned ${res.status}`);
       }
-    } catch (e) {
-      console.error("Sync error:", e);
-    } finally {
       this.isSyncing = false;
+    } catch (e) {
+      if (retries > 0) {
+        setTimeout(() => {
+          this.isSyncing = false;
+          this.fetchFromServer(retries - 1);
+        }, 1000);
+      } else {
+        console.error("Legal Sync error after retries:", e);
+        this.isSyncing = false;
+      }
     }
   }
 
