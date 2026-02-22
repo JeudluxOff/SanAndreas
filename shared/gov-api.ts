@@ -41,6 +41,7 @@ export interface GovAnnouncement {
 export interface GovDocument {
   id: string;
   title: string;
+  content?: string;
   type: string;
   date: string;
   status: string;

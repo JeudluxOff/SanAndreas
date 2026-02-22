@@ -1,15 +1,16 @@
-import { 
-  GovernmentStore, 
-  GovWorkspace, 
-  GovEmployee, 
-  GovTask, 
-  GovAnnouncement, 
-  GovDocument, 
+import {
+  GovernmentStore,
+  GovWorkspace,
+  GovEmployee,
+  GovTask,
+  GovAnnouncement,
+  GovDocument,
   GovDossier,
   GovNotification,
   GovMessage,
   GovAuditLog
 } from '@shared/gov-api';
+import { legalStore } from './legal-store';
 
 const STORE_KEY = 'gov_intranet_store';
 const SYNC_INTERVAL = 5000; // Poll every 5 seconds
@@ -157,7 +158,25 @@ class GovernmentStoreManager {
   }
 
   // Audit
-  getAuditLogs() { return this.data.auditLogs; }
+  getAuditLogs() {
+    const govLogs = this.data.auditLogs;
+
+    // Include Legal Audit Logs
+    const legalLogs = legalStore.getAuditLogs().map(log => ({
+      id: log.id,
+      timestamp: log.timestamp,
+      user_id: log.user_id,
+      user_name: log.user_name,
+      role: 'Avocat',
+      service_id: 'JUSTICE',
+      action: `[CABINET] ${log.action}`,
+      metadata: log.metadata
+    }));
+
+    return [...govLogs, ...legalLogs].sort((a, b) =>
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  }
   logAction(log: GovAuditLog) {
     this.data.auditLogs.unshift(log);
     this.save();
@@ -201,11 +220,28 @@ class GovernmentStoreManager {
 
   // Documents
   getGlobalDocuments() {
-    return Object.values(this.data.workspaces).flatMap(ws => (ws.documents || []).map(d => ({
+    const govDocs = Object.values(this.data.workspaces).flatMap(ws => (ws.documents || []).map(d => ({
       ...d,
       service_name: ws.name,
       service_id: Object.keys(this.data.workspaces).find(key => this.data.workspaces[key] === ws)?.toUpperCase()
     })));
+
+    // Include Legal Documents from legalStore
+    const legalDocs = legalStore.getDocuments().map(d => ({
+      id: d.id,
+      title: d.title,
+      content: d.content,
+      type: d.category,
+      date: new Date(d.created_at).toLocaleDateString(),
+      status: d.status,
+      author: 'Cabinet H&C',
+      archived: d.status === 'Archivé',
+      acl: [],
+      service_name: 'Cabinet Juridique',
+      service_id: 'JUSTICE'
+    }));
+
+    return [...govDocs, ...legalDocs];
   }
 
   createDocument(serviceId: string, doc: GovDocument) {
@@ -234,11 +270,28 @@ class GovernmentStoreManager {
 
   // Dossiers
   getGlobalDossiers() {
-    return Object.values(this.data.workspaces).flatMap(ws => (ws.dossiers || []).map(d => ({
+    const govDossiers = Object.values(this.data.workspaces).flatMap(ws => (ws.dossiers || []).map(d => ({
       ...d,
       service_name: ws.name,
       service_id: Object.keys(this.data.workspaces).find(key => this.data.workspaces[key] === ws)?.toUpperCase()
     })));
+
+    // Include Legal Dossiers from legalStore
+    const legalDossiers = legalStore.getCases().map(c => ({
+      id: c.id,
+      title: c.title,
+      status: c.status,
+      archived: c.status === 'Archivé',
+      acl: [],
+      priority: 'Normale',
+      creationDate: new Date(c.created_at).toLocaleDateString(),
+      description: c.description,
+      progress: c.progression || 0,
+      service_name: 'Cabinet Juridique',
+      service_id: 'JUSTICE'
+    }));
+
+    return [...govDossiers, ...legalDossiers];
   }
 
   getDossier(id: string) {

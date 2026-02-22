@@ -87,6 +87,17 @@ const DossierDetail = () => {
     logAction(`${action} sur le dossier: ${dossier.id}`);
   };
 
+  const linkify = (text: string) => {
+    if (!text) return null;
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.split(urlRegex).map((part, i) => {
+      if (part.match(urlRegex)) {
+        return <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">{part}</a>;
+      }
+      return part;
+    });
+  };
+
   return (
     <IntranetLayout>
       <div className="space-y-6 pb-20">
@@ -166,9 +177,9 @@ const DossierDetail = () => {
 
                 <div className="space-y-2 p-4 bg-slate-50 rounded-lg border border-slate-200">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Description / Objet</span>
-                  <p className="text-sm text-slate-700 leading-relaxed font-medium">
-                    {dossier.description}
-                  </p>
+                  <div className="text-sm text-slate-700 leading-relaxed font-medium whitespace-pre-wrap text-left">
+                    {linkify(dossier.description)}
+                  </div>
                 </div>
               </CardContent>
             </Card>

@@ -1,17 +1,18 @@
-import { 
-  Case, 
-  LegalDocument, 
-  Evidence, 
-  Task, 
-  Hearing, 
-  Invoice, 
-  AuditLog, 
+import {
+  Case,
+  LegalDocument,
+  Evidence,
+  Task,
+  Hearing,
+  Invoice,
+  AuditLog,
   ConflictCheck,
   Client,
   Message,
   StaffMember,
   CabinetSettings
 } from '@shared/api';
+import { governmentStore } from './government-store';
 
 const STORE_KEY = 'hc_legal_store';
 const SYNC_INTERVAL = 5000; // Poll every 5 seconds
@@ -134,6 +135,10 @@ class LegalStoreManager {
     this.saveLocally();
     this.saveToServer();
     this.notify();
+    // Notify governmentStore to refresh its global views that include legal data
+    if ((governmentStore as any).notify) {
+      (governmentStore as any).notify();
+    }
   }
 
   subscribe(listener: () => void) {

@@ -33,15 +33,23 @@ import {
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
@@ -53,8 +61,21 @@ const Documents = () => {
   const store = useGovernmentStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const [showViewModal, setShowViewModal] = useState(false);
 
   const documents = store.getGlobalDocuments();
+
+  const linkify = (text: string) => {
+    if (!text) return null;
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.split(urlRegex).map((part, i) => {
+      if (part.match(urlRegex)) {
+        return <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">{part}</a>;
+      }
+      return part;
+    });
+  };
 
   const filteredDocs = documents.filter(doc => {
     const matchesSearch = (doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -173,7 +194,7 @@ const Documents = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className={cn(
+                          <div { ... (doc.content ? { onClick: () => { setSelectedDocId(doc.id); setShowViewModal(true); }, className: "cursor-pointer" } : {}) } className={cn(
                             "p-2 rounded-lg",
                             doc.status === 'Signé' ? "bg-emerald-50 text-emerald-600" :
                             doc.status === 'Brouillon' ? "bg-slate-100 text-slate-500" :
@@ -182,7 +203,7 @@ const Documents = () => {
                           )}>
                             <FileText className="w-5 h-5" />
                           </div>
-                          <span className="text-sm font-bold text-slate-900 group-hover:text-primary transition-colors cursor-pointer">{doc.title}</span>
+                          <span onClick={() => { if(doc.content) { setSelectedDocId(doc.id); setShowViewModal(true); } }} className={cn("text-sm font-bold text-slate-900 group-hover:text-primary transition-colors", doc.content && "cursor-pointer")}>{doc.title}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -206,7 +227,13 @@ const Documents = () => {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-primary" title="Voir">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-slate-500 hover:text-primary"
+                            title="Voir"
+                            onClick={() => { setSelectedDocId(doc.id); setShowViewModal(true); }}
+                          >
                             <Eye className="w-4 h-4" />
                           </Button>
                           {hasPermission('documents:edit') && (doc.service_id === user?.service_id || user?.role === 'gouverneur') && (
@@ -329,6 +356,55 @@ const Documents = () => {
           </button>
         </div>
       </div>
+
+      {/* Document View Modal */}
+      <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
+        <DialogContent className="max-w-4xl bg-white rounded-3xl p-8 border-none shadow-2xl overflow-y-auto max-h-[90vh]">
+          {selectedDocId && (
+            <>
+              <DialogHeader className="flex flex-row items-center justify-between space-y-0 text-left border-b pb-6">
+                <div className="space-y-1">
+                  <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">
+                    {documents.find(d => d.id === selectedDocId)?.title}
+                  </DialogTitle>
+                  <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    #{selectedDocId} • {documents.find(d => d.id === selectedDocId)?.service_name}
+                  </DialogDescription>
+                </div>
+                <Badge className={cn(
+                  "text-[9px] font-black uppercase tracking-widest px-3 py-1",
+                  documents.find(d => d.id === selectedDocId)?.status === 'Signé' ? 'bg-emerald-600 text-white' :
+                  documents.find(d => d.id === selectedDocId)?.status === 'En relecture' ? 'bg-amber-500 text-white' :
+                  documents.find(d => d.id === selectedDocId)?.status === 'Brouillon' ? 'bg-slate-400 text-white' :
+                  'bg-blue-600 text-white'
+                )}>
+                  {documents.find(d => d.id === selectedDocId)?.status}
+                </Badge>
+              </DialogHeader>
+
+              <div className="my-8 p-8 bg-slate-50 rounded-2xl border border-slate-100 min-h-[400px]">
+                <div className="whitespace-pre-wrap text-sm text-slate-700 font-medium leading-relaxed text-left">
+                  {linkify(documents.find(d => d.id === selectedDocId)?.content || "AUCUN CONTENU DISPONIBLE POUR CE DOCUMENT OFFICIEL.")}
+                </div>
+              </div>
+
+              <DialogFooter className="flex justify-between items-center w-full">
+                <div className="flex gap-4">
+                  <Button variant="outline" size="sm" className="font-bold uppercase text-[10px] tracking-widest h-10 px-6 gap-2">
+                    <Download className="w-4 h-4" /> Télécharger PDF
+                  </Button>
+                </div>
+                <Button
+                  onClick={() => setShowViewModal(false)}
+                  className="bg-[#1B365D] text-white font-bold uppercase text-[10px] tracking-widest h-10 px-8 rounded-xl shadow-xl shadow-blue-900/10"
+                >
+                  Fermer
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </IntranetLayout>
   );
 };
