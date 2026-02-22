@@ -368,6 +368,17 @@ class LegalStoreManager {
 
   // Invoices
   getInvoices() { return this.data.invoices; }
+  createInvoice(inv: Invoice) {
+    this.data.invoices.unshift(inv);
+    this.save();
+  }
+  updateInvoice(updated: Invoice) {
+    const idx = this.data.invoices.findIndex(i => i.id === updated.id);
+    if (idx !== -1) {
+      this.data.invoices[idx] = updated;
+      this.save();
+    }
+  }
 
   // Audit
   logAction(log: AuditLog) {

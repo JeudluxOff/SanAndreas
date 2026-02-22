@@ -41,6 +41,7 @@ import { legalStore } from '@/lib/legal-store';
 import { Invoice } from '@shared/api';
 
 const Billing = () => {
+  const { user } = useAuth();
   const { isAssocié, canBill } = useLegalRBAC();
   const [invoices, setInvoices] = React.useState(legalStore.getInvoices());
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -50,6 +51,30 @@ const Billing = () => {
     amount: '',
     description: ''
   });
+
+  // Real-time animation for numbers (simulated)
+  const [displayTotal, setDisplayTotal] = React.useState(0);
+
+  const totalInvoiced = invoices.reduce((acc, inv) => acc + inv.amount, 0);
+  const totalPending = invoices.filter(i => i.status !== 'Payé').reduce((acc, inv) => acc + inv.amount, 0);
+  const totalPaid = invoices.filter(i => i.status === 'Payé').reduce((acc, inv) => acc + inv.amount, 0);
+
+  React.useEffect(() => {
+    let start = 0;
+    const end = totalInvoiced;
+    if (start === end) return;
+
+    let timer = setInterval(() => {
+      start += Math.ceil((end - start) / 10);
+      if (start >= end) {
+        setDisplayTotal(end);
+        clearInterval(timer);
+      } else {
+        setDisplayTotal(start);
+      }
+    }, 30);
+    return () => clearInterval(timer);
+  }, [totalInvoiced]);
 
   const cases = legalStore.getCases();
 
@@ -70,12 +95,8 @@ const Billing = () => {
     );
   }
 
-  const totalInvoiced = invoices.reduce((acc, inv) => acc + inv.amount, 0);
-  const totalPending = invoices.filter(i => i.status !== 'Payé').reduce((acc, inv) => acc + inv.amount, 0);
-  const totalPaid = invoices.filter(i => i.status === 'Payé').reduce((acc, inv) => acc + inv.amount, 0);
-
   const handleCreateInvoice = () => {
-    if (!newInvoice.case_id || !newInvoice.amount) return;
+    if (!newInvoice.case_id || !newInvoice.amount || !user) return;
     const caseObj = legalStore.getCase(newInvoice.case_id);
     if (!caseObj) return;
 
@@ -91,21 +112,44 @@ const Billing = () => {
       items: [{ description: newInvoice.description || 'Honoraires juridiques', amount: Number(newInvoice.amount) }]
     };
 
-    // Simulated store update
-    const allInvoices = [...legalStore.getInvoices(), inv];
-    localStorage.setItem('hc_legal_store', JSON.stringify({ ...JSON.parse(localStorage.getItem('hc_legal_store')!), invoices: allInvoices }));
-    setInvoices(allInvoices);
+    legalStore.createInvoice(inv);
+
+    legalStore.logAction({
+      id: `LOG-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      user_id: user.id,
+      user_name: user.name,
+      action: 'Émission de facture',
+      target_type: 'Invoice',
+      target_id: inv.id,
+      metadata: { amount: inv.amount, case_id: inv.case_id }
+    });
+
+    setInvoices(legalStore.getInvoices());
     setShowCreateModal(false);
     setNewInvoice({ case_id: '', amount: '', description: '' });
   };
 
   const handleMarkAsPaid = (id: string) => {
+    if (!user) return;
     const allInvoices = legalStore.getInvoices();
-    const idx = allInvoices.findIndex(i => i.id === id);
-    if (idx !== -1) {
-      allInvoices[idx].status = 'Payé';
-      localStorage.setItem('hc_legal_store', JSON.stringify({ ...JSON.parse(localStorage.getItem('hc_legal_store')!), invoices: allInvoices }));
-      setInvoices([...allInvoices]);
+    const inv = allInvoices.find(i => i.id === id);
+    if (inv) {
+      inv.status = 'Payé';
+      legalStore.updateInvoice(inv);
+
+      legalStore.logAction({
+        id: `LOG-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user_id: user.id,
+        user_name: user.name,
+        action: 'Facture payée',
+        target_type: 'Invoice',
+        target_id: id,
+        metadata: { amount: inv.amount }
+      });
+
+      setInvoices([...legalStore.getInvoices()]);
     }
   };
 
@@ -209,33 +253,57 @@ const Billing = () => {
         </Dialog>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <Card className="bg-white border-none shadow-md px-8 py-6 flex items-center gap-6 rounded-[32px]">
-            <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl">
-              <TrendingUp className="w-6 h-6" />
+          <Card className="bg-[#0a0f18] text-white border-none shadow-2xl px-8 py-10 flex flex-col justify-between rounded-[40px] relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+              <TrendingUp className="w-24 h-24 rotate-12" />
             </div>
-            <div>
-              <p className="text-2xl font-black text-slate-900 leading-none">{totalInvoiced.toLocaleString()} SA$</p>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Honoraires Facturés</p>
+            <div className="relative z-10">
+              <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] mb-4">Chiffre d'Affaires Global</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-5xl font-black tracking-tighter leading-none">{displayTotal.toLocaleString()}</p>
+                <p className="text-xl font-black text-[#c1a461] uppercase tracking-widest">SA$</p>
+              </div>
             </div>
-          </Card>
-          <Card className="bg-white border-none shadow-md px-8 py-6 flex items-center gap-6 rounded-[32px]">
-            <div className="p-4 bg-amber-50 text-amber-600 rounded-2xl">
-              <Clock className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-slate-900 leading-none">{totalPending.toLocaleString()} SA$</p>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">En attente de paiement</p>
-            </div>
-          </Card>
-          <Card className="bg-white border-none shadow-md px-8 py-6 flex items-center gap-6 rounded-[32px]">
-            <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl">
-              <FileCheck className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-slate-900 leading-none">{totalPaid.toLocaleString()} SA$</p>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Montant recouvré</p>
+            <div className="relative z-10 mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#c1a461] animate-pulse" />
+                <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest text-left">Mise à jour en temps réel</span>
+              </div>
+              <ArrowRight className="w-4 h-4 text-white/20" />
             </div>
           </Card>
+
+          <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <Card className="bg-white border-none shadow-md px-8 py-6 flex items-center gap-6 rounded-[32px]">
+              <div className="p-4 bg-amber-50 text-amber-600 rounded-2xl">
+                <Clock className="w-6 h-6" />
+              </div>
+              <div className="text-left">
+                <p className="text-2xl font-black text-slate-900 leading-none">{totalPending.toLocaleString()} SA$</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">En attente de paiement</p>
+              </div>
+            </Card>
+            <Card className="bg-white border-none shadow-md px-8 py-6 flex items-center gap-6 rounded-[32px]">
+              <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl">
+                <FileCheck className="w-6 h-6" />
+              </div>
+              <div className="text-left">
+                <p className="text-2xl font-black text-slate-900 leading-none">{totalPaid.toLocaleString()} SA$</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Montant recouvré</p>
+              </div>
+            </Card>
+            <Card className="bg-white border-none shadow-md px-8 py-6 flex items-center gap-6 rounded-[32px] md:col-span-2">
+               <div className="flex-grow flex items-center justify-between text-left">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Performance de Recouvrement</p>
+                    <p className="text-sm font-black text-slate-900 uppercase">{Math.round((totalPaid / (totalInvoiced || 1)) * 100)}% de réussite</p>
+                  </div>
+                  <div className="w-64 h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#c1a461] transition-all duration-1000" style={{ width: `${(totalPaid / (totalInvoiced || 1)) * 100}%` }} />
+                  </div>
+               </div>
+            </Card>
+          </div>
         </div>
 
         <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
