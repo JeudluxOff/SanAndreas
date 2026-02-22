@@ -7,22 +7,77 @@
       "members": 12,
       "activeDossiers": 8,
       "description": "Centre névralgique du gouvernement. Gestion des décrets, de la stratégie politique et des relations institutionnelles.",
-      "procedures": ["Rédaction d'un décret", "Protocole de signature", "Liaison inter-agences"],
+      "procedures": [
+        "Rédaction d'un décret",
+        "Protocole de signature",
+        "Liaison inter-agences"
+      ],
       "staff": [
-        { "name": "Arthur Vance", "role": "Gouverneur", "role_short": "Gov", "status": "available" },
-        { "name": "Elena Rodriguez", "role": "Lieutenant-Gouverneur", "role_short": "Lt-Gov", "status": "busy" },
-        { "name": "Jean Dupont", "role": "Chef de Cabinet", "role_short": "Chef", "status": "away" }
+        {
+          "name": "Arthur Vance",
+          "role": "Gouverneur",
+          "role_short": "Gov",
+          "status": "available"
+        },
+        {
+          "name": "Elena Rodriguez",
+          "role": "Lieutenant-Gouverneur",
+          "role_short": "Lt-Gov",
+          "status": "busy"
+        },
+        {
+          "name": "Jean Dupont",
+          "role": "Chef de Cabinet",
+          "role_short": "Chef",
+          "status": "away"
+        }
       ],
       "tasks": [
-        { "id": 1, "title": "Rédaction Décret Urbanisme", "status": "in_progress", "priority": "high", "due": "Demain" },
-        { "id": 2, "title": "Préparation Conférence de Presse", "status": "pending", "priority": "medium", "due": "26 Mai" }
+        {
+          "id": 1,
+          "title": "Rédaction Décret Urbanisme",
+          "status": "in_progress",
+          "priority": "high",
+          "due": "Demain"
+        },
+        {
+          "id": 2,
+          "title": "Préparation Conférence de Presse",
+          "status": "pending",
+          "priority": "medium",
+          "due": "26 Mai"
+        }
       ],
       "announcements": [
-        { "id": 1, "title": "Rappel : Réunion Hebdomadaire", "text": "Présence obligatoire de tous les membres demain à 9h.", "date": "Il y a 2h", "author": "Arthur V." }
+        {
+          "id": 1,
+          "title": "Rappel : Réunion Hebdomadaire",
+          "text": "Présence obligatoire de tous les membres demain à 9h.",
+          "date": "Il y a 2h",
+          "author": "Arthur V."
+        }
       ],
       "documents": [
-        { "id": "DEC-24-0042", "title": "Décret sur la régulation des commerces", "type": "Décret", "date": "22 Mai 2024", "status": "Signé", "author": "Arthur Vance", "archived": false, "acl": [] },
-        { "id": "DEC-24-0041", "title": "Décret sur les subventions SAMS", "type": "Décret", "date": "08 Mai 2024", "status": "Signé", "author": "Arthur Vance", "archived": false, "acl": [] }
+        {
+          "id": "DEC-24-0042",
+          "title": "Décret sur la régulation des commerces",
+          "type": "Décret",
+          "date": "22 Mai 2024",
+          "status": "Signé",
+          "author": "Arthur Vance",
+          "archived": false,
+          "acl": []
+        },
+        {
+          "id": "DEC-24-0041",
+          "title": "Décret sur les subventions SAMS",
+          "type": "Décret",
+          "date": "08 Mai 2024",
+          "status": "Signé",
+          "author": "Arthur Vance",
+          "archived": false,
+          "acl": []
+        }
       ],
       "dossiers": [
         {
@@ -37,8 +92,16 @@
           "description": "Projet de refonte des articles fondamentaux de la constitution de l'État.",
           "progress": 65,
           "participants": [
-            { "id": "governor", "name": "Arthur Vance", "role": "Gouverneur" },
-            { "id": "press", "name": "Elena Rodriguez", "role": "Press Secretary" }
+            {
+              "id": "governor",
+              "name": "Arthur Vance",
+              "role": "Gouverneur"
+            },
+            {
+              "id": "press",
+              "name": "Elena Rodriguez",
+              "role": "Press Secretary"
+            }
           ]
         },
         {
@@ -53,7 +116,11 @@
           "description": "Validation des budgets pour le troisième trimestre.",
           "progress": 40,
           "participants": [
-            { "id": "governor", "name": "Arthur Vance", "role": "Gouverneur" }
+            {
+              "id": "governor",
+              "name": "Arthur Vance",
+              "role": "Gouverneur"
+            }
           ]
         }
       ]
@@ -65,25 +132,83 @@
       "members": 85,
       "activeDossiers": 154,
       "description": "Coordination des forces de l'ordre, gestion des budgets de sécurité et élaboration des plans de réponse aux urgences.",
-      "procedures": ["Rapport d'incident", "Demande de renforts", "Protocole d'intervention"],
+      "procedures": [
+        "Rapport d'incident",
+        "Demande de renforts",
+        "Protocole d'intervention"
+      ],
       "staff": [
-        { "name": "Jackson Teller", "role": "Secrétaire Sécurité", "role_short": "Sec", "status": "available" },
-        { "name": "Marcus Wright", "role": "Commandant LSPD", "role_short": "Cmd", "status": "busy" },
-        { "name": "Sarah Miller", "role": "Shérif LSSD", "role_short": "Shr", "status": "available" }
+        {
+          "name": "Jackson Teller",
+          "role": "Secrétaire Sécurité",
+          "role_short": "Sec",
+          "status": "available"
+        },
+        {
+          "name": "Marcus Wright",
+          "role": "Commandant LSPD",
+          "role_short": "Cmd",
+          "status": "busy"
+        },
+        {
+          "name": "Sarah Miller",
+          "role": "Shérif LSSD",
+          "role_short": "Shr",
+          "status": "available"
+        }
       ],
       "tasks": [
-        { "id": 1, "title": "Déploiement Patrouilles Sud", "status": "completed", "priority": "high", "due": "Terminé" },
-        { "id": 2, "title": "Révision Budget Munitions", "status": "in_progress", "priority": "medium", "due": "30 Mai" }
+        {
+          "id": 1,
+          "title": "Déploiement Patrouilles Sud",
+          "status": "completed",
+          "priority": "high",
+          "due": "Terminé"
+        },
+        {
+          "id": 2,
+          "title": "Révision Budget Munitions",
+          "status": "in_progress",
+          "priority": "medium",
+          "due": "30 Mai"
+        }
       ],
       "announcements": [
-        { "id": 1, "title": "Alerte : Manifestation prévue", "text": "Déploiement préventif aux alentours de la Mairie.", "date": "Il y a 1h", "author": "Jackson T." }
+        {
+          "id": 1,
+          "title": "Alerte : Manifestation prévue",
+          "text": "Déploiement préventif aux alentours de la Mairie.",
+          "date": "Il y a 1h",
+          "author": "Jackson T."
+        }
       ],
       "documents": [
-        { "id": "ARR-24-1102", "title": "Arrêté préfectoral zone de sécurité", "type": "Arrêté", "date": "21 Mai 2024", "status": "En relecture", "author": "Jackson Teller", "archived": false, "acl": [] }
+        {
+          "id": "ARR-24-1102",
+          "title": "Arrêté préfectoral zone de sécurité",
+          "type": "Arrêté",
+          "date": "21 Mai 2024",
+          "status": "En relecture",
+          "author": "Jackson Teller",
+          "archived": false,
+          "acl": []
+        }
       ],
       "dossiers": [
-        { "id": "DOS-SEC-1024", "title": "Opération Clean Street", "status": "En cours", "archived": false, "acl": [] },
-        { "id": "DOS-SEC-1056", "title": "Achat Véhicules Intervention", "status": "Clos", "archived": false, "acl": [] }
+        {
+          "id": "DOS-SEC-1024",
+          "title": "Opération Clean Street",
+          "status": "En cours",
+          "archived": false,
+          "acl": []
+        },
+        {
+          "id": "DOS-SEC-1056",
+          "title": "Achat Véhicules Intervention",
+          "status": "Clos",
+          "archived": false,
+          "acl": []
+        }
       ]
     },
     "justice": {
@@ -93,13 +218,33 @@
       "members": 24,
       "activeDossiers": 89,
       "description": "Gestion du système judiciaire, des parquets et de l'administration pénitentiaire. Rédaction du Code Pénal.",
-      "procedures": ["Dépôt de plainte État", "Mandat judiciaire", "Rapport d'audition"],
+      "procedures": [
+        "Dépôt de plainte État",
+        "Mandat judiciaire",
+        "Rapport d'audition"
+      ],
       "staff": [
-        { "name": "Thomas Vercetti", "role": "Secrétaire Justice", "role_short": "Sec", "status": "available" },
-        { "name": "Harvey Dent", "role": "Procureur", "role_short": "Proc", "status": "away" }
+        {
+          "name": "Thomas Vercetti",
+          "role": "Secrétaire Justice",
+          "role_short": "Sec",
+          "status": "available"
+        },
+        {
+          "name": "Harvey Dent",
+          "role": "Procureur",
+          "role_short": "Proc",
+          "status": "away"
+        }
       ],
       "tasks": [
-        { "id": 1, "title": "Rédaction nouveau Code Pénal", "status": "in_progress", "priority": "critical", "due": "15 Juin" }
+        {
+          "id": 1,
+          "title": "Rédaction nouveau Code Pénal",
+          "status": "in_progress",
+          "priority": "critical",
+          "due": "15 Juin"
+        }
       ],
       "announcements": [],
       "documents": [],
@@ -112,9 +257,18 @@
       "members": 42,
       "activeDossiers": 30,
       "description": "Gestion de la santé publique, des services sociaux et des protocoles d'urgence médicale (SAMS).",
-      "procedures": ["Aide sociale", "Licence médicale", "Rapport épidémiologique"],
+      "procedures": [
+        "Aide sociale",
+        "Licence médicale",
+        "Rapport épidémiologique"
+      ],
       "staff": [
-        { "name": "Julian Frost", "role": "Secrétaire Santé", "role_short": "Sec", "status": "available" }
+        {
+          "name": "Julian Frost",
+          "role": "Secrétaire Santé",
+          "role_short": "Sec",
+          "status": "available"
+        }
       ],
       "tasks": [],
       "announcements": [],
@@ -128,9 +282,18 @@
       "members": 15,
       "activeDossiers": 12,
       "description": "Contre-espionnage, protection des infrastructures critiques et gestion des menaces intérieures.",
-      "procedures": ["Habilitation Secret-Défense", "Surveillance zone", "Note de renseignement"],
+      "procedures": [
+        "Habilitation Secret-Défense",
+        "Surveillance zone",
+        "Note de renseignement"
+      ],
       "staff": [
-        { "name": "Sarah Connor", "role": "Secrétaire S.I.", "role_short": "Sec", "status": "available" }
+        {
+          "name": "Sarah Connor",
+          "role": "Secrétaire S.I.",
+          "role_short": "Sec",
+          "status": "available"
+        }
       ],
       "tasks": [],
       "announcements": [],
@@ -144,9 +307,18 @@
       "members": 18,
       "activeDossiers": 45,
       "description": "Gestion des finances publiques, régulation du commerce et développement des entreprises de San Andreas.",
-      "procedures": ["Octroi de licence", "Demande de subvention", "Rapport fiscal"],
+      "procedures": [
+        "Octroi de licence",
+        "Demande de subvention",
+        "Rapport fiscal"
+      ],
       "staff": [
-        { "name": "Franklin Clinton", "role": "Secrétaire Trésor", "role_short": "Sec", "status": "available" }
+        {
+          "name": "Franklin Clinton",
+          "role": "Secrétaire Trésor",
+          "role_short": "Sec",
+          "status": "available"
+        }
       ],
       "tasks": [],
       "announcements": [],
@@ -160,9 +332,18 @@
       "members": 8,
       "activeDossiers": 5,
       "description": "Gestion de l'image du gouvernement, relations presse et diffusion des communiqués officiels.",
-      "procedures": ["Communiqué de presse", "Briefing média", "Journal Officiel"],
+      "procedures": [
+        "Communiqué de presse",
+        "Briefing média",
+        "Journal Officiel"
+      ],
       "staff": [
-        { "name": "Lamar Davis", "role": "Press Secretary", "role_short": "Press", "status": "available" }
+        {
+          "name": "Lamar Davis",
+          "role": "Press Secretary",
+          "role_short": "Press",
+          "status": "available"
+        }
       ],
       "tasks": [],
       "announcements": [],
@@ -176,9 +357,18 @@
       "members": 30,
       "activeDossiers": 20,
       "description": "Coordination inter-services, gestion des ressources humaines et logistique gouvernementale.",
-      "procedures": ["Formulaire embauche", "Demande matériel", "Ordre de mission"],
+      "procedures": [
+        "Formulaire embauche",
+        "Demande matériel",
+        "Ordre de mission"
+      ],
       "staff": [
-        { "name": "James Marshall", "role": "Secrétaire d'État", "role_short": "Sec", "status": "available" }
+        {
+          "name": "James Marshall",
+          "role": "Secrétaire d'État",
+          "role_short": "Sec",
+          "status": "available"
+        }
       ],
       "tasks": [],
       "announcements": [],
@@ -266,46 +456,213 @@
     }
   ],
   "globalAnnouncements": [
-    { "id": 1, "title": "Note de Service #24-05", "text": "Nouvelles consignes pour la rédaction des décrets officiels.", "date": "Hier" },
-    { "id": 2, "title": "Maintenance Système", "text": "L'intranet sera indisponible dimanche de 02h à 04h.", "date": "19 Mai" }
+    {
+      "id": 1,
+      "title": "Note de Service #24-05",
+      "text": "Nouvelles consignes pour la rédaction des décrets officiels.",
+      "date": "Hier"
+    },
+    {
+      "id": 2,
+      "title": "Maintenance Système",
+      "text": "L'intranet sera indisponible dimanche de 02h à 04h.",
+      "date": "19 Mai"
+    }
   ],
   "calendarEvents": [
-    { "id": 1, "time": "09:00 - 10:30", "title": "Briefing Sécurité", "type": "official", "date": "2024-05-22", "participants": 8, "location": "Salle de Briefing LSPD", "service": "SECURITE_PUBLIQUE" },
-    { "id": 2, "time": "11:30 - 13:00", "title": "Réunion Budget 2025", "type": "official", "date": "2024-05-22", "participants": 5, "location": "Bureaux du Trésor", "service": "TRESOR_COMMERCE" },
-    { "id": 3, "time": "14:00 - 16:00", "title": "Audience Publique", "type": "official", "date": "2024-05-22", "participants": 25, "location": "Cour de Los Santos", "service": "JUSTICE" },
-    { "id": 4, "time": "16:30 - 17:30", "title": "Point Presse Gouverneur", "type": "official", "date": "2024-05-22", "participants": 15, "location": "Salle de Presse", "service": "CABINET" }
+    {
+      "id": 1,
+      "time": "09:00 - 10:30",
+      "title": "Briefing Sécurité",
+      "type": "official",
+      "date": "2024-05-22",
+      "participants": 8,
+      "location": "Salle de Briefing LSPD",
+      "service": "SECURITE_PUBLIQUE"
+    },
+    {
+      "id": 2,
+      "time": "11:30 - 13:00",
+      "title": "Réunion Budget 2025",
+      "type": "official",
+      "date": "2024-05-22",
+      "participants": 5,
+      "location": "Bureaux du Trésor",
+      "service": "TRESOR_COMMERCE"
+    },
+    {
+      "id": 3,
+      "time": "14:00 - 16:00",
+      "title": "Audience Publique",
+      "type": "official",
+      "date": "2024-05-22",
+      "participants": 25,
+      "location": "Cour de Los Santos",
+      "service": "JUSTICE"
+    },
+    {
+      "id": 4,
+      "time": "16:30 - 17:30",
+      "title": "Point Presse Gouverneur",
+      "type": "official",
+      "date": "2024-05-22",
+      "participants": 15,
+      "location": "Salle de Presse",
+      "service": "CABINET"
+    }
   ],
   "notifications": [
-    { "id": 1, "type": "validation", "text": "Décret #SA-2024-042 en attente de signature", "time": "il y a 2h", "priority": "high", "service_id": "CABINET" },
-    { "id": 2, "type": "assignment", "text": "Nouveau dossier judiciaire assigné #JD-8941", "time": "il y a 5h", "priority": "medium", "service_id": "JUSTICE" },
-    { "id": 3, "type": "meeting", "text": "Réunion de cabinet demain à 09:00", "time": "il y a 1j", "priority": "low", "service_id": "CABINET" },
-    { "id": 4, "type": "system", "text": "Mise à jour des protocoles de sécurité", "time": "il y a 2j", "priority": "medium", "service_id": "SECURITE_PUBLIQUE" }
+    {
+      "id": 1,
+      "type": "validation",
+      "text": "Décret #SA-2024-042 en attente de signature",
+      "time": "il y a 2h",
+      "priority": "high",
+      "service_id": "CABINET"
+    },
+    {
+      "id": 2,
+      "type": "assignment",
+      "text": "Nouveau dossier judiciaire assigné #JD-8941",
+      "time": "il y a 5h",
+      "priority": "medium",
+      "service_id": "JUSTICE"
+    },
+    {
+      "id": 3,
+      "type": "meeting",
+      "text": "Réunion de cabinet demain à 09:00",
+      "time": "il y a 1j",
+      "priority": "low",
+      "service_id": "CABINET"
+    },
+    {
+      "id": 4,
+      "type": "system",
+      "text": "Mise à jour des protocoles de sécurité",
+      "time": "il y a 2j",
+      "priority": "medium",
+      "service_id": "SECURITE_PUBLIQUE"
+    }
   ],
   "messages": [],
-  "auditLogs": [],
+  "auditLogs": [
+    {
+      "id": "1771774636655",
+      "timestamp": "2026-02-22T15:37:16.655Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin_avocat"
+      }
+    }
+  ],
   "economyStats": [
-    { "label": "PIB de l'État", "value": "$4.2B", "trend": "+2.4%", "status": "up" },
-    { "label": "Taux de Chômage", "value": "3.8%", "trend": "-0.5%", "status": "down" },
-    { "label": "Inflation Annuelle", "value": "2.1%", "trend": "+0.1%", "status": "up" },
-    { "label": "Dette Publique", "value": "$1.2B", "trend": "-1.2%", "status": "down" }
+    {
+      "label": "PIB de l'État",
+      "value": "$4.2B",
+      "trend": "+2.4%",
+      "status": "up"
+    },
+    {
+      "label": "Taux de Chômage",
+      "value": "3.8%",
+      "trend": "-0.5%",
+      "status": "down"
+    },
+    {
+      "label": "Inflation Annuelle",
+      "value": "2.1%",
+      "trend": "+0.1%",
+      "status": "up"
+    },
+    {
+      "label": "Dette Publique",
+      "value": "$1.2B",
+      "trend": "-1.2%",
+      "status": "down"
+    }
   ],
   "healthStats": [
-    { "label": "Médecins Actifs", "value": "245", "trend": "+12", "status": "up" },
-    { "label": "Établissements", "value": "12", "trend": "Stable", "status": "neutral" },
-    { "label": "Urgences / Jour", "value": "85", "trend": "-5%", "status": "down" },
-    { "label": "Budget Santé", "value": "$450M", "trend": "+15%", "status": "up" }
+    {
+      "label": "Médecins Actifs",
+      "value": "245",
+      "trend": "+12",
+      "status": "up"
+    },
+    {
+      "label": "Établissements",
+      "value": "12",
+      "trend": "Stable",
+      "status": "neutral"
+    },
+    {
+      "label": "Urgences / Jour",
+      "value": "85",
+      "trend": "-5%",
+      "status": "down"
+    },
+    {
+      "label": "Budget Santé",
+      "value": "$450M",
+      "trend": "+15%",
+      "status": "up"
+    }
   ],
   "securityStats": [
-    { "label": "Effectifs LSPD", "value": "210", "trend": "+15", "status": "up" },
-    { "label": "Effectifs LSSD", "value": "145", "trend": "+8", "status": "up" },
-    { "label": "Incidents / Jour", "value": "124", "trend": "-12%", "status": "down" },
-    { "label": "Taux de Résolution", "value": "78%", "trend": "+2.5%", "status": "up" }
+    {
+      "label": "Effectifs LSPD",
+      "value": "210",
+      "trend": "+15",
+      "status": "up"
+    },
+    {
+      "label": "Effectifs LSSD",
+      "value": "145",
+      "trend": "+8",
+      "status": "up"
+    },
+    {
+      "label": "Incidents / Jour",
+      "value": "124",
+      "trend": "-12%",
+      "status": "down"
+    },
+    {
+      "label": "Taux de Résolution",
+      "value": "78%",
+      "trend": "+2.5%",
+      "status": "up"
+    }
   ],
   "justiceStats": [
-    { "label": "Dossiers En Cours", "value": "342", "trend": "+24", "status": "up" },
-    { "label": "Peines Prononcées", "value": "128", "trend": "Stable", "status": "neutral" },
-    { "label": "Grâces Accordées", "value": "12", "trend": "-2", "status": "down" },
-    { "label": "Budget DOJ", "value": "$125M", "trend": "+5%", "status": "up" }
+    {
+      "label": "Dossiers En Cours",
+      "value": "342",
+      "trend": "+24",
+      "status": "up"
+    },
+    {
+      "label": "Peines Prononcées",
+      "value": "128",
+      "trend": "Stable",
+      "status": "neutral"
+    },
+    {
+      "label": "Grâces Accordées",
+      "value": "12",
+      "trend": "-2",
+      "status": "down"
+    },
+    {
+      "label": "Budget DOJ",
+      "value": "$125M",
+      "trend": "+5%",
+      "status": "up"
+    }
   ],
   "mapLocations": [
     {
@@ -313,7 +670,10 @@
       "name": "Palais du Gouverneur",
       "type": "government",
       "description": "Le centre du pouvoir exécutif de l'État de San Andreas. Bureaux du Gouverneur et du Cabinet.",
-      "coords": { "top": "74.792%", "left": "48.042%" },
+      "coords": {
+        "top": "74.792%",
+        "left": "48.042%"
+      },
       "address": "Capital Boulevard, Los Santos",
       "phone": "555-GOV-01"
     },
@@ -322,7 +682,10 @@
       "name": "Department of Justice (DOJ)",
       "type": "government",
       "description": "Siège de l'autorité judiciaire. Cour supérieure et bureaux du Procureur Général.",
-      "coords": { "top": "75.417%", "left": "48.667%" },
+      "coords": {
+        "top": "75.417%",
+        "left": "48.667%"
+      },
       "address": "Rockford Hills, Los Santos",
       "phone": "555-DOJ-02"
     },
@@ -331,7 +694,10 @@
       "name": "LSPD - Mission Row",
       "type": "police",
       "description": "Quartier général de la police de Los Santos. Centre de commandement principal.",
-      "coords": { "top": "74.829%", "left": "53.543%" },
+      "coords": {
+        "top": "74.829%",
+        "left": "53.543%"
+      },
       "address": "Mission Row, Los Santos",
       "phone": "911-LSPD-01"
     },
@@ -340,7 +706,10 @@
       "name": "LSPD - Vespucci",
       "type": "police",
       "description": "Poste de police desservant les quartiers de Vespucci et Del Perro.",
-      "coords": { "top": "73.508%", "left": "40.767%" },
+      "coords": {
+        "top": "73.508%",
+        "left": "40.767%"
+      },
       "address": "Vespucci Boulevard, Los Santos",
       "phone": "911-LSPD-02"
     },
@@ -349,7 +718,10 @@
       "name": "LSSD - Sandy Shores",
       "type": "sheriff",
       "description": "Bureau du shérif du comté de Blaine. Responsable de la sécurité rurale.",
-      "coords": { "top": "35.975%", "left": "65.458%" },
+      "coords": {
+        "top": "35.975%",
+        "left": "65.458%"
+      },
       "address": "Alhambra Drive, Sandy Shores",
       "phone": "911-LSSD-01"
     },
@@ -358,7 +730,10 @@
       "name": "LSSD - Paleto Bay",
       "type": "sheriff",
       "description": "Poste avancé du shérif situé à l'extrémité nord de l'État.",
-      "coords": { "top": "16.575%", "left": "46.333%" },
+      "coords": {
+        "top": "16.575%",
+        "left": "46.333%"
+      },
       "address": "Duluoz Avenue, Paleto Bay",
       "phone": "911-LSSD-02"
     },
@@ -367,7 +742,10 @@
       "name": "Central Los Santos Medical Center",
       "type": "hospital",
       "description": "Hôpital principal de l'État, spécialisé dans les urgences chirurgicales.",
-      "coords": { "top": "71.533%", "left": "52.483%" },
+      "coords": {
+        "top": "71.533%",
+        "left": "52.483%"
+      },
       "address": "Capital Boulevard, Los Santos",
       "phone": "911-SAMS-01"
     },
@@ -376,7 +754,10 @@
       "name": "Mount Zonah Medical Center",
       "type": "hospital",
       "description": "Centre médical de renommée mondiale, leader en recherche et soins spécialisés.",
-      "coords": { "top": "69.500%", "left": "46.258%" },
+      "coords": {
+        "top": "69.500%",
+        "left": "46.258%"
+      },
       "address": "Dorset Drive, Rockford Hills",
       "phone": "911-SAMS-02"
     },
@@ -385,7 +766,10 @@
       "name": "Pillbox Hill Medical Center",
       "type": "hospital",
       "description": "Hôpital de proximité au cœur du centre-ville, ouvert 24h/24.",
-      "coords": { "top": "78.608%", "left": "52.558%" },
+      "coords": {
+        "top": "78.608%",
+        "left": "52.558%"
+      },
       "address": "Elgin Avenue, Los Santos",
       "phone": "911-SAMS-03"
     },
@@ -394,7 +778,10 @@
       "name": "Sandy Shores Medical Center",
       "type": "hospital",
       "description": "Seul centre de soins disponible dans la région du désert de Grand Senora.",
-      "coords": { "top": "36.025%", "left": "65.325%" },
+      "coords": {
+        "top": "36.025%",
+        "left": "65.325%"
+      },
       "address": "Panorama Drive, Sandy Shores",
       "phone": "911-SAMS-04"
     }
