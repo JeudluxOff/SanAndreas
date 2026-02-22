@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Scale, 
@@ -457,6 +457,10 @@ const Footer = () => (
 );
 
 export default function Cabinet() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen font-sans selection:bg-[#c1a461] selection:text-white">
       <Navigation />
