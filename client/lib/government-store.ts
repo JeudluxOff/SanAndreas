@@ -10,7 +10,7 @@ import {
   GovMessage,
   GovAuditLog
 } from '@shared/gov-api';
-import { legalStore } from './legal-store';
+import { legalStore } from '@/lib/legal-store';
 
 const STORE_KEY = 'gov_intranet_store';
 const SYNC_INTERVAL = 5000; // Poll every 5 seconds

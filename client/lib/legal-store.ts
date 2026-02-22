@@ -12,7 +12,7 @@ import {
   StaffMember,
   CabinetSettings
 } from '@shared/api';
-import { governmentStore } from './government-store';
+import { governmentStore } from '@/lib/government-store';
 
 const STORE_KEY = 'hc_legal_store';
 const SYNC_INTERVAL = 5000; // Poll every 5 seconds
