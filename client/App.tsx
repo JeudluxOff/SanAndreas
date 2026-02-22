@@ -80,6 +80,7 @@ const AppRoutes = () => (
           <Route path="/communication" element={<LegalCommunication />} />
           <Route path="/clients" element={<LegalClients />} />
           <Route path="/workspaces" element={<LegalWorkspaces />} />
+          <Route path="/tasks" element={<LegalTasks />} />
           <Route path="/audit" element={<LegalAudit />} />
           <Route path="/admin" element={<LegalAdmin />} />
           <Route path="*" element={<NotFound />} />

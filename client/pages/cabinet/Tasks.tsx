@@ -18,15 +18,34 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import LegalIntranetLayout from './intranet/LegalIntranetLayout';
+import { legalStore } from '@/lib/legal-store';
+import { useAuth } from '@/contexts/AuthContext';
+import { Task } from '@shared/api';
+import { Link } from 'react-router-dom';
 
 const Tasks = () => {
+  const { user } = useAuth();
+  const [tasks, setTasks] = React.useState(legalStore.getTasks());
+  const [searchQuery, setSearchQuery] = React.useState('');
+
+  const myTasks = tasks.filter(t => t.assigned_to === user?.id);
+  const urgentTasks = tasks.filter(t => t.priority === 'Critique' || t.priority === 'Haute');
+  const inProgressTasks = tasks.filter(t => t.status === 'In Progress');
+  const doneTasks = tasks.filter(t => t.status === 'Done');
+
+  const filteredTasks = tasks.filter(t => 
+    t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    t.case_id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <LegalIntranetLayout>
       <div className="p-10 space-y-10">
         <div className="flex justify-between items-end">
-          <div className="space-y-1">
+          <div className="space-y-1 text-left">
             <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Gestion des Tâches</h2>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
               Assignations par dossier • Priorités Stratégiques • Suivi d'avancement
@@ -44,18 +63,18 @@ const Tasks = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {[
-            { label: "À Faire", value: 24, icon: <AlertCircle className="w-5 h-5" />, color: "text-slate-600", bg: "bg-slate-50" },
-            { label: "En Cours", value: 12, icon: <Zap className="w-5 h-5" />, color: "text-blue-600", bg: "bg-blue-50" },
-            { label: "Urgent", value: 5, icon: <Flag className="w-5 h-5" />, color: "text-red-600", bg: "bg-red-50" },
-            { label: "Terminées", value: 184, icon: <CheckCircle2 className="w-5 h-5" />, color: "text-emerald-600", bg: "bg-emerald-50" }
+            { label: "À Faire", value: tasks.filter(t => t.status === 'Todo').length, icon: <AlertCircle className="w-5 h-5" />, color: "text-slate-600", bg: "bg-slate-50" },
+            { label: "En Cours", value: inProgressTasks.length, icon: <Zap className="w-5 h-5" />, color: "text-blue-600", bg: "bg-blue-50" },
+            { label: "Urgent", value: urgentTasks.length, icon: <Flag className="w-5 h-5" />, color: "text-red-600", bg: "bg-red-50" },
+            { label: "Terminées", value: doneTasks.length, icon: <CheckCircle2 className="w-5 h-5" />, color: "text-emerald-600", bg: "bg-emerald-50" }
           ].map((stat, idx) => (
             <Card key={idx} className="bg-white border-none shadow-md px-6 py-5 flex items-center gap-5 rounded-2xl">
               <div className={cn("p-3 rounded-xl", stat.bg, stat.color)}>
                 {stat.icon}
               </div>
               <div>
-                <p className="text-xl font-black text-slate-900 leading-none">{stat.value}</p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{stat.label}</p>
+                <p className="text-xl font-black text-slate-900 leading-none text-left">{stat.value}</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 text-left">{stat.label}</p>
               </div>
             </Card>
           ))}
@@ -66,43 +85,54 @@ const Tasks = () => {
             <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
               <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between bg-slate-50/50">
                 <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight">Liste des Tâches Actives</CardTitle>
-                <div className="flex items-center gap-2">
-                   <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-200">Tout voir</Badge>
+                <div className="flex items-center gap-4">
+                   <div className="relative">
+                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                     <input 
+                      type="text" 
+                      placeholder="RECHERCHER..." 
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="bg-white border-slate-200 border rounded-lg pl-9 text-[9px] font-bold uppercase tracking-widest h-9" 
+                     />
+                   </div>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-slate-50">
-                  {[
-                    { title: "Dépôt conclusions pénales", case: "Madrazo - Dossier #882", due: "Aujourd'hui, 14:00", prio: "Critique", by: "Victoria C." },
-                    { title: "Révision contrat de fusion", case: "UD Fusion - Dossier #945", due: "Demain", prio: "Haute", by: "Julian H." },
-                    { title: "Vérification Conflits V. Duggan", case: "Succession Duggan", due: "26 Mai", prio: "Normale", by: "Marcus V." },
-                    { title: "Préparation de l'audience", case: "LS Mairie - Dossier #912", due: "28 Mai", prio: "Haute", by: "Elena R." }
-                  ].map((task, idx) => (
-                    <div key={idx} className="p-8 flex items-center justify-between group hover:bg-slate-50 transition-all cursor-pointer">
-                      <div className="flex items-center gap-6">
-                        <div className={cn("w-1.5 h-12 rounded-full", 
-                          task.prio === 'Critique' ? 'bg-red-500' : 
-                          task.prio === 'Haute' ? 'bg-amber-500' : 'bg-[#c1a461]'
-                        )} />
-                        <div className="space-y-1">
-                          <h4 className="text-base font-black text-slate-900 uppercase tracking-tighter">{task.title}</h4>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{task.case} • {task.due}</p>
+                  {filteredTasks.map((task, idx) => {
+                    const caseObj = legalStore.getCase(task.case_id);
+                    return (
+                      <div key={idx} className="p-8 flex items-center justify-between group hover:bg-slate-50 transition-all cursor-pointer">
+                        <div className="flex items-center gap-6">
+                          <div className={cn("w-1.5 h-12 rounded-full", 
+                            task.priority === 'Critique' ? 'bg-red-500' : 
+                            task.priority === 'Haute' ? 'bg-amber-500' : 'bg-[#c1a461]'
+                          )} />
+                          <div className="space-y-1 text-left">
+                            <h4 className="text-base font-black text-slate-900 uppercase tracking-tighter">{task.title}</h4>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{caseObj?.title || task.case_id} • Échéance: {new Date(task.due_date).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-6">
+                          <Badge className={cn("text-[9px] font-black uppercase tracking-widest px-3 py-1", 
+                            task.priority === 'Critique' ? 'bg-red-600 text-white' : 
+                            task.priority === 'Haute' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-600'
+                          )}>
+                            {task.priority}
+                          </Badge>
+                          <Avatar className="h-8 w-8 ring-2 ring-slate-100">
+                            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${task.assigned_to}`} />
+                            <AvatarFallback>U</AvatarFallback>
+                          </Avatar>
+                          <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#c1a461] transition-colors" />
                         </div>
                       </div>
-                      <div className="flex items-center gap-6">
-                        <Badge className={cn("text-[9px] font-black uppercase tracking-widest px-3 py-1", 
-                          task.prio === 'Critique' ? 'bg-red-600 text-white' : 
-                          task.prio === 'Haute' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-600'
-                        )}>
-                          {task.prio}
-                        </Badge>
-                        <Avatar className="h-8 w-8 ring-2 ring-slate-100">
-                          <AvatarFallback className="text-[8px] font-black">{task.by.split(' ')[0][0]}{task.by.split(' ')[1][0]}</AvatarFallback>
-                        </Avatar>
-                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#c1a461] transition-colors" />
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
+                  {filteredTasks.length === 0 && (
+                     <div className="p-20 text-center text-slate-400 uppercase font-black text-[10px]">Aucune tâche correspondante</div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -114,22 +144,20 @@ const Tasks = () => {
                 <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
                   <UserCheck className="w-4 h-4 text-[#c1a461]" /> Vos Tâches
                 </CardTitle>
-                <Badge className="bg-[#c1a461] text-white text-[8px] font-black uppercase tracking-widest border-none">4 ACTIVES</Badge>
+                <Badge className="bg-[#c1a461] text-white text-[8px] font-black uppercase tracking-widest border-none">{myTasks.length} ACTIVES</Badge>
               </CardHeader>
               <CardContent className="p-0 space-y-6">
-                {[
-                  { task: "Signature conclusions HC-882", due: "URGENT" },
-                  { task: "Relecture requête Fleeca", due: "DEMAIN" },
-                  { task: "Briefing Stagiaire - Dossier 402", due: "VENDREDI" }
-                ].map((item, idx) => (
+                {myTasks.length > 0 ? myTasks.map((item, idx) => (
                   <div key={idx} className="flex gap-4 p-4 bg-white/5 rounded-2xl border border-white/10 group hover:bg-white/10 transition-all cursor-pointer">
                     <div className="w-1 h-full bg-[#c1a461] rounded-full" />
-                    <div>
-                      <p className="text-[11px] font-black uppercase text-white leading-tight">{item.task}</p>
-                      <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-1">{item.due}</p>
+                    <div className="text-left">
+                      <p className="text-[11px] font-black uppercase text-white leading-tight">{item.title}</p>
+                      <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-1">{item.priority}</p>
                     </div>
                   </div>
-                ))}
+                )) : (
+                   <p className="text-[9px] font-bold text-white/20 uppercase text-center py-4">Aucune tâche assignée</p>
+                )}
               </CardContent>
             </Card>
 
@@ -137,14 +165,14 @@ const Tasks = () => {
               <div className="p-3 bg-emerald-50 rounded-2xl w-fit">
                  <CheckCircle2 className="w-6 h-6 text-emerald-600" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 text-left">
                 <h3 className="text-lg font-black uppercase text-slate-900 tracking-tighter">Productivité Cabinet</h3>
                 <p className="text-slate-400 text-xs font-medium leading-relaxed uppercase tracking-tight">
-                  Vous avez clôturé 12 dossiers ce mois-ci. Votre taux de complétion des tâches est de 94%.
+                  Taux de complétion des tâches : {Math.round((doneTasks.length / (tasks.length || 1)) * 100)}%.
                 </p>
               </div>
               <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500 rounded-full" style={{ width: '94%' }} />
+                <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${Math.round((doneTasks.length / (tasks.length || 1)) * 100)}%` }} />
               </div>
             </Card>
           </div>

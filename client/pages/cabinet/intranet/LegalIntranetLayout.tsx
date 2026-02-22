@@ -68,6 +68,7 @@ const MENU_ITEMS = [
   { icon: <Briefcase className="w-4 h-4" />, label: "Dossiers", path: "/cabinet/intranet/dossiers", roles: ['Associé', 'Avocat', 'Juriste', 'Stagiaire'] },
   { icon: <FileText className="w-4 h-4" />, label: "Documents", path: "/cabinet/intranet/documents", roles: ['Associé', 'Avocat', 'Juriste', 'Stagiaire'] },
   { icon: <ShieldCheck className="w-4 h-4" />, label: "Preuves (Vault)", path: "/cabinet/intranet/evidence", roles: ['Associé', 'Avocat'] },
+  { icon: <Zap className="w-4 h-4" />, label: "Tâches", path: "/cabinet/intranet/tasks", roles: ['Associé', 'Avocat', 'Juriste', 'Secrétaire'] },
   { icon: <Calendar className="w-4 h-4" />, label: "Planning", path: "/cabinet/intranet/planning", roles: ['Associé', 'Avocat', 'Juriste', 'Secrétaire'] },
   { icon: <CreditCard className="w-4 h-4" />, label: "Facturation", path: "/cabinet/intranet/billing", roles: ['Associé', 'Comptable'] },
   { icon: <MessageSquare className="w-4 h-4" />, label: "Communication", path: "/cabinet/intranet/communication", roles: ['Associé', 'Avocat', 'Secrétaire'] },

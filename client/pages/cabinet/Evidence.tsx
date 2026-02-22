@@ -39,38 +39,62 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import LegalIntranetLayout from './intranet/LegalIntranetLayout';
-
-const INITIAL_EVIDENCE = [
-  { id: "EVI-882-01", name: "CCTV - Braquage UD", case: "Dossier #882", type: "Vidéo", conf: "Secret", by: "Victoria C." },
-  { id: "EVI-882-02", name: "Relevés Bancaires Fleeca", case: "Dossier #882", type: "Document", conf: "Confidentiel", by: "Marcus V." },
-  { id: "EVI-912-05", name: "Photos Site Urbanisme", case: "Dossier #912", type: "Image", conf: "Normal", by: "Elena R." },
-  { id: "EVI-402-XX", name: "Scellé Parquet - Dossier 402", case: "Dossier #402", type: "Digital", conf: "Scellé", by: "Julian H." }
-];
+import { legalStore } from '@/lib/legal-store';
+import { useAuth } from '@/contexts/AuthContext';
+import { Evidence, ConfidentialityLevel } from '@shared/api';
+import { Link } from 'react-router-dom';
 
 const EvidenceVault = () => {
-  const [evidence, setEvidence] = React.useState(INITIAL_EVIDENCE);
+  const { user } = useAuth();
+  const [evidence, setEvidence] = React.useState(legalStore.getCases().flatMap(c => legalStore.getEvidence(c.id)));
   const [showUploadModal, setShowUploadModal] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState('');
   const [newEvidence, setNewEvidence] = React.useState({
     name: '',
-    case: '',
+    case_id: '',
     type: 'Document',
-    conf: 'Normal'
+    confidentiality: 'Normal' as ConfidentialityLevel
   });
 
+  const cases = legalStore.getCases();
+
   const handleUpload = () => {
-    const newEntry = {
+    if (!user || !newEvidence.name || !newEvidence.case_id) return;
+
+    const evi: Evidence = {
       id: `EVI-${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 90) + 10}`,
+      case_id: newEvidence.case_id,
       name: newEvidence.name,
-      case: newEvidence.case || "Dossier #000",
       type: newEvidence.type,
-      conf: newEvidence.conf,
-      by: "Julian H."
+      file_url: '#',
+      confidentiality: newEvidence.confidentiality,
+      uploaded_by: user.name,
+      uploaded_at: new Date().toISOString(),
+      to_produce_at_hearing: false
     };
-    setEvidence([newEntry, ...evidence]);
+
+    legalStore.addEvidence(evi);
+    setEvidence(legalStore.getCases().flatMap(c => legalStore.getEvidence(c.id)));
     setShowUploadModal(false);
-    setNewEvidence({ name: '', case: '', type: 'Document', conf: 'Normal' });
-    alert("PREUVE DÉPOSÉE : Le fichier a été chiffré et scellé avec succès.");
+    setNewEvidence({ name: '', case_id: '', type: 'Document', confidentiality: 'Normal' });
+    
+    legalStore.logAction({
+      id: `LOG-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      user_id: user.id,
+      user_name: user.name,
+      action: 'Dépôt preuve',
+      target_type: 'Evidence',
+      target_id: evi.id,
+      metadata: { name: evi.name, case_id: evi.case_id }
+    });
   };
+
+  const filteredEvidence = evidence.filter(e => 
+    e.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    e.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    e.case_id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <LegalIntranetLayout>
@@ -138,8 +162,8 @@ const EvidenceVault = () => {
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Niveau Confidentialité</Label>
                   <Select 
-                    value={newEvidence.conf}
-                    onValueChange={(val) => setNewEvidence({...newEvidence, conf: val})}
+                    value={newEvidence.confidentiality}
+                    onValueChange={(val) => setNewEvidence({...newEvidence, confidentiality: val as ConfidentialityLevel})}
                   >
                     <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
                       <SelectValue />
@@ -155,13 +179,20 @@ const EvidenceVault = () => {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Réf Dossier</Label>
-                <Input 
-                  value={newEvidence.case}
-                  onChange={(e) => setNewEvidence({...newEvidence, case: e.target.value})}
-                  placeholder="EX: DOSSIER #882" 
-                  className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
-                />
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dossier Assigné</Label>
+                <Select 
+                  value={newEvidence.case_id}
+                  onValueChange={(val) => setNewEvidence({...newEvidence, case_id: val})}
+                >
+                  <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
+                    <SelectValue placeholder="Choisir un dossier..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cases.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.id} - {c.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -175,7 +206,7 @@ const EvidenceVault = () => {
               </Button>
               <Button 
                 onClick={handleUpload}
-                disabled={!newEvidence.name}
+                disabled={!newEvidence.name || !newEvidence.case_id}
                 className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl"
               >
                 Chiffrer & Sceller
@@ -202,7 +233,7 @@ const EvidenceVault = () => {
                <FileDigit className="w-6 h-6 text-[#c1a461]" />
             </div>
             <div>
-               <p className="text-2xl font-black text-slate-900 leading-none">84.2 GB</p>
+               <p className="text-2xl font-black text-slate-900 leading-none">{filteredEvidence.length} Éléments</p>
                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Données Scellées</p>
             </div>
           </Card>
@@ -211,8 +242,8 @@ const EvidenceVault = () => {
                <AlertTriangle className="w-6 h-6 text-red-600" />
             </div>
             <div>
-               <p className="text-2xl font-black text-slate-900 leading-none">Secret</p>
-               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Niveau d'Accès Requis: Associé</p>
+               <p className="text-2xl font-black text-slate-900 leading-none">Intégrité 100%</p>
+               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Audit de scellement validé</p>
             </div>
           </Card>
         </div>
@@ -226,7 +257,13 @@ const EvidenceVault = () => {
             <div className="flex items-center gap-4">
                <div className="relative">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                 <input type="text" placeholder="RECHERCHER..." className="bg-white border-slate-200 border rounded-lg pl-9 text-[9px] font-bold uppercase tracking-widest h-9" />
+                 <input 
+                  type="text" 
+                  placeholder="RECHERCHER..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-white border-slate-200 border rounded-lg pl-9 text-[9px] font-bold uppercase tracking-widest h-9" 
+                 />
                </div>
             </div>
           </CardHeader>
@@ -243,10 +280,10 @@ const EvidenceVault = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {evidence.map((item, idx) => (
+                {filteredEvidence.map((item, idx) => (
                   <tr key={idx} className="group hover:bg-slate-50/50 transition-all cursor-pointer">
                     <td className="px-8 py-6">
-                      <div className="flex items-center gap-4">
+                      <Link to={`/cabinet/intranet/dossiers/${item.case_id}`} className="flex items-center gap-4">
                         <div className="p-3 bg-slate-50 rounded-xl text-slate-400 group-hover:text-[#c1a461] transition-colors">
                           <Fingerprint className="w-5 h-5" />
                         </div>
@@ -254,25 +291,25 @@ const EvidenceVault = () => {
                           <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{item.name}</p>
                           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.id}</p>
                         </div>
-                      </div>
+                      </Link>
                     </td>
                     <td className="px-8 py-6">
-                      <p className="text-xs font-bold text-slate-600 uppercase tracking-tight">{item.case}</p>
+                      <p className="text-xs font-bold text-slate-600 uppercase tracking-tight">{item.case_id}</p>
                     </td>
                     <td className="px-8 py-6">
                       <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-200">{item.type}</Badge>
                     </td>
                     <td className="px-8 py-6">
                       <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-3 py-1", 
-                        item.conf === 'Scellé' ? 'bg-[#0a0f18] text-white' : 
-                        item.conf === 'Secret' ? 'bg-red-600 text-white' : 
-                        item.conf === 'Confidentiel' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-600'
+                        item.confidentiality === 'Scellé' ? 'bg-[#0a0f18] text-white' : 
+                        item.confidentiality === 'Secret' ? 'bg-red-600 text-white' : 
+                        item.confidentiality === 'Confidentiel' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-600'
                       )}>
-                        {item.conf}
+                        {item.confidentiality}
                       </Badge>
                     </td>
                     <td className="px-8 py-6">
-                       <p className="text-[10px] font-black text-slate-900 uppercase tracking-tight">{item.by}</p>
+                       <p className="text-[10px] font-black text-slate-900 uppercase tracking-tight">{item.uploaded_by}</p>
                     </td>
                     <td className="px-8 py-6">
                       <div className="flex gap-2">

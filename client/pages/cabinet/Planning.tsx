@@ -14,7 +14,8 @@ import {
   Filter,
   Search,
   Zap,
-  UserCheck
+  UserCheck,
+  Lock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -24,53 +25,28 @@ import { cn } from '@/lib/utils';
 import LegalIntranetLayout from './intranet/LegalIntranetLayout';
 import { format, addDays, startOfWeek, addWeeks, subWeeks, isSameDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
-const MOCK_EVENTS = [
-  { 
-    id: 1, 
-    title: "Audience Préliminaire", 
-    date: new Date(2024, 4, 26, 10, 30), 
-    type: "Audience", 
-    case: "Dossier Madrazo", 
-    loc: "Tribunal LS", 
-    judge: "Hon. J. Miller",
-    status: "Confirmé"
-  },
-  { 
-    id: 2, 
-    title: "RDV Client - UD Merger", 
-    date: addDays(new Date(), 1), 
-    type: "RDV", 
-    case: "Union Depository", 
-    loc: "Salle de Conférence A", 
-    members: ["Julian", "Elena"],
-    status: "En attente"
-  },
-  { 
-    id: 3, 
-    title: "Visioconférence Duggan", 
-    date: addDays(new Date(), 2), 
-    type: "Appel", 
-    case: "Succession Duggan", 
-    loc: "Zoom Sécurisé", 
-    status: "Confirmé"
-  }
-];
+import { legalStore } from '@/lib/legal-store';
+import { Hearing } from '@shared/api';
 
 const Planning = () => {
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [view, setView] = React.useState<'week' | 'day'>('week');
+  const hearings = legalStore.getHearings();
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+
+  const getEventsForDay = (day: Date) => {
+    return hearings.filter(h => isSameDay(new Date(h.date), day));
+  };
 
   return (
     <LegalIntranetLayout>
       <div className="p-10 space-y-10">
         <div className="flex justify-between items-end">
-          <div className="space-y-1">
-            <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter text-left">Planning & Audiences</h2>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-left">
+          <div className="space-y-1 text-left">
+            <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Planning & Audiences</h2>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
               Calendrier Centralisé • Audiences Judiciaires • Rendez-vous Clients
             </p>
           </div>
@@ -143,39 +119,47 @@ const Planning = () => {
                   
                   {/* Events Overlay (Simplified for UI) */}
                   <div className="ml-20 p-10 space-y-6">
-                    {MOCK_EVENTS.map((event) => (
-                      <div key={event.id} className="flex gap-8 group">
-                        <div className="w-24 text-right pt-1">
-                          <p className="text-xs font-black text-slate-900">{format(event.date, 'HH:mm')}</p>
-                          <p className="text-[9px] font-bold text-slate-400 uppercase">{event.type}</p>
-                        </div>
-                        <div className={cn(
-                          "flex-grow p-6 rounded-[24px] border transition-all duration-500 cursor-pointer hover:shadow-xl hover:-translate-y-1",
-                          event.type === 'Audience' ? "bg-red-50/50 border-red-100" : "bg-white shadow-md border-slate-50"
-                        )}>
-                          <div className="flex justify-between items-start">
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-3">
-                                <Badge className={cn("text-[8px] font-black uppercase px-2 py-0 border-none", 
-                                  event.type === 'Audience' ? "bg-red-600 text-white" : "bg-[#c1a461] text-white"
-                                )}>
-                                  {event.type}
-                                </Badge>
-                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{event.case}</span>
+                    {hearings.length > 0 ? hearings.map((event) => {
+                      const caseObj = legalStore.getCase(event.case_id);
+                      return (
+                        <div key={event.id} className="flex gap-8 group">
+                          <div className="w-24 text-right pt-1">
+                            <p className="text-xs font-black text-slate-900">{format(new Date(event.date), 'HH:mm')}</p>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase">{event.type}</p>
+                          </div>
+                          <div className={cn(
+                            "flex-grow p-6 rounded-[24px] border transition-all duration-500 cursor-pointer hover:shadow-xl hover:-translate-y-1",
+                            event.type === 'Pénal' ? "bg-red-50/50 border-red-100" : "bg-white shadow-md border-slate-50"
+                          )}>
+                            <div className="flex justify-between items-start">
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-3">
+                                  <Badge className={cn("text-[8px] font-black uppercase px-2 py-0 border-none", 
+                                    event.type === 'Pénal' ? "bg-red-600 text-white" : "bg-[#c1a461] text-white"
+                                  )}>
+                                    {event.type}
+                                  </Badge>
+                                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{caseObj?.title || event.case_id}</span>
+                                </div>
+                                <h4 className="text-lg font-black text-slate-900 uppercase tracking-tighter text-left">{event.title}</h4>
+                                <div className="flex items-center gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                  <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-[#c1a461]" /> {event.location}</span>
+                                  <span className="flex items-center gap-1"><Gavel className="w-3 h-3 text-[#c1a461]" /> {event.judge}</span>
+                                </div>
                               </div>
-                              <h4 className="text-lg font-black text-slate-900 uppercase tracking-tighter">{event.title}</h4>
-                              <div className="flex items-center gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                                <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-[#c1a461]" /> {event.loc}</span>
-                                {event.judge && <span className="flex items-center gap-1"><Gavel className="w-3 h-3 text-[#c1a461]" /> {event.judge}</span>}
-                              </div>
+                              <Avatar className="h-10 w-10 ring-4 ring-white shadow-lg">
+                                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${event.id}`} />
+                                <AvatarFallback>H</AvatarFallback>
+                              </Avatar>
                             </div>
-                            <Avatar className="h-10 w-10 ring-4 ring-white shadow-lg">
-                              <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${event.id}`} />
-                            </Avatar>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    }) : (
+                       <div className="p-20 text-center">
+                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Aucun événement programmé</p>
+                       </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -193,12 +177,10 @@ const Planning = () => {
               </CardHeader>
               <CardContent className="p-0 space-y-6">
                 <div className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-2">
-                  <p className="text-[10px] font-black text-[#c1a461] uppercase tracking-widest">Aujourd'hui 14:00</p>
-                  <p className="text-xs font-bold text-white uppercase tracking-tight">Appel Sortant : Cabinet Duggan</p>
-                </div>
-                <div className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-2">
-                  <p className="text-[10px] font-black text-red-500 uppercase tracking-widest">Demain 09:00</p>
-                  <p className="text-xs font-bold text-white uppercase tracking-tight">Signification Acte - Dossier 912</p>
+                  <p className="text-[10px] font-black text-[#c1a461] uppercase tracking-widest">Prochaine Audience</p>
+                  <p className="text-xs font-bold text-white uppercase tracking-tight">
+                    {hearings.length > 0 ? hearings[0].title : 'Aucune audience'}
+                  </p>
                 </div>
                 <Button className="w-full bg-[#c1a461] hover:bg-[#927843] text-white text-[10px] font-black uppercase h-12 rounded-xl mt-4">
                   Gérer les Notifications
@@ -214,7 +196,7 @@ const Planning = () => {
               <div className="space-y-2">
                 <h3 className="text-lg font-black uppercase text-slate-900 tracking-tighter text-left">Suivi des Audiences</h3>
                 <p className="text-slate-400 text-xs font-medium leading-relaxed uppercase tracking-tight text-left">
-                  12 audiences ce mois-ci. Taux de report : 8%. Succès des référés : 92%.
+                  {hearings.length} audiences ce mois-ci. Taux de report : 8%. Succès des référés : 92%.
                 </p>
               </div>
               <div className="pt-4 border-t border-slate-50 flex justify-between items-center text-[10px] font-black uppercase tracking-widest">

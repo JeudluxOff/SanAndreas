@@ -20,9 +20,13 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import LegalIntranetLayout, { useLegalRBAC } from './intranet/LegalIntranetLayout';
 import { Link } from 'react-router-dom';
+import { legalStore } from '@/lib/legal-store';
+import { Invoice } from '@shared/api';
 
 const Billing = () => {
   const { isAssocié, canBill } = useLegalRBAC();
+  const invoices = legalStore.getInvoices();
+  const [searchQuery, setSearchQuery] = React.useState('');
 
   if (!isAssocié && !canBill) {
     return (
@@ -43,6 +47,20 @@ const Billing = () => {
     );
   }
 
+  const totalInvoiced = invoices.reduce((acc, inv) => acc + inv.amount, 0);
+  const totalPending = invoices.filter(i => i.status !== 'Payé').reduce((acc, inv) => acc + inv.amount, 0);
+  const totalPaid = invoices.filter(i => i.status === 'Payé').reduce((acc, inv) => acc + inv.amount, 0);
+
+  const filteredInvoices = invoices.filter(inv => {
+    const client = legalStore.getClient(inv.client_id);
+    const caseObj = legalStore.getCase(inv.case_id);
+    return (
+      inv.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      client?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      caseObj?.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
+
   return (
     <LegalIntranetLayout>
       <div className="p-10 space-y-10">
@@ -50,7 +68,7 @@ const Billing = () => {
           <div className="space-y-1">
             <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Gestion de Facturation</h2>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-              Honoraires • Provisions • Factures • 142.5k SA$ ce mois
+              Honoraires • Provisions • Factures • {totalInvoiced.toLocaleString()} SA$ au total
             </p>
           </div>
           <div className="flex gap-4">
@@ -69,7 +87,7 @@ const Billing = () => {
               <TrendingUp className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-2xl font-black text-slate-900 leading-none">142,500 SA$</p>
+              <p className="text-2xl font-black text-slate-900 leading-none">{totalInvoiced.toLocaleString()} SA$</p>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Honoraires Facturés</p>
             </div>
           </Card>
@@ -78,7 +96,7 @@ const Billing = () => {
               <Clock className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-2xl font-black text-slate-900 leading-none">12,400 SA$</p>
+              <p className="text-2xl font-black text-slate-900 leading-none">{totalPending.toLocaleString()} SA$</p>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">En attente de paiement</p>
             </div>
           </Card>
@@ -87,7 +105,7 @@ const Billing = () => {
               <FileCheck className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-2xl font-black text-slate-900 leading-none">84,000 SA$</p>
+              <p className="text-2xl font-black text-slate-900 leading-none">{totalPaid.toLocaleString()} SA$</p>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Montant recouvré</p>
             </div>
           </Card>
@@ -99,9 +117,17 @@ const Billing = () => {
               <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight">Factures Récentes</CardTitle>
               <CardDescription className="text-[10px] font-bold uppercase tracking-widest mt-1">Suivi des honoraires par dossier</CardDescription>
             </div>
-            <div className="flex items-center gap-2">
-               <Badge className="bg-emerald-50 text-emerald-600 text-[9px] font-black uppercase tracking-widest px-3 py-1">Payé: 82%</Badge>
-               <Badge className="bg-amber-50 text-amber-600 text-[9px] font-black uppercase tracking-widest px-3 py-1">En attente: 18%</Badge>
+            <div className="flex items-center gap-4">
+               <div className="relative">
+                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                 <input 
+                  type="text" 
+                  placeholder="RECHERCHER..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-white border-slate-200 border rounded-lg pl-9 text-[9px] font-bold uppercase tracking-widest h-9" 
+                 />
+               </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -117,48 +143,48 @@ const Billing = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {[
-                  { id: "INV-2024-882", case: "État de SA vs. Madrazo", amount: "12,500 SA$", date: "15 Mai", status: "Payé" },
-                  { id: "INV-2024-883", case: "Union Depository - Fusion", amount: "45,000 SA$", date: "18 Mai", status: "Payé" },
-                  { id: "INV-2024-884", case: "Mairie LS - Urbanisme", amount: "8,400 SA$", date: "20 Mai", status: "Partiel" },
-                  { id: "INV-2024-885", case: "Thornton Duggan - Civil", amount: "12,400 SA$", date: "22 Mai", status: "Impayé" }
-                ].map((item, idx) => (
-                  <tr key={idx} className="group hover:bg-slate-50/50 transition-all cursor-pointer">
-                    <td className="px-8 py-6">
-                      <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{item.id}</p>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="space-y-1">
-                        <p className="text-xs font-bold text-slate-600 uppercase tracking-tight">{item.case}</p>
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Réf: Dossier #882</p>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <p className="text-sm font-black text-slate-900 tracking-tighter">{item.amount}</p>
-                    </td>
-                    <td className="px-8 py-6 text-xs font-bold text-slate-500 uppercase">
-                      {item.date}
-                    </td>
-                    <td className="px-8 py-6">
-                      <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-3 py-1", 
-                        item.status === 'Payé' ? 'bg-emerald-600 text-white' : 
-                        item.status === 'Partiel' ? 'bg-amber-600 text-white' : 'bg-red-600 text-white'
-                      )}>
-                        {item.status}
-                      </Badge>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="flex gap-2">
-                        <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
-                          <Download className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
-                          <MoreVertical className="w-5 h-5" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {filteredInvoices.map((item, idx) => {
+                  const client = legalStore.getClient(item.client_id);
+                  const caseObj = legalStore.getCase(item.case_id);
+                  return (
+                    <tr key={idx} className="group hover:bg-slate-50/50 transition-all cursor-pointer">
+                      <td className="px-8 py-6">
+                        <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{item.id}</p>
+                      </td>
+                      <td className="px-8 py-6">
+                        <div className="space-y-1">
+                          <p className="text-xs font-bold text-slate-600 uppercase tracking-tight">{caseObj?.title}</p>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{client?.name} • Réf: {item.case_id}</p>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <p className="text-sm font-black text-slate-900 tracking-tighter">{item.amount.toLocaleString()} {item.currency}</p>
+                      </td>
+                      <td className="px-8 py-6 text-xs font-bold text-slate-500 uppercase">
+                        {new Date(item.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-8 py-6">
+                        <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-3 py-1", 
+                          item.status === 'Payé' ? 'bg-emerald-600 text-white' : 
+                          item.status === 'Envoyé' ? 'bg-blue-600 text-white' : 
+                          item.status === 'En retard' ? 'bg-red-600 text-white' : 'bg-slate-100 text-slate-600'
+                        )}>
+                          {item.status}
+                        </Badge>
+                      </td>
+                      <td className="px-8 py-6">
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                            <Download className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                            <MoreVertical className="w-5 h-5" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </CardContent>

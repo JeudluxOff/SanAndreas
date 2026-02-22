@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   Briefcase, 
   ChevronLeft, 
@@ -19,7 +19,9 @@ import {
   Gavel,
   MessageSquare,
   UserPlus,
-  Send
+  Send,
+  Eye,
+  Activity
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -28,44 +30,58 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import LegalIntranetLayout from './intranet/LegalIntranetLayout';
-
-const MOCK_DOSSIER = {
-  id: "HC-2024-882",
-  title: "État de San Andreas vs. Martin Madrazo",
-  client: "Martin Madrazo",
-  type: "Pénal",
-  status: "Audiences",
-  confidentiality: "Confidentiel",
-  lead: "Victoria Cole",
-  members: [
-    { name: "Victoria Cole", role: "Associée", avatar: "Victoria" },
-    { name: "Marcus Vane", role: "Avocat Senior", avatar: "Marcus" },
-    { name: "Elena Rossi", role: "Avocate", avatar: "Elena" }
-  ],
-  timeline: [
-    { date: "24 Mai, 09:42", action: "Conclusions pénales déposées par Maître Cole", user: "Victoria C." },
-    { date: "22 Mai, 10:00", action: "Audit de conflit validé - Base centralisée", user: "Julian H." },
-    { date: "20 Mai, 14:30", action: "Nouvelle preuve déposée : CCTV Evidence", user: "Marcus V." },
-    { date: "15 Mai, 09:00", action: "Ouverture du dossier", user: "Victoria C." }
-  ],
-  documents: [
-    { id: "HC-2024-001", name: "Conclusions de défense", status: "Signé", ver: "v3" },
-    { id: "HC-2024-002", name: "Requête en nullité", status: "Validé", ver: "v2" },
-    { id: "HC-2024-003", name: "Convention d'Honoraires", status: "Signé", ver: "v1" }
-  ],
-  evidence: [
-    { id: "EVI-882-01", name: "Vidéo CCTV - Union Depository", type: "Vidéo", conf: "Secret" },
-    { id: "EVI-882-02", name: "Relevés de compte Fleeca", type: "Document", conf: "Confidentiel" }
-  ],
-  tasks: [
-    { title: "Préparer interrogatoire témoin X", status: "En cours", p: "Critique" },
-    { title: "Signer acte de cautionnement", status: "Todo", p: "Haute" }
-  ]
-};
+import { legalStore } from '@/lib/legal-store';
+import { useAuth } from '@/contexts/AuthContext';
+import { Case, LegalDocument, Evidence, Task, Hearing } from '@shared/api';
 
 const DossierDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = React.useState('overview');
+  
+  const dossier = legalStore.getCase(id || '');
+  const docs = legalStore.getDocuments(id);
+  const evidence = legalStore.getEvidence(id || '');
+  const tasks = legalStore.getTasks(id);
+  const hearings = legalStore.getHearings().filter(h => h.case_id === id);
+  const client = dossier ? legalStore.getClient(dossier.client_id) : null;
+  const auditLogs = legalStore.getAuditLogs().filter(log => log.target_id === id);
+
+  // Security check for Sealed cases
+  React.useEffect(() => {
+    if (dossier?.confidentiality === 'Scellé') {
+      if (user?.role !== 'admin' && user?.role !== 'gouverneur') {
+        navigate('/cabinet/intranet/dossiers');
+        return;
+      }
+      
+      // Log access to sealed dossier
+      if (user) {
+        legalStore.logAction({
+          id: `LOG-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          user_id: user.id,
+          user_name: user.name,
+          action: 'Accès Dossier Scellé',
+          target_type: 'Case',
+          target_id: dossier.id,
+          metadata: { reason: 'Consultation dossier scellé' }
+        });
+      }
+    }
+  }, [dossier, user, navigate]);
+
+  if (!dossier) return (
+    <LegalIntranetLayout>
+      <div className="p-20 text-center">
+        <h2 className="text-2xl font-black uppercase tracking-widest text-slate-400">Dossier non trouvé</h2>
+        <Link to="/cabinet/intranet/dossiers">
+          <Button variant="link" className="text-[#c1a461] uppercase mt-4">Retour aux dossiers</Button>
+        </Link>
+      </div>
+    </LegalIntranetLayout>
+  );
 
   return (
     <LegalIntranetLayout>
@@ -80,21 +96,25 @@ const DossierDetail = () => {
             </Link>
             <div>
               <div className="flex items-center gap-3 mb-1">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">{MOCK_DOSSIER.id}</span>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">{dossier.id}</span>
                 <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-2 py-0", 
-                  MOCK_DOSSIER.confidentiality === 'Confidentiel' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-600'
+                  dossier.confidentiality === 'Scellé' ? 'bg-[#0a0f18] text-white' :
+                  dossier.confidentiality === 'Secret' ? 'bg-red-600 text-white' :
+                  dossier.confidentiality === 'Confidentiel' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-600'
                 )}>
-                  {MOCK_DOSSIER.confidentiality}
+                  {dossier.confidentiality}
                 </Badge>
               </div>
-              <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter leading-none">{MOCK_DOSSIER.title}</h2>
+              <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter leading-none">{dossier.title}</h2>
             </div>
           </div>
           
           <div className="flex gap-4">
-            <Button variant="outline" className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-12 px-6 gap-2">
-              <Lock className="w-4 h-4" /> Sceller Dossier
-            </Button>
+            {dossier.status !== 'Scellé' && (
+               <Button variant="outline" className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-12 px-6 gap-2">
+                 <Lock className="w-4 h-4" /> Sceller Dossier
+               </Button>
+            )}
             <Button className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 gap-2 shadow-xl shadow-black/10">
               Actions Dossier <MoreVertical className="w-4 h-4" />
             </Button>
@@ -103,7 +123,7 @@ const DossierDetail = () => {
 
         {/* Tabs Navigation */}
         <div className="border-b border-slate-100">
-          <div className="flex gap-12">
+          <div className="flex gap-12 overflow-x-auto">
             {[
               { id: 'overview', label: 'Vue d\'ensemble' },
               { id: 'documents', label: 'Documents' },
@@ -115,7 +135,7 @@ const DossierDetail = () => {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "pb-4 text-[10px] font-black uppercase tracking-[0.2em] relative transition-all",
+                  "pb-4 text-[10px] font-black uppercase tracking-[0.2em] relative transition-all whitespace-nowrap",
                   activeTab === tab.id ? "text-[#c1a461]" : "text-slate-400 hover:text-slate-600"
                 )}
               >
@@ -140,18 +160,18 @@ const DossierDetail = () => {
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Statut Actuel</p>
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 rounded-full bg-[#c1a461] animate-pulse" />
-                      <p className="text-xl font-black text-slate-900 uppercase tracking-tight">{MOCK_DOSSIER.status}</p>
+                      <p className="text-xl font-black text-slate-900 uppercase tracking-tight">{dossier.status}</p>
                     </div>
                   </Card>
                   <Card className="bg-white border-none shadow-md p-6 rounded-[32px]">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Pôle Juridique</p>
-                    <p className="text-xl font-black text-slate-900 uppercase tracking-tight">{MOCK_DOSSIER.type}</p>
+                    <p className="text-xl font-black text-slate-900 uppercase tracking-tight">{dossier.type}</p>
                   </Card>
                   <Card className="bg-[#0a0f18] text-white border-none shadow-xl p-6 rounded-[32px]">
                     <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2 text-center">Progression</p>
                     <div className="space-y-3">
                        <div className="flex justify-between items-end">
-                         <span className="text-[9px] font-bold text-[#c1a461] uppercase tracking-widest">Phase 3/4</span>
+                         <span className="text-[9px] font-bold text-[#c1a461] uppercase tracking-widest">Étape 3/4</span>
                          <span className="text-lg font-black tracking-tight">85%</span>
                        </div>
                        <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
@@ -169,21 +189,29 @@ const DossierDetail = () => {
                     </CardTitle>
                     <Button variant="ghost" className="text-[10px] font-black uppercase text-[#c1a461]">+ Ajouter</Button>
                   </CardHeader>
-                  <CardContent className="p-8">
-                    <div className="flex gap-8 items-center bg-slate-50 p-6 rounded-3xl border border-slate-100">
-                      <div className="text-center bg-slate-900 text-white rounded-2xl p-4 min-w-[80px]">
-                        <p className="text-2xl font-black leading-none">26</p>
-                        <p className="text-[10px] font-bold uppercase mt-1">Mai</p>
-                      </div>
-                      <div className="flex-grow space-y-1">
-                        <p className="text-lg font-black uppercase text-slate-900 leading-tight">Audience Préliminaire</p>
-                        <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                          <span>📍 Cour Supérieure de Los Santos</span>
-                          <span>⚖️ Juge Miller</span>
+                  <CardContent className="p-8 space-y-4">
+                    {hearings.length > 0 ? hearings.map((h, idx) => (
+                      <div key={idx} className="flex gap-8 items-center bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                        <div className="text-center bg-slate-900 text-white rounded-2xl p-4 min-w-[80px]">
+                          <p className="text-2xl font-black leading-none">{new Date(h.date).getDate()}</p>
+                          <p className="text-[10px] font-bold uppercase mt-1">
+                            {new Date(h.date).toLocaleString('default', { month: 'short' })}
+                          </p>
                         </div>
+                        <div className="flex-grow space-y-1">
+                          <p className="text-lg font-black uppercase text-slate-900 leading-tight">{h.title}</p>
+                          <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            <span>📍 {h.location}</span>
+                            <span>⚖️ {h.judge}</span>
+                          </div>
+                        </div>
+                        <Badge className="bg-blue-600 text-white font-black uppercase text-[9px] px-4 py-1.5">{h.status}</Badge>
                       </div>
-                      <Badge className="bg-blue-600 text-white font-black uppercase text-[9px] px-4 py-1.5">CONFIRMÉ</Badge>
-                    </div>
+                    )) : (
+                       <div className="p-10 text-center border-2 border-dashed border-slate-100 rounded-3xl">
+                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Aucune audience programmée</p>
+                       </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -191,23 +219,22 @@ const DossierDetail = () => {
                 <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
                   <CardHeader className="p-8 border-b border-slate-50">
                     <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
-                      <History className="w-5 h-5 text-[#c1a461]" /> Activité Récente
+                      <Activity className="w-5 h-5 text-[#c1a461]" /> Activité Récente
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="divide-y divide-slate-50">
-                      {MOCK_DOSSIER.timeline.slice(0, 3).map((item, idx) => (
+                      {auditLogs.slice(0, 3).map((item, idx) => (
                         <div key={idx} className="p-6 flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <div className="w-1.5 h-1.5 rounded-full bg-[#c1a461]" />
                             <div className="space-y-0.5">
                               <p className="text-sm font-bold text-slate-700 uppercase tracking-tight">{item.action}</p>
-                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.user} • {item.date}</p>
+                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                {item.user_name} • {new Date(item.timestamp).toLocaleString()}
+                              </p>
                             </div>
                           </div>
-                          <Button variant="ghost" size="icon" className="text-slate-300">
-                            <ChevronRight className="w-4 h-4" />
-                          </Button>
                         </div>
                       ))}
                     </div>
@@ -228,7 +255,7 @@ const DossierDetail = () => {
                   <Button className="bg-[#c1a461] text-white text-[10px] font-black uppercase h-10 px-6">+ Nouveau</Button>
                 </div>
                 <div className="grid grid-cols-1 gap-4">
-                  {MOCK_DOSSIER.documents.map((doc, idx) => (
+                  {docs.map((doc, idx) => (
                     <Card key={idx} className="border-none shadow-md hover:shadow-xl transition-all group p-6 rounded-[24px]">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-6">
@@ -236,13 +263,14 @@ const DossierDetail = () => {
                             <FileText className="w-6 h-6" />
                           </div>
                           <div className="space-y-1">
-                            <p className="text-base font-black text-slate-900 uppercase tracking-tight">{doc.name}</p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{doc.id} • Version {doc.ver}</p>
+                            <p className="text-base font-black text-slate-900 uppercase tracking-tight">{doc.title}</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{doc.id} • Version {doc.current_version}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-6">
                           <Badge className={cn("text-[9px] font-black uppercase tracking-widest px-3 py-1", 
-                            doc.status === 'Signé' ? 'bg-emerald-600 text-white' : 'bg-blue-600 text-white'
+                            doc.status === 'Signé' ? 'bg-emerald-600 text-white' : 
+                            doc.status === 'Validé' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'
                           )}>
                             {doc.status}
                           </Badge>
@@ -253,6 +281,11 @@ const DossierDetail = () => {
                       </div>
                     </Card>
                   ))}
+                  {docs.length === 0 && (
+                     <div className="p-10 text-center border-2 border-dashed border-slate-100 rounded-[32px]">
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Aucun document lié</p>
+                     </div>
+                  )}
                 </div>
               </div>
             )}
@@ -271,16 +304,16 @@ const DossierDetail = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {MOCK_DOSSIER.evidence.map((evi, idx) => (
+                  {evidence.map((evi, idx) => (
                     <Card key={idx} className="border-none shadow-md hover:shadow-xl transition-all p-8 rounded-[32px] bg-white group">
                       <div className="flex justify-between items-start mb-6">
                         <div className="p-4 bg-slate-50 rounded-2xl text-slate-400 group-hover:text-[#c1a461] transition-colors">
                           <ShieldCheck className="w-8 h-8" />
                         </div>
                         <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-2 py-0.5", 
-                          evi.conf === 'Secret' ? 'bg-red-600 text-white' : 'bg-amber-600 text-white'
+                          evi.confidentiality === 'Secret' ? 'bg-red-600 text-white' : 'bg-amber-600 text-white'
                         )}>
-                          {evi.conf}
+                          {evi.confidentiality}
                         </Badge>
                       </div>
                       <div className="space-y-1 mb-6">
@@ -289,14 +322,55 @@ const DossierDetail = () => {
                       </div>
                       <div className="flex items-center justify-between border-t border-slate-50 pt-6">
                         <span className="text-[10px] font-black text-slate-300 uppercase">{evi.id}</span>
-                        <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
-                          <Download className="w-5 h-5" />
-                        </Button>
+                        <div className="flex gap-2">
+                           {evi.to_produce_at_hearing && <Badge className="bg-red-50 text-red-600 border-red-100 text-[8px] uppercase">À produire</Badge>}
+                           <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                             <Download className="w-5 h-5" />
+                           </Button>
+                        </div>
                       </div>
                     </Card>
                   ))}
+                  {evidence.length === 0 && (
+                     <div className="col-span-2 p-10 text-center border-2 border-dashed border-slate-100 rounded-[32px]">
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Aucune preuve enregistrée</p>
+                     </div>
+                  )}
                 </div>
               </div>
+            )}
+
+            {activeTab === 'timeline' && (
+               <Card className="border-none shadow-xl rounded-[32px] bg-white overflow-hidden">
+                 <CardHeader className="p-8 border-b border-slate-50 bg-slate-50/50">
+                    <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+                      <History className="w-5 h-5 text-[#c1a461]" /> Historique d'Audit & Timeline
+                    </CardTitle>
+                 </CardHeader>
+                 <CardContent className="p-8">
+                    <div className="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
+                       {auditLogs.length > 0 ? auditLogs.map((log, idx) => (
+                         <div key={idx} className="relative pl-10">
+                            <div className="absolute left-0 top-1 w-6 h-6 rounded-full bg-white border-4 border-slate-100 flex items-center justify-center">
+                               <div className="w-1.5 h-1.5 rounded-full bg-[#c1a461]" />
+                            </div>
+                            <div className="space-y-1">
+                               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{new Date(log.timestamp).toLocaleString()}</p>
+                               <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{log.action}</p>
+                               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Effectué par : {log.user_name}</p>
+                               {log.metadata && (
+                                  <div className="mt-2 p-3 bg-slate-50 rounded-xl text-[9px] font-mono text-slate-500">
+                                    {JSON.stringify(log.metadata, null, 2)}
+                                  </div>
+                               )}
+                            </div>
+                         </div>
+                       )) : (
+                          <p className="text-center py-10 text-slate-400 text-[10px] uppercase font-black">Aucun log disponible</p>
+                       )}
+                    </div>
+                 </CardContent>
+               </Card>
             )}
           </div>
 
@@ -311,23 +385,45 @@ const DossierDetail = () => {
                 <UserPlus className="w-4 h-4 text-slate-300 hover:text-[#c1a461] cursor-pointer transition-colors" />
               </CardHeader>
               <CardContent className="p-8 space-y-6">
-                {MOCK_DOSSIER.members.map((member, idx) => (
+                {dossier.members.map((member, idx) => (
                   <div key={idx} className="flex items-center gap-4">
                     <Avatar className="h-10 w-10 ring-2 ring-slate-100">
-                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.avatar}`} />
+                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.avatar || member.user_id}`} />
                       <AvatarFallback>{member.name[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex-grow">
                       <p className="text-xs font-black text-slate-900 uppercase tracking-tight">{member.name}</p>
                       <p className="text-[9px] font-bold text-[#c1a461] uppercase tracking-widest">{member.role}</p>
                     </div>
-                    {member.role === 'Associée' && <Badge className="bg-amber-100 text-amber-700 text-[8px] font-black uppercase px-2 py-0 border-none">LEAD</Badge>}
+                    {member.user_id === dossier.lead_id && <Badge className="bg-amber-100 text-amber-700 text-[8px] font-black uppercase px-2 py-0 border-none">LEAD</Badge>}
                   </div>
                 ))}
                 <Button variant="outline" className="w-full mt-4 border-2 border-slate-900 text-slate-900 font-black uppercase text-[10px] tracking-widest h-12 rounded-xl">
                   Gérer les Accès ACL
                 </Button>
               </CardContent>
+            </Card>
+
+            {/* Client Card */}
+            <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
+               <CardHeader className="p-8 border-b border-slate-50">
+                  <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-[#c1a461]" /> Information Client
+                  </CardTitle>
+               </CardHeader>
+               <CardContent className="p-8 space-y-4">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Client Principal</p>
+                    <p className="text-lg font-black text-slate-900 uppercase tracking-tighter">{client?.name || 'Inconnu'}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</p>
+                    <p className="text-sm font-bold text-slate-600 uppercase">{client?.type}</p>
+                  </div>
+                  <Button variant="outline" className="w-full mt-2 border-slate-200 text-[9px] font-black uppercase tracking-widest h-10 px-4">
+                     Fiche Client Complète
+                  </Button>
+               </CardContent>
             </Card>
 
             {/* Quick Communication Tool */}
@@ -339,14 +435,7 @@ const DossierDetail = () => {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="p-8 space-y-6 max-h-[300px] overflow-y-auto">
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                    <p className="text-[10px] font-black text-[#c1a461] uppercase mb-1">Victoria C. • Hier</p>
-                    <p className="text-xs text-white/70 leading-relaxed uppercase tracking-tight">Martin a validé les conclusions. On part sur une demande de médiation avant l'audience de lundi.</p>
-                  </div>
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                    <p className="text-[10px] font-black text-[#c1a461] uppercase mb-1">Marcus V. • 22 Mai</p>
-                    <p className="text-xs text-white/70 leading-relaxed uppercase tracking-tight">Le témoin principal est enfin localisé. Je prépare l'assignation.</p>
-                  </div>
+                   <p className="text-[9px] font-bold text-white/30 uppercase text-center py-4">Fin de la conversation</p>
                 </div>
                 <div className="p-6 bg-black/20 border-t border-white/5">
                   <div className="relative group">
@@ -356,15 +445,6 @@ const DossierDetail = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Quick Actions / Security */}
-            <div className="bg-[#c1a461]/10 border border-[#c1a461]/20 rounded-[32px] p-8 space-y-4">
-               <div className="flex items-center gap-3">
-                 <ShieldCheck className="w-5 h-5 text-[#c1a461]" />
-                 <p className="text-[10px] font-black text-[#c1a461] uppercase tracking-[0.2em]">Sécurité du Dossier</p>
-               </div>
-               <p className="text-[9px] font-bold text-slate-500 uppercase leading-relaxed">Ce dossier est sous surveillance d'audit critique. Tout accès non autorisé par un membre non assigné déclenche une alerte immédiate au pôle Administration.</p>
-            </div>
           </div>
         </div>
       </div>

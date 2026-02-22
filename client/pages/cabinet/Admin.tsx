@@ -26,9 +26,12 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import LegalIntranetLayout, { useLegalRBAC } from './intranet/LegalIntranetLayout';
+import { Link } from 'react-router-dom';
+import { legalStore } from '@/lib/legal-store';
 
 const Admin = () => {
   const { isAssocié, canAudit } = useLegalRBAC();
+  const logs = legalStore.getAuditLogs();
 
   if (!isAssocié && !canAudit) {
     return (
@@ -53,7 +56,7 @@ const Admin = () => {
     <LegalIntranetLayout>
       <div className="p-10 space-y-10">
         <div className="flex justify-between items-end">
-          <div className="space-y-1">
+          <div className="space-y-1 text-left">
             <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Administration du Cabinet</h2>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
               Configuration Système • Gestion RH • Permissions RBAC
@@ -73,7 +76,7 @@ const Admin = () => {
           {[
             { label: "Membres Cabinet", value: 12, icon: <Users className="w-5 h-5" />, color: "text-[#c1a461]", bg: "bg-[#c1a461]/5" },
             { label: "Canaux Actifs", value: 8, icon: <Activity className="w-5 h-5" />, color: "text-blue-600", bg: "bg-blue-50" },
-            { label: "Logs de Sécurité", value: "842", icon: <ShieldCheck className="w-5 h-5" />, color: "text-emerald-600", bg: "bg-emerald-50" },
+            { label: "Audit Logs", value: logs.length, icon: <ShieldCheck className="w-5 h-5" />, color: "text-emerald-600", bg: "bg-emerald-50" },
             { label: "Stockage Vault", value: "84%", icon: <Server className="w-5 h-5" />, color: "text-red-600", bg: "bg-red-50" }
           ].map((stat, idx) => (
             <Card key={idx} className="bg-white border-none shadow-md px-6 py-5 flex items-center gap-5 rounded-2xl">
@@ -81,8 +84,8 @@ const Admin = () => {
                 {stat.icon}
               </div>
               <div>
-                <p className="text-xl font-black text-slate-900 leading-none">{stat.value}</p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{stat.label}</p>
+                <p className="text-xl font-black text-slate-900 leading-none text-left">{stat.value}</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 text-left">{stat.label}</p>
               </div>
             </Card>
           ))}
@@ -108,7 +111,7 @@ const Admin = () => {
                       <Avatar className="h-10 w-10 ring-2 ring-transparent group-hover:ring-[#c1a461]/20 transition-all">
                         <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} />
                       </Avatar>
-                      <div>
+                      <div className="text-left">
                         <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{user.name}</p>
                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{user.role}</p>
                       </div>
@@ -140,7 +143,7 @@ const Admin = () => {
                 ].map((item, idx) => (
                   <div key={idx} className="flex gap-4 p-4 bg-white/5 rounded-2xl border border-white/10 group hover:bg-white/10 transition-all cursor-pointer">
                     <div className="w-1 h-full bg-[#c1a461] rounded-full" />
-                    <div className="flex-grow">
+                    <div className="flex-grow text-left">
                       <div className="flex justify-between items-center">
                          <p className="text-[11px] font-black uppercase text-white leading-tight">{item.label}</p>
                          <Badge className="bg-emerald-600 text-white text-[8px] font-black uppercase tracking-widest border-none px-2 py-0.5">{item.status}</Badge>
@@ -156,7 +159,7 @@ const Admin = () => {
               <div className="p-3 bg-blue-50 rounded-2xl w-fit">
                  <Globe className="w-6 h-6 text-blue-600" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 text-left">
                 <h3 className="text-lg font-black uppercase text-slate-900 tracking-tighter">Infrastructure Cloud</h3>
                 <p className="text-slate-400 text-xs font-medium leading-relaxed uppercase tracking-tight">
                   Serveurs localisés à San Andreas. Bande passante illimitée. Monitoring actif 24/7.

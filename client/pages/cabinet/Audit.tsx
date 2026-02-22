@@ -20,9 +20,12 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import LegalIntranetLayout, { useLegalRBAC } from './intranet/LegalIntranetLayout';
 import { Link } from 'react-router-dom';
+import { legalStore } from '@/lib/legal-store';
 
 const Audit = () => {
   const { isAssocié, canAudit } = useLegalRBAC();
+  const logs = legalStore.getAuditLogs();
+  const sealedAccessLogs = logs.filter(l => l.action === 'Accès Dossier Scellé');
 
   if (!isAssocié && !canAudit) {
     return (
@@ -47,7 +50,7 @@ const Audit = () => {
     <LegalIntranetLayout>
       <div className="p-10 space-y-10">
         <div className="flex justify-between items-end">
-          <div className="space-y-1">
+          <div className="space-y-1 text-left">
             <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Audit & Sécurité Système</h2>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
               Journalisation AES-256 • Traçabilité totale des accès • Surveillance en temps réel
@@ -69,26 +72,26 @@ const Audit = () => {
               <ShieldCheck className="w-8 h-8 opacity-40" />
               <Badge className="bg-emerald-500 text-white text-[8px] font-black uppercase tracking-widest border-none">NOMINAL</Badge>
             </div>
-            <p className="text-2xl font-black leading-none">Status OK</p>
-            <p className="text-[9px] font-bold text-emerald-100 uppercase tracking-widest mt-1">Tous les services sont actifs</p>
+            <p className="text-2xl font-black leading-none text-left">Status OK</p>
+            <p className="text-[9px] font-bold text-emerald-100 uppercase tracking-widest mt-1 text-left">Tous les services sont actifs</p>
           </Card>
           <Card className="bg-white border-none shadow-md px-8 py-6 flex flex-col justify-between rounded-[32px]">
             <div className="flex justify-between items-start mb-4">
               <Activity className="w-8 h-8 text-[#c1a461] opacity-40" />
-              <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-200">24H</Badge>
+              <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-200">HISTORIQUE</Badge>
             </div>
-            <div>
-               <p className="text-2xl font-black text-slate-900 leading-none">1,240</p>
+            <div className="text-left">
+               <p className="text-2xl font-black text-slate-900 leading-none">{logs.length}</p>
                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Actions Logguées</p>
             </div>
           </Card>
           <Card className="bg-white border-none shadow-md px-8 py-6 flex flex-col justify-between rounded-[32px]">
             <div className="flex justify-between items-start mb-4">
               <Eye className="w-8 h-8 text-blue-600 opacity-40" />
-              <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-200">TEMPS RÉEL</Badge>
+              <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-200">CRITIQUE</Badge>
             </div>
-            <div>
-               <p className="text-2xl font-black text-slate-900 leading-none">8</p>
+            <div className="text-left">
+               <p className="text-2xl font-black text-slate-900 leading-none">{sealedAccessLogs.length}</p>
                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Accès Dossiers Scellés</p>
             </div>
           </Card>
@@ -97,8 +100,8 @@ const Audit = () => {
               <AlertTriangle className="w-8 h-8 text-amber-500 opacity-40" />
               <Badge className="bg-amber-600 text-white text-[8px] font-black uppercase tracking-widest border-none">ALERTES: 0</Badge>
             </div>
-            <p className="text-2xl font-black leading-none text-amber-500">Sécurité</p>
-            <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-1">Dernier backup réalisé il y a 4h</p>
+            <p className="text-2xl font-black leading-none text-amber-500 text-left">Sécurité</p>
+            <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-1 text-left">Intégrité des données : 100%</p>
           </Card>
         </div>
 
@@ -111,60 +114,57 @@ const Audit = () => {
             <div className="flex items-center gap-4">
                <div className="relative">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                 <input type="text" placeholder="RECHERCHER..." className="bg-white border-slate-200 border rounded-lg pl-9 text-[9px] font-bold uppercase tracking-widest h-9" />
+                 <input type="text" placeholder="RECHERCHER UN LOG..." className="bg-white border-slate-200 border rounded-lg pl-9 text-[9px] font-bold uppercase tracking-widest h-9 w-64" />
                </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-slate-50/30 border-b border-slate-100">
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Utilisateur / Rôle</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Action / Cible</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Niveau Sécurité</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Horodatage</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Détails</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {[
-                  { user: "Victoria Cole", role: "Associée", action: "Accès Dossier Scellé", target: "HC-2024-402", level: "Critique", time: "10:42:15" },
-                  { user: "Marcus Vane", role: "Avocat", action: "Upload Preuve Vault", target: "HC-2024-001", level: "Haute", time: "10:15:22" },
-                  { user: "Julian Harrington", role: "Associé", action: "Modification Planning", target: "Audience Madrazo", level: "Normal", time: "09:55:10" },
-                  { user: "Elena Rossi", role: "Avocate", action: "Signature Document", target: "Conclusions HC-882", level: "Haute", time: "09:30:45" },
-                  { user: "Secrétariat", role: "Secrétaire", action: "Création Dossier", target: "HC-2024-006", level: "Normal", time: "09:12:33" }
-                ].map((item, idx) => (
-                  <tr key={idx} className="group hover:bg-slate-50/50 transition-all cursor-pointer">
-                    <td className="px-8 py-6">
-                      <div className="space-y-1">
-                        <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{item.user}</p>
-                        <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-200">{item.role}</Badge>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="space-y-1">
-                        <p className="text-xs font-bold text-slate-600 uppercase tracking-tight">{item.action}</p>
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Cible: {item.target}</p>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-3 py-1", 
-                        item.level === 'Critique' ? 'bg-red-600 text-white' : 
-                        item.level === 'Haute' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-600'
-                      )}>
-                        {item.level}
-                      </Badge>
-                    </td>
-                    <td className="px-8 py-6 text-xs font-black text-slate-500 uppercase">
-                      {item.time}
-                    </td>
-                    <td className="px-8 py-6 text-right">
-                       <Button variant="ghost" className="text-[#c1a461] text-[9px] font-black uppercase tracking-widest hover:bg-[#c1a461]/5">Détails <ChevronRight className="w-3 h-3 ml-1" /></Button>
-                    </td>
+            <div className="max-h-[600px] overflow-y-auto">
+              <table className="w-full text-left">
+                <thead className="sticky top-0 z-10">
+                  <tr className="bg-slate-50 border-b border-slate-100">
+                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Utilisateur / Rôle</th>
+                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Action / Cible</th>
+                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type Cible</th>
+                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Horodatage</th>
+                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {logs.length > 0 ? logs.map((item, idx) => (
+                    <tr key={idx} className="group hover:bg-slate-50/50 transition-all cursor-pointer">
+                      <td className="px-8 py-6">
+                        <div className="space-y-1">
+                          <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{item.user_name}</p>
+                          <p className="text-[8px] font-bold text-slate-400 uppercase">{item.user_id}</p>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <div className="space-y-1">
+                          <p className="text-xs font-bold text-slate-600 uppercase tracking-tight">{item.action}</p>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">ID: {item.target_id}</p>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-200">
+                          {item.target_type}
+                        </Badge>
+                      </td>
+                      <td className="px-8 py-6 text-xs font-black text-slate-500 uppercase">
+                        {new Date(item.timestamp).toLocaleString()}
+                      </td>
+                      <td className="px-8 py-6 text-right">
+                         <Button variant="ghost" className="text-[#c1a461] text-[9px] font-black uppercase tracking-widest hover:bg-[#c1a461]/5">Détails <ChevronRight className="w-3 h-3 ml-1" /></Button>
+                      </td>
+                    </tr>
+                  )) : (
+                     <tr>
+                       <td colSpan={5} className="p-20 text-center text-slate-400 uppercase font-black text-[10px]">Aucun log d'audit enregistré</td>
+                     </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
       </div>

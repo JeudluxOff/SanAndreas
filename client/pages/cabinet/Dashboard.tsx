@@ -19,11 +19,26 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import LegalIntranetLayout, { Sidebar, Header } from './intranet/LegalIntranetLayout';
-
-export { Sidebar, Header };
+import LegalIntranetLayout from './intranet/LegalIntranetLayout';
+import { legalStore } from '@/lib/legal-store';
+import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
+  const { user } = useAuth();
+  const cases = legalStore.getCases();
+  const tasks = legalStore.getTasks(undefined, user?.id);
+  const docs = legalStore.getDocuments();
+  const hearings = legalStore.getHearings();
+  const invoices = legalStore.getInvoices();
+
+  const urgentTasks = tasks.filter(t => t.priority === 'Critique' || t.priority === 'Haute');
+  const pendingDocs = docs.filter(d => d.status === 'Relecture' || d.status === 'Validé');
+  const activeCases = cases.filter(c => c.status === 'En cours');
+  const unpaidInvoices = invoices.filter(i => i.status === 'En retard' || i.status === 'Envoyé');
+
+  const totalBilling = invoices.reduce((acc, inv) => acc + inv.amount, 0);
+
   return (
     <LegalIntranetLayout>
       <div className="p-10 space-y-10">
@@ -33,15 +48,19 @@ const Dashboard = () => {
             <AlertTriangle className="w-5 h-5 text-red-600 animate-pulse" />
             <div className="flex-grow">
               <p className="text-[10px] font-black text-red-900 uppercase tracking-widest">Alerte Prioritaire</p>
-              <p className="text-xs font-bold text-red-700/70 uppercase">Échéance de dépôt conclusions : Dossier Madrazo (H-4)</p>
+              <p className="text-xs font-bold text-red-700/70 uppercase">
+                {urgentTasks.length > 0 ? `Tâche urgente : ${urgentTasks[0].title}` : 'Aucune alerte critique immédiate'}
+              </p>
             </div>
-            <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white text-[9px] font-black uppercase h-8 px-4 rounded-lg">Consulter</Button>
+            {urgentTasks.length > 0 && (
+              <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white text-[9px] font-black uppercase h-8 px-4 rounded-lg">Consulter</Button>
+            )}
           </div>
           <div className="bg-[#c1a461]/10 border border-[#c1a461]/20 rounded-2xl px-6 py-3 flex items-center gap-4 shadow-sm">
             <BellRing className="w-5 h-5 text-[#c1a461]" />
             <div>
               <p className="text-[10px] font-black text-[#c1a461] uppercase tracking-widest">Notification</p>
-              <p className="text-xs font-bold text-[#c1a461]/70 uppercase">3 nouveaux documents à signer</p>
+              <p className="text-xs font-bold text-[#c1a461]/70 uppercase">{pendingDocs.length} nouveaux documents en attente</p>
             </div>
           </div>
         </div>
@@ -51,7 +70,7 @@ const Dashboard = () => {
           <div className="space-y-1">
             <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Tableau de Bord Stratégique</h2>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <Clock className="w-3 h-3 text-[#c1a461]" /> Lundi 24 Mai 2024 • 09:42 • Session Sécurisée AES-256
+              <Clock className="w-3 h-3 text-[#c1a461]" /> {new Date().toLocaleString()} • Session Sécurisée AES-256
             </p>
           </div>
           
@@ -61,8 +80,8 @@ const Dashboard = () => {
                 <TrendingUp className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xl font-black text-slate-900 leading-none">142.5k SA$</p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Facturation Mois</p>
+                <p className="text-xl font-black text-slate-900 leading-none">{totalBilling.toLocaleString()} SA$</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Facturation Totale</p>
               </div>
             </Card>
             <Card className="bg-white border-none shadow-md px-6 py-4 flex items-center gap-4 rounded-2xl">
@@ -70,7 +89,7 @@ const Dashboard = () => {
                 <Briefcase className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xl font-black text-slate-900 leading-none">42</p>
+                <p className="text-xl font-black text-slate-900 leading-none">{activeCases.length}</p>
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Dossiers Actifs</p>
               </div>
             </Card>
@@ -85,47 +104,46 @@ const Dashboard = () => {
               <Card className="border-none shadow-xl rounded-[32px] bg-white overflow-hidden border-t-4 border-amber-500">
                 <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between">
                   <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-slate-900">
-                    <FileSignature className="w-4 h-4 text-amber-500" /> Signatures en Attente
+                    <FileSignature className="w-4 h-4 text-amber-500" /> Documents en Attente
                   </CardTitle>
-                  <Badge className="bg-amber-100 text-amber-700 border-none text-[10px]">3 Docs</Badge>
+                  <Badge className="bg-amber-100 text-amber-700 border-none text-[10px]">{pendingDocs.length} Docs</Badge>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
-                  {[
-                    { title: "Conclusions Madrazo", ref: "HC-882", type: "Pénal" },
-                    { title: "Convention Honoraires UD", ref: "HC-945", type: "Affaires" },
-                    { title: "Accord Transactionnel LS", ref: "HC-912", type: "Admin" }
-                  ].map((doc, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group hover:bg-slate-100 transition-all cursor-pointer">
+                  {pendingDocs.slice(0, 3).map((doc, idx) => (
+                    <Link key={idx} to={`/cabinet/intranet/dossiers/${doc.case_id}`} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group hover:bg-slate-100 transition-all cursor-pointer">
                       <div className="space-y-1">
                         <p className="text-[11px] font-black uppercase text-slate-900 leading-tight">{doc.title}</p>
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{doc.ref} • {doc.type}</p>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{doc.id} • {doc.category}</p>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-amber-500 transition-all" />
-                    </div>
+                      <Badge className="bg-blue-100 text-blue-600 text-[8px] uppercase">{doc.status}</Badge>
+                    </Link>
                   ))}
+                  {pendingDocs.length === 0 && (
+                     <p className="text-center py-6 text-[10px] font-bold text-slate-400 uppercase">Aucun document en attente</p>
+                  )}
                 </CardContent>
               </Card>
 
               <Card className="border-none shadow-xl rounded-[32px] bg-[#0a0f18] text-white overflow-hidden border-t-4 border-[#c1a461]">
                 <CardHeader className="p-8 border-b border-white/5 flex flex-row items-center justify-between">
                   <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-[#c1a461]" /> Tâches Critiques
+                    <Zap className="w-4 h-4 text-[#c1a461]" /> Tâches Prioritaires
                   </CardTitle>
-                  <Badge className="bg-[#c1a461] text-white border-none text-[10px]">2 Urgent</Badge>
+                  <Badge className="bg-[#c1a461] text-white border-none text-[10px]">{urgentTasks.length} Urgent</Badge>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
-                  {[
-                    { task: "Vérification Conflits Duggan", due: "ASAP", color: "bg-red-500" },
-                    { task: "Relecture Requête Référé", due: "Demain 10h", color: "bg-[#c1a461]" }
-                  ].map((task, idx) => (
+                  {urgentTasks.slice(0, 3).map((task, idx) => (
                     <div key={idx} className="flex gap-4 p-4 bg-white/5 rounded-2xl border border-white/10 group hover:bg-white/10 transition-all cursor-pointer">
-                      <div className={cn("w-1 h-full rounded-full", task.color)} />
+                      <div className={cn("w-1 h-full rounded-full", task.priority === 'Critique' ? 'bg-red-500' : 'bg-[#c1a461]')} />
                       <div className="flex-grow">
-                        <p className="text-[11px] font-black uppercase leading-tight">{task.task}</p>
-                        <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-1">Échéance: {task.due}</p>
+                        <p className="text-[11px] font-black uppercase leading-tight">{task.title}</p>
+                        <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-1">Échéance: {new Date(task.due_date).toLocaleDateString()}</p>
                       </div>
                     </div>
                   ))}
+                  {urgentTasks.length === 0 && (
+                     <p className="text-center py-6 text-[10px] font-bold text-white/20 uppercase">Aucune tâche urgente</p>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -135,20 +153,18 @@ const Dashboard = () => {
               <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between">
                 <div>
                   <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
-                    <FolderOpen className="w-5 h-5 text-[#c1a461]" /> Dossiers Prioritaires
+                    <FolderOpen className="w-5 h-5 text-[#c1a461]" /> Dossiers Actifs
                   </CardTitle>
-                  <CardDescription className="text-[10px] font-bold uppercase tracking-widest mt-1">Dossiers dont vous êtes responsable</CardDescription>
+                  <CardDescription className="text-[10px] font-bold uppercase tracking-widest mt-1">Aperçu des dossiers prioritaires</CardDescription>
                 </div>
-                <Button variant="ghost" className="text-[10px] font-black uppercase text-[#c1a461]">Gérer tout</Button>
+                <Link to="/cabinet/intranet/dossiers">
+                   <Button variant="ghost" className="text-[10px] font-black uppercase text-[#c1a461]">Gérer tout</Button>
+                </Link>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-slate-50">
-                  {[
-                    { id: "CASE-2024-882", title: "État de SA vs. Madrazo", type: "Pénal", status: "Conclusions", conf: "Confidentiel", progress: 85 },
-                    { id: "CASE-2024-912", title: "Mairie LS - Recours Admin", type: "Admin", status: "Audiences", conf: "Normal", progress: 45 },
-                    { id: "CASE-2024-945", title: "Union Depository - Fusion", type: "Affaires", status: "Audit", conf: "Secret", progress: 20 }
-                  ].map((item, idx) => (
-                    <div key={idx} className="p-8 flex items-center justify-between group hover:bg-slate-50 transition-all cursor-pointer">
+                  {activeCases.slice(0, 5).map((item, idx) => (
+                    <Link to={`/cabinet/intranet/dossiers/${item.id}`} key={idx} className="p-8 flex items-center justify-between group hover:bg-slate-50 transition-all cursor-pointer">
                       <div className="flex items-center gap-6">
                         <div className="p-4 bg-slate-50 rounded-2xl text-slate-400 group-hover:bg-white group-hover:text-[#c1a461] shadow-inner transition-all">
                           <Briefcase className="w-6 h-6" />
@@ -163,23 +179,14 @@ const Dashboard = () => {
                       </div>
                       <div className="flex items-center gap-8">
                         <Badge className={cn("text-[9px] font-black uppercase tracking-widest px-3 py-1", 
-                          item.conf === 'Secret' ? 'bg-red-600 text-white' : 
-                          item.conf === 'Confidentiel' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-600'
+                          item.confidentiality === 'Secret' ? 'bg-red-600 text-white' : 
+                          item.confidentiality === 'Confidentiel' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-600'
                         )}>
-                          {item.conf}
+                          {item.confidentiality}
                         </Badge>
-                        <div className="text-right w-32">
-                           <div className="flex justify-between items-end mb-1">
-                             <p className="text-[9px] font-black text-slate-900 uppercase tracking-widest">{item.status}</p>
-                             <p className="text-[9px] font-bold text-slate-400">{item.progress}%</p>
-                           </div>
-                           <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                             <div className="h-full bg-[#c1a461] transition-all duration-1000 group-hover:bg-[#927843]" style={{ width: `${item.progress}%` }} />
-                           </div>
-                        </div>
                         <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#c1a461] transition-colors" />
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </CardContent>
@@ -196,25 +203,25 @@ const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-8 space-y-6">
-                {[
-                  { date: "26 Mai", title: "Audience Préliminaire", case: "Madrazo", judge: "Hon. J. Miller" },
-                  { date: "28 Mai", title: "Jugement en Référé", case: "LS Mairie", judge: "Hon. S. Wright" }
-                ].map((hearing, idx) => (
-                  <div key={idx} className="flex gap-6 items-center p-4 rounded-2xl hover:bg-slate-50 transition-all group cursor-pointer border border-transparent hover:border-slate-100">
+                {hearings.slice(0, 3).map((hearing, idx) => (
+                  <Link to={`/cabinet/intranet/dossiers/${hearing.case_id}`} key={idx} className="flex gap-6 items-center p-4 rounded-2xl hover:bg-slate-50 transition-all group cursor-pointer border border-transparent hover:border-slate-100">
                     <div className="text-center bg-slate-900 text-white rounded-xl p-3 min-w-[60px] group-hover:bg-[#c1a461] transition-colors">
-                      <p className="text-lg font-black leading-none">{hearing.date.split(' ')[0]}</p>
-                      <p className="text-[8px] font-bold uppercase mt-1 opacity-60">{hearing.date.split(' ')[1]}</p>
+                      <p className="text-lg font-black leading-none">{new Date(hearing.date).getDate()}</p>
+                      <p className="text-[8px] font-bold uppercase mt-1 opacity-60">
+                        {new Date(hearing.date).toLocaleString('default', { month: 'short' })}
+                      </p>
                     </div>
                     <div>
                       <p className="text-[11px] font-black uppercase text-slate-900 leading-tight">{hearing.title}</p>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Dossier: {hearing.case}</p>
                       <p className="text-[9px] font-bold text-[#c1a461] uppercase mt-0.5">{hearing.judge}</p>
                     </div>
-                  </div>
+                  </Link>
                 ))}
-                <Button variant="outline" className="w-full border-2 border-slate-900 text-slate-900 font-black uppercase text-[10px] tracking-widest h-12 rounded-xl hover:bg-slate-900 hover:text-white transition-all">
-                  Calendrier Complet
-                </Button>
+                <Link to="/cabinet/intranet/planning">
+                  <Button variant="outline" className="w-full border-2 border-slate-900 text-slate-900 font-black uppercase text-[10px] tracking-widest h-12 rounded-xl hover:bg-slate-900 hover:text-white transition-all">
+                    Calendrier Complet
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -222,28 +229,34 @@ const Dashboard = () => {
             <Card className="border-none shadow-xl rounded-[32px] bg-white overflow-hidden">
               <CardHeader className="p-8 border-b border-slate-50">
                 <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-red-600">
-                  <CreditCard className="w-4 h-4" /> Honoraires Impayés
+                  <CreditCard className="w-4 h-4" /> Honoraires en Attente
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-8 space-y-6">
-                {[
-                  { client: "T. Duggan", amount: "12,400 SA$", age: "J+15", status: "Critique" },
-                  { client: "Union Depository", amount: "45,000 SA$", age: "J+2", status: "Normal" }
-                ].map((inv, idx) => (
-                  <div key={idx} className="flex items-center justify-between group">
-                    <div className="space-y-1">
-                      <p className="text-[11px] font-black uppercase text-slate-900 leading-tight">{inv.client}</p>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{inv.age} • Relance requise</p>
+                {unpaidInvoices.slice(0, 3).map((inv, idx) => {
+                  const client = legalStore.getClient(inv.client_id);
+                  return (
+                    <div key={idx} className="flex items-center justify-between group">
+                      <div className="space-y-1">
+                        <p className="text-[11px] font-black uppercase text-slate-900 leading-tight">{client?.name}</p>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Échéance : {new Date(inv.due_date).toLocaleDateString()}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-black text-red-600 tracking-tighter">{inv.amount.toLocaleString()} {inv.currency}</p>
+                        <Badge className={cn("text-[8px] font-black uppercase border-none px-2 py-0", 
+                           inv.status === 'En retard' ? 'bg-red-50 text-red-600' : 'bg-slate-50 text-slate-400'
+                        )}>
+                           {inv.status}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-black text-red-600 tracking-tighter">{inv.amount}</p>
-                      <Badge className="bg-red-50 text-red-600 text-[8px] font-black uppercase border-none px-2 py-0">Impayé</Badge>
-                    </div>
-                  </div>
-                ))}
-                <Button className="w-full bg-slate-900 text-white font-black uppercase text-[10px] tracking-widest h-12 rounded-xl hover:bg-slate-800 transition-all">
-                  Module Facturation
-                </Button>
+                  );
+                })}
+                <Link to="/cabinet/intranet/billing">
+                  <Button className="w-full bg-slate-900 text-white font-black uppercase text-[10px] tracking-widest h-12 rounded-xl hover:bg-slate-800 transition-all">
+                    Module Facturation
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 

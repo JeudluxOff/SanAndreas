@@ -1,12 +1,148 @@
-/**
- * Shared code between client and server
- * Useful to share types between client and server
- * and/or small pure JS functions that can be used on both client and server
- */
+// Harrington & Cole - Shared Types
 
-/**
- * Example response type for /api/demo
- */
-export interface DemoResponse {
-  message: string;
+export type LegalRole = 'Associé' | 'Avocat' | 'Juriste' | 'Secrétaire' | 'Comptable' | 'Stagiaire' | 'Auditeur';
+
+export type CaseType = 'Pénal' | 'Civil' | 'Affaires' | 'Admin';
+export type CaseStatus = 'Ouvert' | 'En cours' | 'En attente' | 'Clos' | 'Archivé' | 'Scellé';
+export type ConfidentialityLevel = 'Normal' | 'Confidentiel' | 'Secret' | 'Scellé';
+
+export interface Client {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  type: 'Individu' | 'Entreprise';
+  created_at: string;
+}
+
+export interface CaseMember {
+  user_id: string;
+  name: string;
+  role: string;
+  avatar?: string;
+}
+
+export interface Case {
+  id: string;
+  title: string;
+  client_id: string;
+  type: CaseType;
+  status: CaseStatus;
+  confidentiality: ConfidentialityLevel;
+  description?: string;
+  lead_id: string;
+  members: CaseMember[];
+  created_at: string;
+  updated_at: string;
+  sealed_at?: string;
+  sealed_by?: string;
+}
+
+export type DocumentStatus = 'Brouillon' | 'Relecture' | 'Validé' | 'Signé' | 'Envoyé' | 'Archivé';
+export type DocumentCategory = 'Convention' | 'Plainte' | 'Requête' | 'Courrier' | 'Conclusions';
+
+export interface DocumentVersion {
+  version: number;
+  file_url: string;
+  created_at: string;
+  created_by: string;
+  change_note?: string;
+}
+
+export interface LegalDocument {
+  id: string; // Format: HC-YYYY-XXXX
+  case_id: string;
+  title: string;
+  category: DocumentCategory;
+  status: DocumentStatus;
+  current_version: number;
+  versions: DocumentVersion[];
+  signatures: {
+    user_id: string;
+    signed_at: string;
+    role: string;
+  }[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Evidence {
+  id: string;
+  case_id: string;
+  name: string;
+  type: string;
+  file_url: string;
+  confidentiality: ConfidentialityLevel;
+  uploaded_by: string;
+  uploaded_at: string;
+  to_produce_at_hearing: boolean;
+}
+
+export interface Task {
+  id: string;
+  case_id: string;
+  title: string;
+  description?: string;
+  priority: 'Basse' | 'Moyenne' | 'Haute' | 'Critique';
+  status: 'Todo' | 'In Progress' | 'Done';
+  due_date: string;
+  assigned_to: string; // user_id
+  created_at: string;
+}
+
+export interface Hearing {
+  id: string;
+  case_id: string;
+  title: string;
+  date: string;
+  location: string;
+  judge: string;
+  type: string;
+  result?: string;
+  status: 'Confirmé' | 'Reporté' | 'Terminé' | 'Annulé';
+}
+
+export interface Invoice {
+  id: string;
+  case_id: string;
+  client_id: string;
+  amount: number;
+  currency: string;
+  status: 'Brouillon' | 'Envoyé' | 'Payé' | 'Annulé' | 'En retard';
+  due_date: string;
+  created_at: string;
+  items: {
+    description: string;
+    amount: number;
+  }[];
+}
+
+export interface AuditLog {
+  id: string;
+  timestamp: string;
+  user_id: string;
+  user_name: string;
+  action: string;
+  target_type: string;
+  target_id: string;
+  metadata?: any;
+}
+
+export interface ConflictCheck {
+  id: string;
+  timestamp: string;
+  query: string;
+  result: 'Pass' | 'Fail';
+  matched_entities: string[];
+  performed_by: string;
+}
+
+export interface Message {
+  id: string;
+  channel_id: string;
+  sender_id: string;
+  content: string;
+  timestamp: string;
+  attachments?: string[];
 }

@@ -24,58 +24,61 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import LegalIntranetLayout from './intranet/LegalIntranetLayout';
+import { legalStore } from '@/lib/legal-store';
+import { CaseType } from '@shared/api';
+import { Link } from 'react-router-dom';
 
-const WORKSPACES = [
+const WORKSPACES_CONFIG = [
   { 
-    id: 'penal', 
+    id: 'penal' as CaseType, 
     name: 'Pôle Pénal', 
     icon: <Gavel className="w-6 h-6" />, 
     color: 'text-red-600', 
     bg: 'bg-red-50',
-    stats: { active: 12, rate: '92%', docs: 45 },
-    members: ["Victoria", "Marcus", "Julian"],
     procedures: ["Audit de conflit", "Dépôt conclusions", "Scellement Vault"]
   },
   { 
-    id: 'civil', 
+    id: 'civil' as CaseType, 
     name: 'Pôle Civil', 
     icon: <Users className="w-6 h-6" />, 
     color: 'text-[#c1a461]', 
     bg: 'bg-[#c1a461]/5',
-    stats: { active: 8, rate: '88%', docs: 32 },
-    members: ["Marcus", "Elena"],
     procedures: ["Convention Honoraires", "Assignation", "Signification"]
   },
   { 
-    id: 'affaires', 
+    id: 'affaires' as CaseType, 
     name: 'Pôle Affaires', 
     icon: <Briefcase className="w-6 h-6" />, 
     color: 'text-blue-600', 
     bg: 'bg-blue-50',
-    stats: { active: 15, rate: '95%', docs: 120 },
-    members: ["Julian", "Elena"],
     procedures: ["Fusion-Acquisition", "Audit LCB-FT", "Contrat cadre"]
   },
   { 
-    id: 'admin', 
+    id: 'admin' as CaseType, 
     name: 'Pôle Administratif', 
     icon: <Landmark className="w-6 h-6" />, 
     color: 'text-emerald-600', 
     bg: 'bg-emerald-50',
-    stats: { active: 5, rate: '84%', docs: 18 },
-    members: ["Elena", "Staff1"],
     procedures: ["Recours pour excès de pouvoir", "Urbanisme", "Marchés publics"]
   }
 ];
 
 const Workspaces = () => {
-  const [selectedWorkspace, setSelectedWorkspace] = React.useState(WORKSPACES[0]);
+  const [selectedType, setSelectedType] = React.useState<CaseType>('Pénal');
+  const cases = legalStore.getCases();
+  
+  const selectedConfig = WORKSPACES_CONFIG.find(w => w.name.includes(selectedType)) || WORKSPACES_CONFIG[0];
+  const activeCases = cases.filter(c => c.type === selectedType && c.status === 'En cours');
+  const poleDocs = legalStore.getDocuments().filter(d => {
+    const c = legalStore.getCase(d.case_id);
+    return c?.type === selectedType;
+  });
 
   return (
     <LegalIntranetLayout>
       <div className="p-10 space-y-10">
         <div className="flex justify-between items-end">
-          <div className="space-y-1">
+          <div className="space-y-1 text-left">
             <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Espaces de Travail (Pôles)</h2>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
               Organisation par spécialité • Procédures dédiées • Performance analytique
@@ -90,33 +93,37 @@ const Workspaces = () => {
 
         {/* Horizontal Workspace Selector */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {WORKSPACES.map((ws) => (
-            <Card 
-              key={ws.id}
-              onClick={() => setSelectedWorkspace(ws)}
-              className={cn(
-                "cursor-pointer transition-all duration-500 border-none shadow-md hover:shadow-xl rounded-3xl group overflow-hidden",
-                selectedWorkspace.id === ws.id ? "ring-2 ring-[#c1a461] shadow-[#c1a461]/10 scale-[1.02]" : "hover:-translate-y-1"
-              )}
-            >
-              <CardContent className="p-8">
-                <div className={cn("p-4 rounded-2xl w-fit mb-6 transition-transform group-hover:scale-110", ws.bg, ws.color)}>
-                  {ws.icon}
-                </div>
-                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter mb-4">{ws.name}</h3>
-                <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                  <div className="flex -space-x-2">
-                    {ws.members.map((m, i) => (
-                      <Avatar key={i} className="h-6 w-6 ring-2 ring-white">
-                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${m}`} />
-                      </Avatar>
-                    ))}
+          {WORKSPACES_CONFIG.map((ws) => {
+            const type = ws.name.split(' ')[1] as CaseType;
+            const poleCases = cases.filter(c => c.type === type);
+            return (
+              <Card 
+                key={ws.id}
+                onClick={() => setSelectedType(type)}
+                className={cn(
+                  "cursor-pointer transition-all duration-500 border-none shadow-md hover:shadow-xl rounded-3xl group overflow-hidden",
+                  selectedType === type ? "ring-2 ring-[#c1a461] shadow-[#c1a461]/10 scale-[1.02]" : "hover:-translate-y-1"
+                )}
+              >
+                <CardContent className="p-8">
+                  <div className={cn("p-4 rounded-2xl w-fit mb-6 transition-transform group-hover:scale-110", ws.bg, ws.color)}>
+                    {ws.icon}
                   </div>
-                  <Badge variant="outline" className="text-[8px] font-black uppercase border-slate-200">{ws.stats.active} Dossiers</Badge>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter mb-4 text-left">{ws.name}</h3>
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                    <div className="flex -space-x-2">
+                      {[1, 2].map((i) => (
+                        <Avatar key={i} className="h-6 w-6 ring-2 ring-white">
+                          <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Pole${ws.id}${i}`} />
+                        </Avatar>
+                      ))}
+                    </div>
+                    <Badge variant="outline" className="text-[8px] font-black uppercase border-slate-200">{poleCases.length} Dossiers</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Workspace Detail Area */}
@@ -124,10 +131,10 @@ const Workspaces = () => {
           {/* Left: Procedures & Docs */}
           <div className="lg:col-span-8 space-y-8 animate-in fade-in duration-700">
             <div className="flex items-center gap-4">
-               <div className={cn("p-3 rounded-xl", selectedWorkspace.bg, selectedWorkspace.color)}>
-                 {selectedWorkspace.icon}
+               <div className={cn("p-3 rounded-xl", selectedConfig.bg, selectedConfig.color)}>
+                 {selectedConfig.icon}
                </div>
-               <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">{selectedWorkspace.name} — Workspace</h3>
+               <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">{selectedConfig.name} — Workspace</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -140,11 +147,11 @@ const Workspaces = () => {
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="divide-y divide-slate-50">
-                    {selectedWorkspace.procedures.map((proc, idx) => (
+                    {selectedConfig.procedures.map((proc, idx) => (
                       <div key={idx} className="p-6 flex items-center justify-between group hover:bg-slate-50 transition-all cursor-pointer">
                         <div className="flex items-center gap-4">
                           <FileText className="w-4 h-4 text-slate-300 group-hover:text-[#c1a461]" />
-                          <p className="text-xs font-bold text-slate-600 uppercase tracking-tight">{proc}</p>
+                          <p className="text-xs font-bold text-slate-600 uppercase tracking-tight text-left">{proc}</p>
                         </div>
                         <ArrowRight className="w-4 h-4 text-slate-200 group-hover:translate-x-1 transition-all" />
                       </div>
@@ -156,20 +163,23 @@ const Workspaces = () => {
               <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
                 <CardHeader className="p-8 border-b border-slate-50">
                   <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
-                    <Star className="w-4 h-4 text-[#c1a461]" /> Dossiers Actifs (Top 5)
+                    <Star className="w-4 h-4 text-[#c1a461]" /> Dossiers Actifs
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="divide-y divide-slate-50">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <div key={i} className="p-6 flex items-center justify-between group hover:bg-slate-50 transition-all cursor-pointer">
-                        <div className="space-y-0.5">
-                          <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight">Affaire Specifique #{i*100}</p>
-                          <p className="text-[9px] font-bold text-slate-400 uppercase">Martin Madrazo • J+12</p>
+                    {activeCases.slice(0, 5).map((c) => (
+                      <Link to={`/cabinet/intranet/dossiers/${c.id}`} key={c.id} className="p-6 flex items-center justify-between group hover:bg-slate-50 transition-all cursor-pointer">
+                        <div className="space-y-0.5 text-left">
+                          <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight">{c.title}</p>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase">{c.id}</p>
                         </div>
-                        <Badge className="bg-slate-100 text-slate-600 text-[8px] font-black">EN COURS</Badge>
-                      </div>
+                        <Badge className="bg-slate-100 text-slate-600 text-[8px] font-black">{c.status}</Badge>
+                      </Link>
                     ))}
+                    {activeCases.length === 0 && (
+                       <p className="p-10 text-center text-slate-400 uppercase font-black text-[10px]">Aucun dossier actif</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -185,15 +195,10 @@ const Workspaces = () => {
               <CardContent className="p-10">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                   <div className="space-y-4">
-                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest text-center">Taux de Clôture</p>
-                    <div className="relative h-24 w-24 mx-auto">
-                       <svg className="h-full w-full" viewBox="0 0 36 36">
-                         <path className="text-white/5" strokeDasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                         <path className="text-[#c1a461]" strokeDasharray={`${selectedWorkspace.stats.rate.replace('%', '')}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                       </svg>
-                       <div className="absolute inset-0 flex items-center justify-center">
-                         <span className="text-xl font-black">{selectedWorkspace.stats.rate}</span>
-                       </div>
+                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest text-center">Docs Indexés</p>
+                    <div className="text-center">
+                       <p className="text-4xl font-black text-white">{poleDocs.length}</p>
+                       <p className="text-[9px] font-bold text-[#c1a461] uppercase tracking-widest mt-2">Volume Documentaire</p>
                     </div>
                   </div>
                   <div className="space-y-4 text-center">
@@ -202,9 +207,9 @@ const Workspaces = () => {
                     <p className="text-[9px] font-bold text-[#c1a461] uppercase tracking-widest">Ratio Optimal</p>
                   </div>
                   <div className="space-y-4 text-center">
-                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Temps Moyen Clôture</p>
-                    <p className="text-4xl font-black text-white">18j</p>
-                    <p className="text-[9px] font-bold text-[#c1a461] uppercase tracking-widest">Target: 20j</p>
+                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Taux de Clôture</p>
+                    <p className="text-4xl font-black text-white">92%</p>
+                    <p className="text-[9px] font-bold text-[#c1a461] uppercase tracking-widest">Performance</p>
                   </div>
                 </div>
               </CardContent>
@@ -215,18 +220,18 @@ const Workspaces = () => {
           <div className="lg:col-span-4 space-y-10">
             <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
               <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between">
-                <CardTitle className="text-sm font-black uppercase tracking-widest">Membres du Pôle</CardTitle>
+                <CardTitle className="text-sm font-black uppercase tracking-widest">Équipe du Pôle</CardTitle>
                 <Users className="w-4 h-4 text-slate-300" />
               </CardHeader>
               <CardContent className="p-8 space-y-6">
-                {selectedWorkspace.members.map((m, idx) => (
-                  <div key={idx} className="flex items-center gap-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-4">
                     <Avatar className="h-10 w-10 ring-2 ring-slate-100">
-                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${m}`} />
+                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Staff${selectedType}${i}`} />
                     </Avatar>
-                    <div className="flex-grow">
-                      <p className="text-xs font-black text-slate-900 uppercase tracking-tight">{m} Cole</p>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Assigné au pôle</p>
+                    <div className="flex-grow text-left">
+                      <p className="text-xs font-black text-slate-900 uppercase tracking-tight">Staff Member {i}</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Pôle {selectedType}</p>
                     </div>
                     <div className="w-2 h-2 rounded-full bg-emerald-500" />
                   </div>
@@ -241,7 +246,7 @@ const Workspaces = () => {
               <div className="p-3 bg-white/20 rounded-2xl w-fit">
                  <Zap className="w-6 h-6" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 text-left">
                 <h3 className="text-lg font-black uppercase tracking-tighter">Objectifs Trimestriels</h3>
                 <p className="text-white/80 text-xs font-medium leading-relaxed uppercase tracking-tight leading-loose">
                   • Atteindre 95% de satisfaction client. <br />
