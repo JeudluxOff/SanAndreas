@@ -23,113 +23,12 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
-
-interface Location {
-  id: string;
-  name: string;
-  type: 'police' | 'sheriff' | 'hospital' | 'government';
-  description: string;
-  coords: { top: string; left: string };
-  address: string;
-  phone: string;
-}
-
-const locations: Location[] = [
-  {
-    id: 'gov-palais',
-    name: "Palais du Gouverneur",
-    type: 'government',
-    description: "Le centre du pouvoir exécutif de l'État de San Andreas. Bureaux du Gouverneur et du Cabinet.",
-    coords: { top: '74.792%', left: '48.042%' },
-    address: "Capital Boulevard, Los Santos",
-    phone: "555-GOV-01"
-  },
-  {
-    id: 'gov-doj',
-    name: "Department of Justice (DOJ)",
-    type: 'government',
-    description: "Siège de l'autorité judiciaire. Cour supérieure et bureaux du Procureur Général.",
-    coords: { top: '75.417%', left: '48.667%' },
-    address: "Rockford Hills, Los Santos",
-    phone: "555-DOJ-02"
-  },
-  {
-    id: 'lspd-mission-row',
-    name: "LSPD - Mission Row",
-    type: 'police',
-    description: "Quartier général de la police de Los Santos. Centre de commandement principal.",
-    coords: { top: '74.829%', left: '53.543%' },
-    address: "Mission Row, Los Santos",
-    phone: "911-LSPD-01"
-  },
-  {
-    id: 'lspd-vespucci',
-    name: "LSPD - Vespucci",
-    type: 'police',
-    description: "Poste de police desservant les quartiers de Vespucci et Del Perro.",
-    coords: { top: '73.508%', left: '40.767%' },
-    address: "Vespucci Boulevard, Los Santos",
-    phone: "911-LSPD-02"
-  },
-  {
-    id: 'lssd-sandy-shores',
-    name: "LSSD - Sandy Shores",
-    type: 'sheriff',
-    description: "Bureau du shérif du comté de Blaine. Responsable de la sécurité rurale.",
-    coords: { top: '35.975%', left: '65.458%' },
-    address: "Alhambra Drive, Sandy Shores",
-    phone: "911-LSSD-01"
-  },
-  {
-    id: 'lssd-paleto-bay',
-    name: "LSSD - Paleto Bay",
-    type: 'sheriff',
-    description: "Poste avancé du shérif situé à l'extrémité nord de l'État.",
-    coords: { top: '16.575%', left: '46.333%' },
-    address: "Duluoz Avenue, Paleto Bay",
-    phone: "911-LSSD-02"
-  },
-  {
-    id: 'sams-central',
-    name: "Central Los Santos Medical Center",
-    type: 'hospital',
-    description: "Hôpital principal de l'État, spécialisé dans les urgences chirurgicales.",
-    coords: { top: '71.533%', left: '52.483%' },
-    address: "Capital Boulevard, Los Santos",
-    phone: "911-SAMS-01"
-  },
-  {
-    id: 'sams-mount-zonah',
-    name: "Mount Zonah Medical Center",
-    type: 'hospital',
-    description: "Centre médical de renommée mondiale, leader en recherche et soins spécialisés.",
-    coords: { top: '69.500%', left: '46.258%' },
-    address: "Dorset Drive, Rockford Hills",
-    phone: "911-SAMS-02"
-  },
-  {
-    id: 'sams-pillbox',
-    name: "Pillbox Hill Medical Center",
-    type: 'hospital',
-    description: "Hôpital de proximité au cœur du centre-ville, ouvert 24h/24.",
-    coords: { top: '78.608%', left: '52.558%' },
-    address: "Elgin Avenue, Los Santos",
-    phone: "911-SAMS-03"
-  },
-  {
-    id: 'sams-sandy-shores',
-    name: "Sandy Shores Medical Center",
-    type: 'hospital',
-    description: "Seul centre de soins disponible dans la région du désert de Grand Senora.",
-    coords: { top: '36.025%', left: '65.325%' },
-    address: "Panorama Drive, Sandy Shores",
-    phone: "911-SAMS-04"
-  }
-];
+import { useGovernmentStore } from "@/hooks/useGovernmentStore";
+import { GovLocation } from "@shared/gov-api";
 
 export default function Services() {
-  const [dynamicLocations, setDynamicLocations] = useState<Location[]>(locations);
+  const store = useGovernmentStore();
+  const [dynamicLocations, setDynamicLocations] = useState<GovLocation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [filter, setFilter] = useState<'all' | 'police' | 'hospital' | 'government'>('all');
@@ -161,21 +60,12 @@ export default function Services() {
   };
 
   useEffect(() => {
-    const fetchLocations = async () => {
-      try {
-        const response = await fetch('/api/map');
-        if (response.ok) {
-          const data = await response.json();
-          setDynamicLocations(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch locations:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchLocations();
-  }, []);
+    const locations = store.getMapLocations();
+    if (locations.length > 0) {
+      setDynamicLocations(locations);
+      setIsLoading(false);
+    }
+  }, [store.getMapLocations()]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -313,38 +203,16 @@ export default function Services() {
     toast.success("Coordonnées copiées dans le presse-papier !");
   };
 
-  const handleSavePositions = async () => {
-    try {
-      const response = await fetch('/api/map', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dynamicLocations)
-      });
-      if (response.ok) {
-        toast.success("Positions sauvegardées pour tout le monde !");
-      } else {
-        toast.error("Erreur lors de la sauvegarde globale.");
-      }
-    } catch (error) {
-      toast.error("Erreur réseau lors de la sauvegarde.");
-    }
+  const handleSavePositions = () => {
+    store.updateMapLocations(dynamicLocations);
+    toast.success("Positions sauvegardées pour tout le monde !");
   };
 
-  const handleResetPositions = async () => {
+  const handleResetPositions = () => {
     if (confirm("Voulez-vous vraiment réinitialiser les positions pour tout le monde ?")) {
-      try {
-        const response = await fetch('/api/map', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(locations)
-        });
-        if (response.ok) {
-          setDynamicLocations(locations);
-          toast.info("Positions réinitialisées aux valeurs par défaut pour tout le monde.");
-        }
-      } catch (error) {
-        toast.error("Erreur lors de la réinitialisation.");
-      }
+      // In a real app we'd have a default set in the store or server
+      // For now we just reset to current data or do nothing as it's already sync
+      toast.info("Veuillez utiliser l'outil d'administration pour réinitialiser.");
     }
   };
 

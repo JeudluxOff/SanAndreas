@@ -15,57 +15,20 @@ import {
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-
-const priorities = [
-  {
-    title: "Sécurité Publique",
-    description: "Renforcement des effectifs du LSPD et du LSSD pour assurer la paix dans tout l'État.",
-    icon: <ShieldCheck className="w-8 h-8 text-secondary" />,
-    link: "/securite"
-  },
-  {
-    title: "Justice & Équité",
-    description: "Réforme du code pénal et modernisation du système judiciaire pour une justice plus rapide.",
-    icon: <Gavel className="w-8 h-8 text-secondary" />,
-    link: "/justice"
-  },
-  {
-    title: "Économie & Croissance",
-    description: "Programmes de soutien aux PME et simplification de la fiscalité pour les nouveaux entrepreneurs.",
-    icon: <TrendingUp className="w-8 h-8 text-secondary" />,
-    link: "/economie"
-  },
-  {
-    title: "Santé & Services",
-    description: "Amélioration des infrastructures SAMS et accès facilité aux soins pour tous les citoyens.",
-    icon: <HeartPulse className="w-8 h-8 text-secondary" />,
-    link: "/sante"
-  }
-];
-
-const news = [
-  {
-    date: "15 Mai 2024",
-    category: "Sécurité",
-    title: "Inauguration du nouveau centre de formation du LSPD à Mission Row.",
-    image: "/placeholder.svg"
-  },
-  {
-    date: "12 Mai 2024",
-    category: "Économie",
-    title: "Publication du rapport trimestriel sur la croissance économique de Los Santos.",
-    image: "/placeholder.svg"
-  },
-  {
-    date: "10 Mai 2024",
-    category: "Justice",
-    title: "Nomination de trois nouveaux juges à la Cour Supérieure de San Andreas.",
-    image: "/placeholder.svg"
-  }
-];
+import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 
 export default function Index() {
   const { emergencyMode } = useAuth();
+  const store = useGovernmentStore();
+  const news = store.getNews();
+  const priorities = store.getPriorities();
+
+  const iconMap: Record<string, any> = {
+    "ShieldCheck": <ShieldCheck className="w-8 h-8 text-secondary" />,
+    "Gavel": <Gavel className="w-8 h-8 text-secondary" />,
+    "TrendingUp": <TrendingUp className="w-8 h-8 text-secondary" />,
+    "HeartPulse": <HeartPulse className="w-8 h-8 text-secondary" />
+  };
 
   return (
     <Layout>
@@ -202,12 +165,12 @@ export default function Index() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {priorities.map((priority) => (
-              <div 
-                key={priority.title} 
+              <div
+                key={priority.title}
                 className="group bg-white p-8 rounded-lg shadow-sm border border-slate-200 transition-all hover:shadow-xl hover:border-primary/20 hover:-translate-y-2"
               >
                 <div className="mb-6 p-4 bg-slate-50 rounded-full inline-block group-hover:bg-primary/5 transition-colors">
-                  {priority.icon}
+                  {iconMap[priority.icon] || <ShieldCheck className="w-8 h-8 text-secondary" />}
                 </div>
                 <h3 className="text-xl font-black text-primary mb-4 uppercase tracking-tight">{priority.title}</h3>
                 <p className="text-slate-600 text-sm leading-relaxed mb-6 font-medium">

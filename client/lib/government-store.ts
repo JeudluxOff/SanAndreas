@@ -26,6 +26,9 @@ const INITIAL_DATA: GovernmentStore = {
   healthStats: [],
   securityStats: [],
   justiceStats: [],
+  mapLocations: [],
+  news: [],
+  priorities: [],
   emergencyMode: false
 };
 
@@ -182,6 +185,19 @@ class GovernmentStoreManager {
 
   // Justice
   getJusticeStats() { return this.data.justiceStats || []; }
+
+  // Map
+  getMapLocations() { return this.data.mapLocations || []; }
+  updateMapLocations(locations: GovLocation[]) {
+    this.data.mapLocations = locations;
+    this.save();
+  }
+
+  // News
+  getNews() { return this.data.news || []; }
+
+  // Priorities
+  getPriorities() { return this.data.priorities || []; }
 
   // Documents
   getGlobalDocuments() {

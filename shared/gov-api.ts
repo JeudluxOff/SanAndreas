@@ -144,6 +144,30 @@ export interface GovJusticeStat {
   status: string;
 }
 
+export interface GovLocation {
+  id: string;
+  name: string;
+  type: 'police' | 'sheriff' | 'hospital' | 'government';
+  description: string;
+  coords: { top: string; left: string };
+  address: string;
+  phone: string;
+}
+
+export interface GovNews {
+  date: string;
+  category: string;
+  title: string;
+  image: string;
+}
+
+export interface GovPriority {
+  title: string;
+  description: string;
+  link: string;
+  icon: string;
+}
+
 export interface GovernmentStore {
   workspaces: Record<string, GovWorkspace>;
   employees: GovEmployee[];
@@ -156,5 +180,8 @@ export interface GovernmentStore {
   healthStats: GovHealthStat[];
   securityStats: GovSecurityStat[];
   justiceStats: GovJusticeStat[];
+  mapLocations: GovLocation[];
+  news: GovNews[];
+  priorities: GovPriority[];
   emergencyMode: boolean;
 }
