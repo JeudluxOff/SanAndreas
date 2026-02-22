@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function CabinetLogin() {
-  const [email, setEmail] = React.useState('');
+  const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ export default function CabinetLogin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password);
+      await login(username, password);
       navigate('/cabinet/intranet');
     } catch (error) {
       console.error("Login failed", error);
@@ -64,11 +64,11 @@ export default function CabinetLogin() {
             <div className="space-y-6">
               <div className="space-y-3">
                 <Label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Identifiant Professionnel</Label>
-                <Input 
-                  type="email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="j.harrington@harrington-cole.sa" 
+                <Input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="EX: J.HARRINGTON"
                   className="bg-white/5 border-white/10 h-14 rounded-2xl text-white placeholder:text-white/10 focus:ring-[#c1a461]/20 focus:border-[#c1a461]/40 transition-all font-medium"
                 />
               </div>
