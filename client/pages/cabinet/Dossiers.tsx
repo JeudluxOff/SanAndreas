@@ -1,203 +1,254 @@
 import React from 'react';
 import { 
-  Scale, 
   Briefcase, 
   Search, 
   Plus, 
   Filter, 
   MoreVertical, 
   ChevronRight, 
-  Lock, 
-  AlertTriangle, 
-  ShieldCheck, 
-  FileText, 
-  UserPlus, 
-  History,
-  Activity,
-  ArrowRight,
-  UserCheck
+  Lock,
+  UserCheck,
+  Calendar,
+  ShieldAlert,
+  Search as SearchIcon,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { Sidebar, Header } from './Dashboard'; // Reusing components
+import LegalIntranetLayout from './intranet/LegalIntranetLayout';
 
-const CASE_TYPES = ['Pénal', 'Civil', 'Affaires', 'Administratif'];
-const CONFIDENTIALITY_LEVELS = ['Normal', 'Confidentiel', 'Secret', 'Scellé'];
+const MOCK_EXISTING_CLIENTS = [
+  "Martin Madrazo",
+  "Union Depository",
+  "Thornton Duggan",
+  "Gouvernement SA",
+  "Mairie de Los Santos"
+];
 
 const Dossiers = () => {
-  const [showNewCaseModal, setShowNewCaseModal] = React.useState(false);
-  const [conflictCheckDone, setConflictCheckDone] = React.useState(false);
-  const [conflictResult, setConflictResult] = React.useState<'safe' | 'conflict' | null>(null);
+  const [showConflictModal, setShowConflictModal] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [conflictResult, setConflictResult] = React.useState<'none' | 'conflict' | null>(null);
 
   const handleConflictCheck = () => {
-    // Simulated conflict check
-    setConflictCheckDone(true);
-    setConflictResult('safe');
+    if (MOCK_EXISTING_CLIENTS.some(name => name.toLowerCase().includes(searchQuery.toLowerCase()))) {
+      setConflictResult('conflict');
+    } else {
+      setConflictResult('none');
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      <Sidebar activeRole="Associé" />
-      
-      <main className="flex-grow pl-64">
-        <Header />
-        
-        <div className="p-10 space-y-10">
-          <div className="flex justify-between items-end">
-            <div className="space-y-1">
-              <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Gestion des Dossiers (Cases)</h2>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Système centralisé de gestion juridique Harrington & Cole</p>
-            </div>
-            
-            <div className="flex gap-4">
-              <Button variant="outline" className="border-2 border-slate-200 text-slate-600 font-black uppercase text-[10px] tracking-widest px-6 h-12 rounded-xl hover:bg-slate-100">
-                <Archive className="w-4 h-4 mr-2" /> Archives
-              </Button>
-              <Button onClick={() => setShowNewCaseModal(true)} className="bg-[#c1a461] hover:bg-[#927843] text-white font-black uppercase text-[10px] tracking-widest px-8 h-12 rounded-xl shadow-xl shadow-[#c1a461]/10">
-                <Plus className="w-4 h-4 mr-2" /> Ouvrir un Nouveau Dossier
-              </Button>
-            </div>
+    <LegalIntranetLayout>
+      <div className="p-10 space-y-10">
+        <div className="flex justify-between items-end">
+          <div className="space-y-1">
+            <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Gestion des Dossiers</h2>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              Index centralisé des affaires • 42 dossiers actifs
+            </p>
           </div>
-
-          {/* Conflict Check Banner */}
-          {!conflictCheckDone && (
-            <Card className="bg-amber-50 border-2 border-amber-200 shadow-none p-6 flex flex-col md:flex-row items-center justify-between gap-6 rounded-[24px]">
-              <div className="flex items-center gap-6">
-                <div className="p-3 bg-amber-100 text-amber-600 rounded-xl">
-                  <AlertTriangle className="w-6 h-6" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-black text-amber-900 uppercase tracking-tight">Vérification des Conflits d'Intérêts Obligatoire</h4>
-                  <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mt-1">Aucun dossier ne peut être ouvert sans validation déontologique préalable.</p>
-                </div>
-              </div>
-              <Button onClick={handleConflictCheck} className="bg-amber-600 hover:bg-amber-700 text-white font-black uppercase text-[10px] tracking-widest px-8 h-12 rounded-xl">
-                Lancer l'Audit de Conflit
-              </Button>
-            </Card>
-          )}
-
-          {/* Stats Bar */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { label: "Dossiers Actifs", count: "42", color: "text-blue-600" },
-              { label: "En Audience", count: "12", color: "text-amber-600" },
-              { label: "En Attente", count: "8", color: "text-slate-400" },
-              { label: "Clos (Mois)", count: "15", color: "text-emerald-600" }
-            ].map((stat, idx) => (
-              <Card key={idx} className="border-none shadow-md p-6 bg-white rounded-2xl">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">{stat.label}</p>
-                <p className={cn("text-3xl font-black leading-none", stat.color)}>{stat.count}</p>
-              </Card>
-            ))}
+          <div className="flex gap-4">
+            <Button variant="outline" className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
+              <Filter className="w-4 h-4" /> Filtrer
+            </Button>
+            <Button
+              onClick={() => setShowConflictModal(true)}
+              className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2"
+            >
+              <Plus className="w-4 h-4" /> Nouveau Dossier
+            </Button>
           </div>
+        </div>
 
-          {/* Main List */}
-          <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
-            <CardHeader className="p-8 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="flex gap-4 items-center">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                  <Input placeholder="FILTRER PAR NOM, NUMÉRO..." className="w-72 h-10 bg-slate-50 border-none rounded-lg pl-9 text-[10px] font-bold uppercase tracking-widest focus:ring-1 ring-[#c1a461]/20" />
+        {/* Audit Banner for Conflict Check */}
+        <Card className="bg-amber-50 border-amber-100 border shadow-none rounded-2xl overflow-hidden">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-2 bg-amber-100 text-amber-600 rounded-lg">
+                <ShieldAlert className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-black text-amber-900 uppercase tracking-tight">Audit de Conflit Obligatoire</p>
+                <p className="text-[10px] font-bold text-amber-700/60 uppercase tracking-widest">Tout nouveau dossier doit faire l'objet d'une vérification préalable dans la base centralisée.</p>
+              </div>
+            </div>
+            <Button
+              onClick={() => setShowConflictModal(true)}
+              variant="outline"
+              className="border-amber-200 text-amber-700 text-[9px] font-black uppercase tracking-widest hover:bg-amber-100"
+            >
+              Lancer un Audit
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Conflict Check Modal */}
+        <Dialog open={showConflictModal} onOpenChange={setShowConflictModal}>
+          <DialogContent className="max-w-2xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Vérification de Conflit d'Intérêts</DialogTitle>
+              <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                Recherchez si le client potentiel ou la partie adverse figure déjà dans nos archives.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-8 my-8">
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nom du Client ou de la Partie Adverse</Label>
+                <div className="relative group">
+                  <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-[#c1a461] transition-colors" />
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="EX: MARTIN MADRAZO..."
+                    className="h-14 bg-slate-50 border-none rounded-2xl pl-12 text-sm font-bold uppercase tracking-widest focus:ring-2 ring-[#c1a461]/20 transition-all"
+                  />
                 </div>
-                <Select defaultValue="tous">
-                  <SelectTrigger className="w-40 h-10 bg-slate-50 border-none rounded-lg text-[10px] font-black uppercase tracking-widest">
-                    <SelectValue placeholder="Catégorie" />
-                  </SelectTrigger>
-                  <SelectContent className="text-[10px] font-black uppercase tracking-widest">
-                    <SelectItem value="tous">Tous les Types</SelectItem>
-                    {CASE_TYPES.map(t => <SelectItem key={t} value={t.toLowerCase()}>{t}</SelectItem>)}
-                  </SelectContent>
-                </Select>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-300"><Filter className="w-4 h-4" /></Button>
-                <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-300"><History className="w-4 h-4" /></Button>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="bg-slate-50 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
-                    <th className="px-8 py-4">Numéro / Dossier</th>
-                    <th className="px-8 py-4">Client Principal</th>
-                    <th className="px-8 py-4">Statut / Type</th>
-                    <th className="px-8 py-4">Confidentialité</th>
-                    <th className="px-8 py-4">Équipe</th>
-                    <th className="px-8 py-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {[
-                    { id: "CASE-2024-882", title: "État vs. Madrazo", client: "Martin Madrazo", type: "Pénal", status: "En cours", conf: "Confidentiel", lead: "Victoria C." },
-                    { id: "CASE-2024-912", title: "Mairie LS - Recours", client: "LS Administration", type: "Admin", status: "Audiences", conf: "Normal", lead: "Julian H." },
-                    { id: "CASE-2024-945", title: "Union Depository", client: "UD Corp", type: "Affaires", status: "Rédaction", conf: "Secret", lead: "Marcus V." },
-                    { id: "CASE-2024-998", title: "Legacy vs. Fleeca", client: "Fleeca Bank", type: "Affaires", status: "Clos", conf: "Normal", lead: "Victoria C." },
-                    { id: "CASE-2024-102", title: "Affaire Scellée Audit", client: "Confidentiel", type: "Spécial", status: "Scellé", conf: "Scellé", lead: "Auditeur" }
-                  ].map((item, idx) => (
-                    <tr key={idx} className="group hover:bg-slate-50/80 transition-all cursor-pointer">
+
+              {conflictResult === 'none' && (
+                <div className="p-6 bg-emerald-50 rounded-2xl border border-emerald-100 animate-in fade-in slide-in-from-top duration-500">
+                  <div className="flex gap-4">
+                    <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
+                    <div>
+                      <p className="text-sm font-black text-emerald-900 uppercase tracking-tight">Aucun conflit détecté</p>
+                      <p className="text-[10px] font-bold text-emerald-700/60 uppercase tracking-widest mt-1">L'entité n'est pas présente dans nos dossiers actuels. Vous pouvez procéder à la création du dossier.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {conflictResult === 'conflict' && (
+                <div className="p-6 bg-red-50 rounded-2xl border border-red-100 animate-in fade-in slide-in-from-top duration-500">
+                  <div className="flex gap-4">
+                    <AlertCircle className="w-6 h-6 text-red-600 shrink-0" />
+                    <div>
+                      <p className="text-sm font-black text-red-900 uppercase tracking-tight">CONFLIT D'INTÉRÊTS DÉTECTÉ</p>
+                      <p className="text-[10px] font-bold text-red-700/60 uppercase tracking-widest mt-1">L'entité est déjà cliente ou partie adverse dans un dossier actif (Réf: Dossier Madrazo). Création bloquée.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter className="flex gap-4">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowConflictModal(false);
+                  setConflictResult(null);
+                  setSearchQuery('');
+                }}
+                className="text-[10px] font-black text-slate-400 uppercase tracking-widest h-12"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleConflictCheck}
+                className="bg-[#c1a461] hover:bg-[#927843] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl shadow-xl shadow-[#c1a461]/10"
+              >
+                Lancer la Vérification
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
+          <CardContent className="p-0">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-100">
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Numéro / Dossier</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Client Principal</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Statut / Type</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Confidentialité</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Équipe</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {[
+                  { id: "HC-2024-001", title: "État de SA vs. Madrazo", client: "Martin Madrazo", type: "Pénal", status: "Audiences", conf: "Confidentiel", lead: "Victoria C." },
+                  { id: "HC-2024-002", title: "Fusion UD & Fleeca", client: "Union Depository", type: "Affaires", status: "Rédaction", conf: "Secret", lead: "Julian H." },
+                  { id: "HC-2024-003", title: "V. Duggan - Succession", client: "Thornton Duggan", type: "Civil", status: "En attente", conf: "Normal", lead: "Marcus V." },
+                  { id: "HC-2024-004", title: "Mairie LS - Urbanisme", client: "Gouvernement SA", type: "Admin", status: "Plaidoirie", conf: "Normal", lead: "Elena R." },
+                  { id: "HC-2024-005", title: "Scellé - Affaire 402", client: "Confidentiel", type: "Pénal", status: "Scellé", conf: "Scellé", lead: "Associé Uniquement" }
+                ].map((item, idx) => {
+                  const isSealed = item.conf === 'Scellé';
+                  return (
+                    <tr
+                      key={idx}
+                      onClick={() => {
+                        if (isSealed) {
+                          alert(`ACCÈS SÉCURISÉ : Votre tentative d'accès au dossier scellé ${item.id} a été enregistrée dans les logs d'audit.`);
+                        }
+                      }}
+                      className="group hover:bg-slate-50/50 transition-all cursor-pointer"
+                    >
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-4">
-                          <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-[10px]", 
-                            item.conf === 'Scellé' ? 'bg-[#0a0f18]' : 'bg-[#c1a461]/10 text-[#c1a461]'
-                          )}>
-                            {item.conf === 'Scellé' ? <Lock className="w-4 h-4 text-white" /> : <FileText className="w-5 h-5" />}
+                          <div className="p-3 bg-slate-50 rounded-xl text-slate-400 group-hover:text-[#c1a461] transition-colors">
+                            <Briefcase className="w-5 h-5" />
                           </div>
                           <div>
-                            <p className="text-[11px] font-black uppercase text-slate-900 leading-none">{item.title}</p>
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">{item.id}</p>
+                            <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{item.title}</p>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.id}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-8 py-6">
-                        <p className="text-[10px] font-black uppercase text-slate-600">{item.client}</p>
-                      </td>
-                      <td className="px-8 py-6">
-                        <div className="flex flex-col gap-1.5">
-                          <Badge className={cn("w-fit text-[8px] font-black uppercase px-2", 
-                            item.status === 'Clos' ? 'bg-emerald-500' : 'bg-[#1B365D]'
-                          )}>
-                            {item.status}
-                          </Badge>
-                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.type}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <span className="text-xs font-bold text-slate-600 uppercase tracking-tight">{item.client}</span>
                         </div>
                       </td>
                       <td className="px-8 py-6">
-                        <Badge variant="outline" className={cn("text-[8px] font-black uppercase border-2", 
-                          item.conf === 'Secret' ? 'border-red-500 text-red-600' : 
-                          item.conf === 'Scellé' ? 'border-[#0a0f18] text-[#0a0f18] bg-slate-100' : 'border-slate-200 text-slate-400'
+                        <div className="space-y-1">
+                          <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-200">{item.status}</Badge>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.type}</p>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-3 py-1",
+                          item.conf === 'Scellé' ? 'bg-[#0a0f18] text-white' :
+                          item.conf === 'Secret' ? 'bg-red-600 text-white' :
+                          item.conf === 'Confidentiel' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-600'
                         )}>
+                          {isSealed && <Lock className="w-2 h-2 mr-1 inline-block" />}
                           {item.conf}
                         </Badge>
                       </td>
                       <td className="px-8 py-6">
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.lead}`} />
-                          </Avatar>
-                          <span className="text-[9px] font-black uppercase text-slate-500">{item.lead}</span>
-                        </div>
+                        <p className="text-[10px] font-black text-slate-900 uppercase tracking-tight">{item.lead}</p>
                       </td>
                       <td className="px-8 py-6 text-right">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 hover:text-[#c1a461]"><ChevronRight className="w-5 h-5" /></Button>
+                        <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                          <MoreVertical className="w-5 h-5" />
+                        </Button>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="p-8 bg-slate-50 border-t border-slate-100 text-center">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Affichage de 5 sur 42 dossiers</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
-    </div>
+                  );
+                })}
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
+      </div>
+    </LegalIntranetLayout>
   );
 };
 

@@ -1,146 +1,148 @@
 import React from 'react';
 import { 
   CreditCard, 
-  Download, 
-  Plus, 
   Search, 
+  Plus, 
   Filter, 
+  MoreVertical, 
   ChevronRight, 
-  ArrowUpRight, 
-  ArrowDownLeft, 
-  Clock, 
+  Lock,
+  Download,
   FileCheck,
-  MoreVertical,
   TrendingUp,
-  Landmark,
-  UserCheck
+  Zap,
+  Clock,
+  ArrowRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Sidebar, Header } from './Dashboard';
+import { cn } from '@/lib/utils';
+import LegalIntranetLayout from './intranet/LegalIntranetLayout';
 
 const Billing = () => {
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      <Sidebar activeRole="Associé" />
-      
-      <main className="flex-grow pl-64">
-        <Header />
-        
-        <div className="p-10 space-y-10">
-          <div className="flex justify-between items-end">
-            <div className="space-y-1">
-              <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Gestion Financière & Honoraires</h2>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Comptabilité analytique Harrington & Cole</p>
-            </div>
-            
-            <Button className="bg-[#c1a461] hover:bg-[#927843] text-white font-black uppercase text-[10px] tracking-widest px-8 h-12 rounded-xl shadow-xl shadow-[#c1a461]/10">
-              <Plus className="w-4 h-4 mr-2" /> Créer une Facture
+    <LegalIntranetLayout>
+      <div className="p-10 space-y-10">
+        <div className="flex justify-between items-end">
+          <div className="space-y-1">
+            <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Gestion de Facturation</h2>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              Honoraires • Provisions • Factures • 142.5k SA$ ce mois
+            </p>
+          </div>
+          <div className="flex gap-4">
+            <Button variant="outline" className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
+              <Download className="w-4 h-4" /> Rapport Financier
+            </Button>
+            <Button className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
+              <Plus className="w-4 h-4" /> Nouvelle Facture
             </Button>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="border-none shadow-xl rounded-[32px] bg-[#0a0f18] text-white p-8">
-               <div className="space-y-8">
-                  <div className="flex justify-between items-start">
-                     <div className="p-3 bg-white/5 rounded-2xl text-[#c1a461]">
-                        <TrendingUp className="w-6 h-6" />
-                     </div>
-                     <Badge className="bg-[#c1a461] text-white font-black uppercase text-[8px] tracking-widest">+12.4%</Badge>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Honoraires Totaux (Mois)</p>
-                    <p className="text-4xl font-black text-white tracking-tighter mt-2">142,500 SA$</p>
-                  </div>
-               </div>
-            </Card>
-
-            <Card className="border-none shadow-xl rounded-[32px] bg-white p-8">
-               <div className="space-y-8">
-                  <div className="flex justify-between items-start">
-                     <div className="p-3 bg-red-50 text-red-600 rounded-2xl">
-                        <Clock className="w-6 h-6" />
-                     </div>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Impayés / En Retard</p>
-                    <p className="text-4xl font-black text-red-600 tracking-tighter mt-2">12,400 SA$</p>
-                  </div>
-               </div>
-            </Card>
-
-            <Card className="border-none shadow-xl rounded-[32px] bg-white p-8">
-               <div className="space-y-8">
-                  <div className="flex justify-between items-start">
-                     <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
-                        <FileCheck className="w-6 h-6" />
-                     </div>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Recouvrement Réalisé</p>
-                    <p className="text-4xl font-black text-emerald-600 tracking-tighter mt-2">84,000 SA$</p>
-                  </div>
-               </div>
-            </Card>
-          </div>
-
-          <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
-            <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-[#c1a461]" /> Historique des Factures
-              </CardTitle>
-              <div className="flex gap-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                  <Input placeholder="NUMÉRO OU CLIENT..." className="w-64 h-10 bg-slate-50 border-none rounded-lg pl-9 text-[10px] font-bold uppercase tracking-widest focus:ring-1 ring-[#c1a461]/20" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="bg-slate-50 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
-                    <th className="px-8 py-4">N° Facture</th>
-                    <th className="px-8 py-4">Client</th>
-                    <th className="px-8 py-4">Dossier</th>
-                    <th className="px-8 py-4">Montant</th>
-                    <th className="px-8 py-4">Statut</th>
-                    <th className="px-8 py-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {[
-                    { id: "INV-8821", client: "M. Madrazo", case: "SA vs. Madrazo", amount: "45,000 SA$", status: "Payé" },
-                    { id: "INV-8822", client: "Fleeca Bank", case: "Legacy vs. Fleeca", amount: "12,400 SA$", status: "Partiel" },
-                    { id: "INV-8823", client: "UD Corp", case: "Union Depository", amount: "85,000 SA$", status: "Impayé" }
-                  ].map((inv, idx) => (
-                    <tr key={idx} className="group hover:bg-slate-50 transition-all cursor-pointer">
-                      <td className="px-8 py-6 text-[11px] font-black uppercase text-[#c1a461]">{inv.id}</td>
-                      <td className="px-8 py-6 text-[10px] font-black uppercase text-slate-900">{inv.client}</td>
-                      <td className="px-8 py-6 text-[10px] font-bold uppercase text-slate-400 tracking-tight">{inv.case}</td>
-                      <td className="px-8 py-6 text-[11px] font-black text-slate-900">{inv.amount}</td>
-                      <td className="px-8 py-6">
-                        <Badge className={cn("text-[9px] font-black uppercase tracking-widest", 
-                          inv.status === 'Payé' ? 'bg-emerald-100 text-emerald-700' : 
-                          inv.status === 'Partiel' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
-                        )}>
-                          {inv.status}
-                        </Badge>
-                      </td>
-                      <td className="px-8 py-6 text-right">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 hover:text-primary"><Download className="w-4 h-4" /></Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <Card className="bg-white border-none shadow-md px-8 py-6 flex items-center gap-6 rounded-[32px]">
+            <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl">
+              <TrendingUp className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-2xl font-black text-slate-900 leading-none">142,500 SA$</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Honoraires Facturés</p>
+            </div>
+          </Card>
+          <Card className="bg-white border-none shadow-md px-8 py-6 flex items-center gap-6 rounded-[32px]">
+            <div className="p-4 bg-amber-50 text-amber-600 rounded-2xl">
+              <Clock className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-2xl font-black text-slate-900 leading-none">12,400 SA$</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">En attente de paiement</p>
+            </div>
+          </Card>
+          <Card className="bg-white border-none shadow-md px-8 py-6 flex items-center gap-6 rounded-[32px]">
+            <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl">
+              <FileCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-2xl font-black text-slate-900 leading-none">84,000 SA$</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Montant recouvré</p>
+            </div>
           </Card>
         </div>
-      </main>
-    </div>
+
+        <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
+          <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between bg-slate-50/50">
+            <div>
+              <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight">Factures Récentes</CardTitle>
+              <CardDescription className="text-[10px] font-bold uppercase tracking-widest mt-1">Suivi des honoraires par dossier</CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+               <Badge className="bg-emerald-50 text-emerald-600 text-[9px] font-black uppercase tracking-widest px-3 py-1">Payé: 82%</Badge>
+               <Badge className="bg-amber-50 text-amber-600 text-[9px] font-black uppercase tracking-widest px-3 py-1">En attente: 18%</Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50/30 border-b border-slate-100">
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Facture #</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Dossier / Client</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Montant</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Émission</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Statut</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {[
+                  { id: "INV-2024-882", case: "État de SA vs. Madrazo", amount: "12,500 SA$", date: "15 Mai", status: "Payé" },
+                  { id: "INV-2024-883", case: "Union Depository - Fusion", amount: "45,000 SA$", date: "18 Mai", status: "Payé" },
+                  { id: "INV-2024-884", case: "Mairie LS - Urbanisme", amount: "8,400 SA$", date: "20 Mai", status: "Partiel" },
+                  { id: "INV-2024-885", case: "Thornton Duggan - Civil", amount: "12,400 SA$", date: "22 Mai", status: "Impayé" }
+                ].map((item, idx) => (
+                  <tr key={idx} className="group hover:bg-slate-50/50 transition-all cursor-pointer">
+                    <td className="px-8 py-6">
+                      <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{item.id}</p>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-slate-600 uppercase tracking-tight">{item.case}</p>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Réf: Dossier #882</p>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <p className="text-sm font-black text-slate-900 tracking-tighter">{item.amount}</p>
+                    </td>
+                    <td className="px-8 py-6 text-xs font-bold text-slate-500 uppercase">
+                      {item.date}
+                    </td>
+                    <td className="px-8 py-6">
+                      <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-3 py-1", 
+                        item.status === 'Payé' ? 'bg-emerald-600 text-white' : 
+                        item.status === 'Partiel' ? 'bg-amber-600 text-white' : 'bg-red-600 text-white'
+                      )}>
+                        {item.status}
+                      </Badge>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex gap-2">
+                        <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                          <Download className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                          <MoreVertical className="w-5 h-5" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
+      </div>
+    </LegalIntranetLayout>
   );
 };
 

@@ -6,6 +6,12 @@ import LegalDossiers from "./pages/cabinet/Dossiers";
 import LegalPortal from "./pages/cabinet/Portal";
 import LegalBilling from "./pages/cabinet/Billing";
 import LegalAudit from "./pages/cabinet/Audit";
+import LegalDocuments from "./pages/cabinet/Documents";
+import LegalEvidence from "./pages/cabinet/Evidence";
+import LegalTasks from "./pages/cabinet/Tasks";
+import LegalCommunication from "./pages/cabinet/Communication";
+import LegalClients from "./pages/cabinet/Clients";
+import LegalAdmin from "./pages/cabinet/Admin";
 import CabinetLogin from "./pages/cabinet/Login";
 import NotFound from "./pages/NotFound";
 import Placeholder from "./pages/Placeholder";
@@ -53,8 +59,14 @@ const AppRoutes = () => (
         <Routes>
           <Route path="/" element={<LegalDashboard />} />
           <Route path="/dossiers" element={<LegalDossiers />} />
+          <Route path="/documents" element={<LegalDocuments />} />
+          <Route path="/evidence" element={<LegalEvidence />} />
+          <Route path="/planning" element={<Calendar />} />
           <Route path="/billing" element={<LegalBilling />} />
+          <Route path="/communication" element={<LegalCommunication />} />
+          <Route path="/clients" element={<LegalClients />} />
           <Route path="/audit" element={<LegalAudit />} />
+          <Route path="/admin" element={<LegalAdmin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </ProtectedRoute>
