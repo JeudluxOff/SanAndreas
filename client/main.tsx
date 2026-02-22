@@ -4,7 +4,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import App from "./App";
+import { AuthProvider } from "@/contexts/AuthContext";
+import App from "@/App";
 
 const queryClient = new QueryClient();
 
@@ -16,9 +17,11 @@ const root = createRoot(rootElement);
 root.render(
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <App />
+      <AuthProvider>
+        <Toaster />
+        <Sonner />
+        <App />
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
