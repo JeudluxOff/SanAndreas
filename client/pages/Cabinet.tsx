@@ -153,18 +153,18 @@ const Expertise = () => {
 const Team = () => {
   const team = [
     {
-      name: "Julian Harrington",
+      name: "Reed NORWOOD",
       role: "Associé Fondateur",
       specialty: "Droit Pénal des Affaires",
-      bio: "Spécialiste reconnu pour sa ténacité dans les dossiers fédéraux complexes. Ancien procureur de Los Santos.",
-      seed: "Julian"
+      bio: "Ancien procureur fédéral de San Andreas, expert en contentieux complexes et défense stratégique.",
+      seed: "Reed"
     },
     {
-      name: "Victoria Cole",
-      role: "Associée Fondatrice",
+      name: "Mathieu Gerrin",
+      role: "Associé Fondateur",
       specialty: "Arbitrage International",
-      bio: "Maîtresse de la stratégie juridique et du contentieux civil complexe. Conseil auprès des grandes institutions.",
-      seed: "Victoria"
+      bio: "Spécialiste en arbitrage et résolution de litiges inter-services, reconnu pour son expertise tactique.",
+      seed: "Mathieu"
     },
     {
       name: "Marcus Vane",
