@@ -50,14 +50,16 @@ import { cn } from '@/lib/utils';
 import { format, addDays, startOfWeek, addWeeks, subWeeks, isSameDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { legalStore } from '@/lib/legal-store';
+import { useLegalStore } from '@/hooks/useLegalStore';
 import { Hearing } from '@shared/api';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Planning = () => {
+  const store = useLegalStore();
   const { user } = useAuth();
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [view, setView] = React.useState<'week' | 'day'>('week');
-  const [hearings, setHearings] = React.useState(legalStore.getHearings());
+  const hearings = store.getHearings();
 
   // Modals state
   const [showCreateModal, setShowCreateModal] = React.useState(false);
@@ -74,7 +76,7 @@ const Planning = () => {
     type: 'Pénal'
   });
 
-  const cases = legalStore.getCases();
+  const cases = store.getCases();
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -213,9 +215,9 @@ const Planning = () => {
                     ...newHearing,
                     status: 'Confirmé'
                   };
-                  legalStore.createHearing(h);
+                  store.createHearing(h);
 
-                  legalStore.logAction({
+                  store.logAction({
                     id: `LOG-${Date.now()}`,
                     timestamp: new Date().toISOString(),
                     user_id: user.id,
@@ -226,7 +228,6 @@ const Planning = () => {
                     metadata: { title: h.title, case_id: h.case_id }
                   });
 
-                  setHearings(legalStore.getHearings());
                   setShowCreateModal(false);
                   setNewHearing({
                     title: '',
@@ -260,8 +261,7 @@ const Planning = () => {
               <Button
                 onClick={() => {
                   if (!user || !hearingToDelete) return;
-                  legalStore.deleteHearing(hearingToDelete, user.id);
-                  setHearings(legalStore.getHearings());
+                  store.deleteHearing(hearingToDelete, user.id);
                   setShowDeleteModal(false);
                   setHearingToDelete(null);
                 }}
@@ -331,7 +331,7 @@ const Planning = () => {
                   {/* Events Overlay (Simplified for UI) */}
                   <div className="ml-20 p-10 space-y-6">
                     {hearings.length > 0 ? hearings.map((event) => {
-                      const caseObj = legalStore.getCase(event.case_id);
+                      const caseObj = store.getCase(event.case_id);
                       return (
                         <div key={event.id} className="flex gap-8 group">
                           <div className="w-24 text-right pt-1">

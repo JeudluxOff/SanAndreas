@@ -20,16 +20,18 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { legalStore } from '@/lib/legal-store';
+import { useLegalStore } from '@/hooks/useLegalStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
+  const store = useLegalStore();
   const { user } = useAuth();
-  const cases = legalStore.getCases();
-  const tasks = legalStore.getTasks(undefined, user?.id);
-  const docs = legalStore.getDocuments();
-  const hearings = legalStore.getHearings();
-  const invoices = legalStore.getInvoices();
+  const cases = store.getCases();
+  const tasks = store.getTasks(undefined, user?.id);
+  const docs = store.getDocuments();
+  const hearings = store.getHearings();
+  const invoices = store.getInvoices();
 
   const urgentTasks = tasks.filter(t => t.priority === 'Critique' || t.priority === 'Haute');
   const pendingDocs = docs.filter(d => d.status === 'Relecture' || d.status === 'Validé');
@@ -232,7 +234,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent className="p-8 space-y-6">
                 {unpaidInvoices.slice(0, 3).map((inv, idx) => {
-                  const client = legalStore.getClient(inv.client_id);
+                  const client = store.getClient(inv.client_id);
                   return (
                     <div key={idx} className="flex items-center justify-between group">
                       <div className="space-y-1">

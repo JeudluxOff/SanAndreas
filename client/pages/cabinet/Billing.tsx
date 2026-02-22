@@ -39,13 +39,15 @@ import { cn } from '@/lib/utils';
 import { useLegalRBAC } from './intranet/LegalIntranetLayout';
 import { Link } from 'react-router-dom';
 import { legalStore } from '@/lib/legal-store';
+import { useLegalStore } from '@/hooks/useLegalStore';
 import { Invoice } from '@shared/api';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Billing = () => {
+  const store = useLegalStore();
   const { user } = useAuth();
   const { isAssocié, canBill } = useLegalRBAC();
-  const [invoices, setInvoices] = React.useState(legalStore.getInvoices());
+  const invoices = store.getInvoices();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [showCreateModal, setShowCreateModal] = React.useState(false);
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
@@ -86,9 +88,9 @@ const Billing = () => {
       }
     }, 30);
     return () => clearInterval(timer);
-  }, [totalInvoiced]);
+  }, [totalInvoiced, displayTotal]);
 
-  const cases = legalStore.getCases();
+  const cases = store.getCases();
 
   if (!isAssocié && !canBill) {
     return (
@@ -109,7 +111,7 @@ const Billing = () => {
 
   const handleCreateInvoice = () => {
     if (!newInvoice.case_id || !newInvoice.amount || !user) return;
-    const caseObj = legalStore.getCase(newInvoice.case_id);
+    const caseObj = store.getCase(newInvoice.case_id);
     if (!caseObj) return;
 
     const inv: Invoice = {
@@ -124,9 +126,9 @@ const Billing = () => {
       items: [{ description: newInvoice.description || 'Honoraires juridiques', amount: Number(newInvoice.amount) }]
     };
 
-    legalStore.createInvoice(inv);
+    store.createInvoice(inv);
 
-    legalStore.logAction({
+    store.logAction({
       id: `LOG-${Date.now()}`,
       timestamp: new Date().toISOString(),
       user_id: user.id,
@@ -137,20 +139,19 @@ const Billing = () => {
       metadata: { amount: inv.amount, case_id: inv.case_id }
     });
 
-    setInvoices(legalStore.getInvoices());
     setShowCreateModal(false);
     setNewInvoice({ case_id: '', amount: '', description: '' });
   };
 
   const handleMarkAsPaid = (id: string) => {
     if (!user) return;
-    const allInvoices = legalStore.getInvoices();
+    const allInvoices = store.getInvoices();
     const inv = allInvoices.find(i => i.id === id);
     if (inv) {
       inv.status = 'Payé';
-      legalStore.updateInvoice(inv);
+      store.updateInvoice(inv);
 
-      legalStore.logAction({
+      store.logAction({
         id: `LOG-${Date.now()}`,
         timestamp: new Date().toISOString(),
         user_id: user.id,
@@ -160,18 +161,16 @@ const Billing = () => {
         target_id: id,
         metadata: { amount: inv.amount }
       });
-
-      setInvoices([...legalStore.getInvoices()]);
     }
   };
 
   const handleDeleteInvoice = () => {
     if (!user || !invoiceToDelete || !deleteReason.trim()) return;
 
-    legalStore.deleteInvoice(invoiceToDelete, user.id, deleteReason.trim());
+    store.deleteInvoice(invoiceToDelete, user.id, deleteReason.trim());
 
     // Custom log since deleteInvoice in store uses 'System' as default user_name
-    legalStore.logAction({
+    store.logAction({
       id: `LOG-${Date.now()}-DEL`,
       timestamp: new Date().toISOString(),
       user_id: user.id,
@@ -182,15 +181,14 @@ const Billing = () => {
       metadata: { reason: deleteReason.trim() }
     });
 
-    setInvoices(legalStore.getInvoices());
     setShowDeleteModal(false);
     setInvoiceToDelete(null);
     setDeleteReason('');
   };
 
   const filteredInvoices = invoices.filter(inv => {
-    const client = legalStore.getClient(inv.client_id);
-    const caseObj = legalStore.getCase(inv.case_id);
+    const client = store.getClient(inv.client_id);
+    const caseObj = store.getCase(inv.case_id);
     return (
       inv.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       client?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -377,8 +375,8 @@ const Billing = () => {
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {filteredInvoices.map((item, idx) => {
-                  const client = legalStore.getClient(item.client_id);
-                  const caseObj = legalStore.getCase(item.case_id);
+                  const client = store.getClient(item.client_id);
+                  const caseObj = store.getCase(item.case_id);
                   return (
                     <tr key={idx} className="group hover:bg-slate-50/50 transition-all cursor-pointer">
                       <td className="px-8 py-6">

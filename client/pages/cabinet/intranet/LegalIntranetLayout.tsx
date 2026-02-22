@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { 
+import {
   Scale,
   Briefcase,
   Archive,
@@ -18,7 +18,8 @@ import {
   ArrowLeft,
   Menu,
   X,
-  Zap
+  Zap,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +27,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { legalStore } from '@/lib/legal-store';
 
 import {
   Select,
@@ -146,6 +148,14 @@ export const Header = () => {
   const { activeRole, setActiveRole } = useLegalRBAC();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [isSyncing, setIsSyncing] = React.useState(false);
+
+  React.useEffect(() => {
+    return legalStore.subscribe(() => {
+      setIsSyncing(true);
+      setTimeout(() => setIsSyncing(false), 1000);
+    });
+  }, []);
 
   return (
     <header className="h-20 bg-white border-b border-slate-100 sticky top-0 z-40 px-10 flex items-center justify-between shadow-sm">
@@ -156,6 +166,15 @@ export const Header = () => {
             <span className="hidden md:inline">Sortir du Cabinet</span>
           </Button>
         </Link>
+
+        <div className="h-6 w-px bg-slate-100" />
+
+        <div className="flex items-center gap-2">
+          <RefreshCw className={cn("w-3 h-3 text-slate-300", isSyncing && "animate-spin text-[#c1a461]")} />
+          <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">
+            {isSyncing ? "Synchronisation..." : "Données synchronisées"}
+          </span>
+        </div>
 
         <div className="h-6 w-px bg-slate-100" />
 

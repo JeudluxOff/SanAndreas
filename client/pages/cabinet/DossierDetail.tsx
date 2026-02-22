@@ -55,24 +55,26 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { legalStore } from '@/lib/legal-store';
+import { useLegalStore } from '@/hooks/useLegalStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { Case, LegalDocument, Evidence, Task, Hearing, DocumentCategory, ConfidentialityLevel, CaseStatus, InternalNote } from '@shared/api';
 
 const DossierDetail = () => {
+  const store = useLegalStore();
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = React.useState('overview');
 
-  const dossier = legalStore.getCase(id || '');
+  const dossier = store.getCase(id || '');
   const [localStatus, setLocalStatus] = React.useState<string>(dossier?.status || '');
-  const [docs, setDocs] = React.useState(legalStore.getDocuments(id).filter(d => d.status !== 'Archivé'));
-  const [evidences, setEvidences] = React.useState(legalStore.getEvidence(id || ''));
-  const [tasks, setTasks] = React.useState(legalStore.getTasks(id));
+  const docs = store.getDocuments(id).filter(d => d.status !== 'Archivé');
+  const evidences = store.getEvidence(id || '');
+  const tasks = store.getTasks(id);
   const [members, setMembers] = React.useState(dossier?.members || []);
-  const hearings = legalStore.getHearings().filter(h => h.case_id === id);
-  const client = dossier ? legalStore.getClient(dossier.client_id) : null;
-  const auditLogs = legalStore.getAuditLogs().filter(log => log.target_id === id);
+  const hearings = store.getHearings().filter(h => h.case_id === id);
+  const client = dossier ? store.getClient(dossier.client_id) : null;
+  const auditLogs = store.getAuditLogs().filter(log => log.target_id === id);
 
   // Modals state
   const [showDocModal, setShowDocModal] = React.useState(false);
@@ -92,12 +94,12 @@ const DossierDetail = () => {
   const [internalNotes, setInternalNotes] = React.useState<InternalNote[]>(dossier?.internal_notes || []);
   const [newNote, setNewNote] = React.useState('');
 
-  const staff = legalStore.getStaff();
+  const staff = store.getStaff();
 
   const handleUpdateCase = (updates: Partial<Case>) => {
     if (!dossier || !user) return;
     const updatedCase = { ...dossier, ...updates, updated_at: new Date().toISOString() };
-    legalStore.updateCase(updatedCase);
+    store.updateCase(updatedCase);
     // Refresh local state if needed (not all fields have local state)
     if (updates.status) setLocalStatus(updates.status);
     if (updates.progression !== undefined) setProgression(updates.progression);
@@ -105,7 +107,7 @@ const DossierDetail = () => {
     if (updates.members) setMembers(updates.members);
     if (updates.internal_notes) setInternalNotes(updates.internal_notes);
 
-    legalStore.logAction({
+    store.logAction({
       id: `LOG-${Date.now()}`,
       timestamp: new Date().toISOString(),
       user_id: user.id,
@@ -171,8 +173,7 @@ const DossierDetail = () => {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
-    legalStore.createDocument(doc);
-    setDocs(legalStore.getDocuments(id));
+    store.createDocument(doc);
     setShowDocModal(false);
     setNewDoc({ title: '', category: 'Conclusions' });
   };
@@ -190,8 +191,7 @@ const DossierDetail = () => {
       uploaded_at: new Date().toISOString(),
       to_produce_at_hearing: false
     };
-    legalStore.addEvidence(evi);
-    setEvidences(legalStore.getEvidence(id));
+    store.addEvidence(evi);
     setShowEviModal(false);
     setNewEvi({ name: '', type: 'Document', confidentiality: 'Normal' });
   };
@@ -208,17 +208,16 @@ const DossierDetail = () => {
       assigned_to: user.id,
       created_at: new Date().toISOString()
     };
-    legalStore.createTask(task);
-    setTasks(legalStore.getTasks(id));
+    store.createTask(task);
     setShowTaskModal(false);
     setNewTask({ title: '', priority: 'Moyenne' });
   };
 
   const handleSeal = () => {
     if (!id || !user) return;
-    legalStore.sealCase(id, user.id);
+    store.sealCase(id, user.id);
     setLocalStatus('Scellé');
-    legalStore.logAction({
+    store.logAction({
       id: `LOG-${Date.now()}`,
       timestamp: new Date().toISOString(),
       user_id: user.id,
@@ -232,9 +231,9 @@ const DossierDetail = () => {
 
   const handleClose = () => {
     if (!id || !user) return;
-    legalStore.closeCase(id, user.id);
+    store.closeCase(id, user.id);
     setLocalStatus('Clos');
-    legalStore.logAction({
+    store.logAction({
       id: `LOG-${Date.now()}`,
       timestamp: new Date().toISOString(),
       user_id: user.id,
@@ -248,37 +247,34 @@ const DossierDetail = () => {
 
   const handleArchiveCase = () => {
     if (!id || !user) return;
-    legalStore.archiveCase(id, user.id);
+    store.archiveCase(id, user.id);
     setLocalStatus('Archivé');
   };
 
   const handleDeleteCase = () => {
     if (!id || !user) return;
     if (confirm("Êtes-vous sûr de vouloir supprimer ce dossier ? Cette action est irréversible.")) {
-      legalStore.deleteCase(id, user.id);
+      store.deleteCase(id, user.id);
       navigate('/cabinet/intranet/dossiers');
     }
   };
 
   const handleArchiveDoc = (docId: string) => {
     if (!id || !user) return;
-    legalStore.archiveDocument(docId, user.id);
-    setDocs(legalStore.getDocuments(id).filter(d => d.status !== 'Archivé'));
+    store.archiveDocument(docId, user.id);
   };
 
   const handleDeleteDoc = (docId: string) => {
     if (!id || !user) return;
     if (confirm("Supprimer ce document ?")) {
-      legalStore.deleteDocument(docId, user.id);
-      setDocs(legalStore.getDocuments(id).filter(d => d.status !== 'Archivé'));
+      store.deleteDocument(docId, user.id);
     }
   };
 
   const handleDeleteEvi = (eviId: string) => {
     if (!id || !user) return;
     if (confirm("Supprimer cette preuve ?")) {
-      legalStore.deleteEvidence(eviId, user.id);
-      setEvidences(legalStore.getEvidence(id));
+      store.deleteEvidence(eviId, user.id);
     }
   };
 
@@ -292,7 +288,7 @@ const DossierDetail = () => {
       
       // Log access to sealed dossier
       if (user) {
-        legalStore.logAction({
+        store.logAction({
           id: `LOG-${Date.now()}`,
           timestamp: new Date().toISOString(),
           user_id: user.id,

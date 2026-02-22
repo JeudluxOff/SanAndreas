@@ -41,10 +41,12 @@ import { cn } from '@/lib/utils';
 import { useLegalRBAC } from './intranet/LegalIntranetLayout';
 import { Link, useLocation } from 'react-router-dom';
 import { legalStore } from '@/lib/legal-store';
+import { useLegalStore } from '@/hooks/useLegalStore';
 import { useAuth } from '@/contexts/AuthContext';
-import { Case, CaseType, ConfidentialityLevel } from '@shared/api';
+import { Case, CaseType, ConfidentialityLevel, Client } from '@shared/api';
 
 const Dossiers = () => {
+  const store = useLegalStore();
   const { isAssocié } = useLegalRBAC();
   const { user } = useAuth();
   const location = useLocation();
@@ -78,8 +80,8 @@ const Dossiers = () => {
     confidentiality: 'Normal',
   });
 
-  const [cases, setCases] = React.useState(legalStore.getCases().filter(c => c.status !== 'Archivé'));
-  const [clients, setClients] = React.useState(legalStore.getClients());
+  const cases = store.getCases().filter(c => c.status !== 'Archivé');
+  const clients = store.getClients();
 
   const handleQuickAddClient = () => {
     if (!newClient.name || !user) return;
@@ -89,8 +91,7 @@ const Dossiers = () => {
       type: (newClient.type as 'Individu' | 'Entreprise') || 'Individu',
       created_at: new Date().toISOString().split('T')[0]
     };
-    legalStore.createClient(client);
-    setClients(legalStore.getClients());
+    store.createClient(client);
     setNewCase(prev => ({ ...prev, client_id: client.id }));
     setShowQuickClientModal(false);
     setNewClient({ name: '', type: 'Individu' });
@@ -98,10 +99,10 @@ const Dossiers = () => {
 
   const handleConflictCheck = () => {
     if (!user) return;
-    const check = legalStore.performConflictCheck(conflictSearchQuery, user.id);
+    const check = store.performConflictCheck(conflictSearchQuery, user.id);
     setConflictResult(check.result === 'Pass' ? 'none' : 'conflict');
 
-    legalStore.logAction({
+    store.logAction({
       id: `LOG-${Date.now()}`,
       timestamp: new Date().toISOString(),
       user_id: user.id,
@@ -134,8 +135,7 @@ const Dossiers = () => {
       updated_at: new Date().toISOString()
     };
 
-    legalStore.createCase(caseToCreate);
-    setCases(legalStore.getCases());
+    store.createCase(caseToCreate);
     setShowCreateModal(false);
     setShowConflictModal(false);
     setConflictResult(null);
@@ -143,7 +143,7 @@ const Dossiers = () => {
     setError(null);
     setNewCase({ title: '', client_id: '', type: 'Pénal', confidentiality: 'Normal' });
 
-    legalStore.logAction({
+    store.logAction({
       id: `LOG-${Date.now()}`,
       timestamp: new Date().toISOString(),
       user_id: user.id,
@@ -157,15 +157,13 @@ const Dossiers = () => {
 
   const handleArchiveCase = (id: string) => {
     if (!user) return;
-    legalStore.archiveCase(id, user.id);
-    setCases(legalStore.getCases().filter(c => c.status !== 'Archivé'));
+    store.archiveCase(id, user.id);
   };
 
   const handleDeleteCase = (id: string) => {
     if (!user) return;
     if (confirm("Êtes-vous sûr de vouloir supprimer ce dossier ? Cette action est irréversible.")) {
-      legalStore.deleteCase(id, user.id);
-      setCases(legalStore.getCases().filter(c => c.status !== 'Archivé'));
+      store.deleteCase(id, user.id);
     }
   };
 
@@ -493,7 +491,7 @@ const Dossiers = () => {
               <tbody className="divide-y divide-slate-50">
                 {filteredCases.map((item, idx) => {
                   const isSealed = item.confidentiality === 'Scellé';
-                  const client = legalStore.getClient(item.client_id);
+                  const client = store.getClient(item.client_id);
                   const lead = item.members.find(m => m.user_id === item.lead_id);
 
                   return (

@@ -27,21 +27,19 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { legalStore } from '@/lib/legal-store';
+import { useLegalStore } from '@/hooks/useLegalStore';
 import { Message } from '@shared/api';
 
 const Communication = () => {
+  const store = useLegalStore();
   const { user } = useAuth();
-  const [activeChannelId, setActiveChannelId] = React.useState("Pôle Pénal");
+  const [activeChannelId, setActiveChannelId] = React.useState("channel:penal");
   const [activeChannelName, setActiveChannelName] = React.useState("Pôle Pénal");
   const [isDM, setIsDM] = React.useState(false);
   const [message, setMessage] = React.useState("");
-  const [chatMessages, setChatMessages] = React.useState<Message[]>([]);
 
-  const staff = legalStore.getStaff();
-
-  React.useEffect(() => {
-    setChatMessages(legalStore.getMessages(activeChannelId));
-  }, [activeChannelId]);
+  const chatMessages = store.getMessages(activeChannelId);
+  const staff = store.getStaff();
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,8 +53,7 @@ const Communication = () => {
       timestamp: new Date().toISOString()
     };
 
-    legalStore.createMessage(newMessage);
-    setChatMessages(legalStore.getMessages(activeChannelId));
+    store.createMessage(newMessage);
     setMessage("");
   };
 

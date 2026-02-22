@@ -6,6 +6,7 @@ import path from "path";
 import { handleDemo } from "./routes/demo";
 
 const SHARED_LOCATIONS_PATH = path.resolve(process.cwd(), "shared", "locations.json");
+const SHARED_LEGAL_PATH = path.resolve(process.cwd(), "shared", "legal-data.json");
 
 export function createServer() {
   const app = express();
@@ -22,6 +23,30 @@ export function createServer() {
   });
 
   app.get("/api/demo", handleDemo);
+
+  // Legal Data persistence
+  app.get("/api/legal", (_req, res) => {
+    try {
+      if (fs.existsSync(SHARED_LEGAL_PATH)) {
+        const data = fs.readFileSync(SHARED_LEGAL_PATH, "utf-8");
+        res.json(JSON.parse(data));
+      } else {
+        res.status(404).json({ error: "Legal data not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/legal", (req, res) => {
+    try {
+      const data = req.body;
+      fs.writeFileSync(SHARED_LEGAL_PATH, JSON.stringify(data, null, 2));
+      res.json({ message: "Legal data saved successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
 
   // Map locations persistence
   app.get("/api/map", (_req, res) => {
