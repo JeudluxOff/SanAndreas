@@ -187,13 +187,83 @@
     }
   },
   "employees": [
-    { "name": "Arthur Vance", "role": "Gouverneur", "service": "Cabinet", "grade": "Exécutif", "status": "En service", "email": "a.vance@sa.gov", "joinDate": "Jan 2024" },
-    { "name": "Elena Rodriguez", "role": "Press Secretary", "service": "Cabinet", "grade": "Cabinet", "status": "En service", "email": "e.rodriguez@sa.gov", "joinDate": "Fév 2024" },
-    { "name": "Jackson Teller", "role": "Secrétaire Sécurité", "service": "LSPD/LSSD", "grade": "Secrétaire", "status": "Hors service", "email": "j.teller@sa.gov", "joinDate": "Mar 2024" },
-    { "name": "Thomas Vercetti", "role": "Secrétaire Justice", "service": "Justice", "grade": "Secrétaire", "status": "En service", "email": "t.vercetti@sa.gov", "joinDate": "Mar 2024" },
-    { "name": "Franklin Clinton", "role": "Secrétaire Trésor", "service": "Économie", "grade": "Secrétaire", "status": "En service", "email": "f.clinton@sa.gov", "joinDate": "Avr 2024" },
-    { "name": "Lamar Davis", "role": "Secrétaire Travail", "service": "Commerce", "grade": "Cabinet", "status": "En service", "email": "l.davis@sa.gov", "joinDate": "Mai 2024" },
-    { "name": "Julian Frost", "role": "Secrétaire Santé", "service": "Santé & Social", "grade": "Secrétaire", "status": "En service", "email": "j.frost@sa.gov", "joinDate": "Jan 2024" }
+    {
+      "name": "Arthur Vance",
+      "role": "Gouverneur",
+      "service": "Cabinet",
+      "grade": "Exécutif",
+      "status": "En service",
+      "email": "a.vance@sa.gov",
+      "joinDate": "Jan 2024",
+      "image": "/placeholder.svg",
+      "description": "Leader visionnaire dévoué à la sécurité et à la prospérité de San Andreas."
+    },
+    {
+      "name": "Elena Rodriguez",
+      "role": "Press Secretary",
+      "service": "Cabinet",
+      "grade": "Cabinet",
+      "status": "En service",
+      "email": "e.rodriguez@sa.gov",
+      "joinDate": "Fév 2024",
+      "image": "/placeholder.svg",
+      "description": "Porte-parole officielle du Gouvernement, assurant une communication transparente avec le public."
+    },
+    {
+      "name": "Jackson Teller",
+      "role": "Secrétaire Sécurité",
+      "service": "LSPD/LSSD",
+      "grade": "Secrétaire",
+      "status": "Hors service",
+      "email": "j.teller@sa.gov",
+      "joinDate": "Mar 2024",
+      "image": "/placeholder.svg",
+      "description": "Coordonne les forces de l'ordre pour garantir un environnement sûr à tous les citoyens."
+    },
+    {
+      "name": "Thomas Vercetti",
+      "role": "Secrétaire Justice",
+      "service": "Justice",
+      "grade": "Secrétaire",
+      "status": "En service",
+      "email": "t.vercetti@sa.gov",
+      "joinDate": "Mar 2024",
+      "image": "/placeholder.svg",
+      "description": "Veille à l'équité du système judiciaire et au respect rigoureux des lois de l'État."
+    },
+    {
+      "name": "Franklin Clinton",
+      "role": "Secrétaire Trésor",
+      "service": "Économie",
+      "grade": "Secrétaire",
+      "status": "En service",
+      "email": "f.clinton@sa.gov",
+      "joinDate": "Avr 2024",
+      "image": "/placeholder.svg",
+      "description": "Gère les finances publiques avec rigueur pour assurer la stabilité économique à long terme."
+    },
+    {
+      "name": "Lamar Davis",
+      "role": "Secrétaire Travail",
+      "service": "Commerce",
+      "grade": "Cabinet",
+      "status": "En service",
+      "email": "l.davis@sa.gov",
+      "joinDate": "Mai 2024",
+      "image": "/placeholder.svg",
+      "description": "Soutient le développement du commerce et protège les droits des travailleurs de l'État."
+    },
+    {
+      "name": "Julian Frost",
+      "role": "Secrétaire Santé",
+      "service": "Santé & Social",
+      "grade": "Secrétaire",
+      "status": "En service",
+      "email": "j.frost@sa.gov",
+      "joinDate": "Jan 2024",
+      "image": "/placeholder.svg",
+      "description": "Dévoué à l'amélioration de la santé publique et au soutien des services sociaux."
+    }
   ],
   "globalAnnouncements": [
     { "id": 1, "title": "Note de Service #24-05", "text": "Nouvelles consignes pour la rédaction des décrets officiels.", "date": "Hier" },

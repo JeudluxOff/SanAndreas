@@ -71,6 +71,8 @@ export interface GovEmployee {
   status: string;
   email: string;
   joinDate: string;
+  image?: string;
+  description?: string;
 }
 
 export interface GovNotification {

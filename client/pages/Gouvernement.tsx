@@ -22,13 +22,13 @@ export default function Gouvernement() {
 
   // Filtrer pour n'afficher que le cabinet (rôles de haut niveau)
   const cabinetMembers = employees.filter(e =>
-    ["Gouverneur", "Lieutenant-Gouverneur", "Cabinet", "Secrétaire"].includes(e.grade) ||
+    ["Gouverneur", "Lieutenant-Gouverneur", "Cabinet", "Secrétaire", "Exécutif"].includes(e.grade) ||
     ["Gouverneur", "Press Secretary", "Lieutenant-Gouverneur"].includes(e.role)
   ).map(e => ({
     role: e.role,
     name: e.name,
-    image: "/placeholder.svg",
-    description: `Membre officiel du Gouvernement de San Andreas au sein du service ${e.service}.`,
+    image: e.image || "/placeholder.svg",
+    description: e.description || `Membre officiel du Gouvernement de San Andreas au sein du service ${e.service}.`,
     icon: roleToIcon[e.role] || <UserCheck className="w-5 h-5" />
   }));
 
