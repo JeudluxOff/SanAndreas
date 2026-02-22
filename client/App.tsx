@@ -3,15 +3,18 @@ import Index from "./pages/Index";
 import Cabinet from "./pages/Cabinet";
 import LegalDashboard from "./pages/cabinet/Dashboard";
 import LegalDossiers from "./pages/cabinet/Dossiers";
+import LegalDossierDetail from "./pages/cabinet/DossierDetail";
 import LegalPortal from "./pages/cabinet/Portal";
 import LegalBilling from "./pages/cabinet/Billing";
 import LegalAudit from "./pages/cabinet/Audit";
 import LegalDocuments from "./pages/cabinet/Documents";
 import LegalEvidence from "./pages/cabinet/Evidence";
+import LegalPlanning from "./pages/cabinet/Planning";
 import LegalTasks from "./pages/cabinet/Tasks";
 import LegalCommunication from "./pages/cabinet/Communication";
 import LegalClients from "./pages/cabinet/Clients";
 import LegalAdmin from "./pages/cabinet/Admin";
+import LegalWorkspaces from "./pages/cabinet/Workspaces";
 import CabinetLogin from "./pages/cabinet/Login";
 import NotFound from "./pages/NotFound";
 import Placeholder from "./pages/Placeholder";
@@ -59,12 +62,14 @@ const AppRoutes = () => (
         <Routes>
           <Route path="/" element={<LegalDashboard />} />
           <Route path="/dossiers" element={<LegalDossiers />} />
+          <Route path="/dossiers/:id" element={<LegalDossierDetail />} />
           <Route path="/documents" element={<LegalDocuments />} />
           <Route path="/evidence" element={<LegalEvidence />} />
-          <Route path="/planning" element={<Calendar />} />
+          <Route path="/planning" element={<LegalPlanning />} />
           <Route path="/billing" element={<LegalBilling />} />
           <Route path="/communication" element={<LegalCommunication />} />
           <Route path="/clients" element={<LegalClients />} />
+          <Route path="/workspaces" element={<LegalWorkspaces />} />
           <Route path="/audit" element={<LegalAudit />} />
           <Route path="/admin" element={<LegalAdmin />} />
           <Route path="*" element={<NotFound />} />

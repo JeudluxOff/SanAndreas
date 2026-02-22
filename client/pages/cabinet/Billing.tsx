@@ -18,9 +18,31 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import LegalIntranetLayout from './intranet/LegalIntranetLayout';
+import LegalIntranetLayout, { useLegalRBAC } from './intranet/LegalIntranetLayout';
+import { Link } from 'react-router-dom';
 
 const Billing = () => {
+  const { isAssocié, canBill } = useLegalRBAC();
+
+  if (!isAssocié && !canBill) {
+    return (
+      <LegalIntranetLayout>
+        <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center text-slate-400 p-10">
+          <CreditCard className="w-16 h-16 mb-6 opacity-20" />
+          <h2 className="text-xl font-black uppercase tracking-widest text-slate-900">Accès Facturation Restreint</h2>
+          <p className="text-xs font-bold uppercase tracking-widest mt-2 max-w-md text-center">
+            La gestion des honoraires et de la facturation est réservée aux Associés et au pôle Comptabilité.
+          </p>
+          <Link to="/cabinet/intranet">
+            <Button className="mt-8 bg-[#0a0f18] text-white uppercase text-[10px] tracking-widest h-12 px-8 rounded-xl">
+              Retour au Tableau de Bord
+            </Button>
+          </Link>
+        </div>
+      </LegalIntranetLayout>
+    );
+  }
+
   return (
     <LegalIntranetLayout>
       <div className="p-10 space-y-10">

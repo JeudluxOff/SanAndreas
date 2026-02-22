@@ -28,7 +28,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import LegalIntranetLayout from './intranet/LegalIntranetLayout';
+import LegalIntranetLayout, { useLegalRBAC } from './intranet/LegalIntranetLayout';
+import { Link } from 'react-router-dom';
 
 const MOCK_EXISTING_CLIENTS = [
   "Martin Madrazo",
@@ -39,6 +40,7 @@ const MOCK_EXISTING_CLIENTS = [
 ];
 
 const Dossiers = () => {
+  const { isAssocié } = useLegalRBAC();
   const [showConflictModal, setShowConflictModal] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [conflictResult, setConflictResult] = React.useState<'none' | 'conflict' | null>(null);
@@ -186,21 +188,21 @@ const Dossiers = () => {
                   { id: "HC-2024-002", title: "Fusion UD & Fleeca", client: "Union Depository", type: "Affaires", status: "Rédaction", conf: "Secret", lead: "Julian H." },
                   { id: "HC-2024-003", title: "V. Duggan - Succession", client: "Thornton Duggan", type: "Civil", status: "En attente", conf: "Normal", lead: "Marcus V." },
                   { id: "HC-2024-004", title: "Mairie LS - Urbanisme", client: "Gouvernement SA", type: "Admin", status: "Plaidoirie", conf: "Normal", lead: "Elena R." },
-                  { id: "HC-2024-005", title: "Scellé - Affaire 402", client: "Confidentiel", type: "Pénal", status: "Scellé", conf: "Scellé", lead: "Associé Uniquement" }
+                  { id: "HC-2024-005", title: "Scellé - Affaire 402", client: "Confidentiel", type: "Pénal", status: "Scellé", conf: "Scellé", lead: "Associé Uniquement" },
+                  { id: "HC-2024-006", title: "Fleeca Bank - Cyber-fraude", client: "Fleeca Bank", type: "Pénal", status: "En cours", conf: "Secret", lead: "Victoria C." },
+                  { id: "HC-2024-007", title: "Litige Contractuel Ammunation", client: "Ammu-Nation", type: "Civil", status: "Audiences", conf: "Normal", lead: "Marcus V." },
+                  { id: "HC-2024-008", title: "Redépôt de Bilan LS Custom", client: "LS Customs", type: "Affaires", status: "Rédaction", conf: "Confidentiel", lead: "Julian H." },
+                  { id: "HC-2024-009", title: "Recours Permis de Construire", client: "Benny's Motorworks", type: "Admin", status: "En attente", conf: "Normal", lead: "Elena R." },
+                  { id: "HC-2024-010", title: "Défense Criminelle - Ballas", client: "Inconnu", type: "Pénal", status: "Audiences", conf: "Secret", lead: "Victoria C." }
                 ].map((item, idx) => {
                   const isSealed = item.conf === 'Scellé';
                   return (
                     <tr
                       key={idx}
-                      onClick={() => {
-                        if (isSealed) {
-                          alert(`ACCÈS SÉCURISÉ : Votre tentative d'accès au dossier scellé ${item.id} a été enregistrée dans les logs d'audit.`);
-                        }
-                      }}
                       className="group hover:bg-slate-50/50 transition-all cursor-pointer"
                     >
                       <td className="px-8 py-6">
-                        <div className="flex items-center gap-4">
+                        <Link to={`/cabinet/intranet/dossiers/${item.id}`} className="flex items-center gap-4">
                           <div className="p-3 bg-slate-50 rounded-xl text-slate-400 group-hover:text-[#c1a461] transition-colors">
                             <Briefcase className="w-5 h-5" />
                           </div>
@@ -208,7 +210,7 @@ const Dossiers = () => {
                             <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{item.title}</p>
                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.id}</p>
                           </div>
-                        </div>
+                        </Link>
                       </td>
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-2">
@@ -236,9 +238,11 @@ const Dossiers = () => {
                         <p className="text-[10px] font-black text-slate-900 uppercase tracking-tight">{item.lead}</p>
                       </td>
                       <td className="px-8 py-6 text-right">
-                        <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
-                          <MoreVertical className="w-5 h-5" />
-                        </Button>
+                        {isAssocié && (
+                          <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                            <MoreVertical className="w-5 h-5" />
+                          </Button>
+                        )}
                       </td>
                     </tr>
                   );

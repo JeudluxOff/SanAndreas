@@ -1,0 +1,375 @@
+import React from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { 
+  Briefcase, 
+  ChevronLeft, 
+  Clock, 
+  Users, 
+  FileText, 
+  ShieldCheck, 
+  Calendar, 
+  MoreVertical, 
+  Plus, 
+  Lock,
+  ArrowRight,
+  Download,
+  History,
+  CheckCircle2,
+  AlertTriangle,
+  Gavel,
+  MessageSquare,
+  UserPlus,
+  Send
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
+import LegalIntranetLayout from './intranet/LegalIntranetLayout';
+
+const MOCK_DOSSIER = {
+  id: "HC-2024-882",
+  title: "État de San Andreas vs. Martin Madrazo",
+  client: "Martin Madrazo",
+  type: "Pénal",
+  status: "Audiences",
+  confidentiality: "Confidentiel",
+  lead: "Victoria Cole",
+  members: [
+    { name: "Victoria Cole", role: "Associée", avatar: "Victoria" },
+    { name: "Marcus Vane", role: "Avocat Senior", avatar: "Marcus" },
+    { name: "Elena Rossi", role: "Avocate", avatar: "Elena" }
+  ],
+  timeline: [
+    { date: "24 Mai, 09:42", action: "Conclusions pénales déposées par Maître Cole", user: "Victoria C." },
+    { date: "22 Mai, 10:00", action: "Audit de conflit validé - Base centralisée", user: "Julian H." },
+    { date: "20 Mai, 14:30", action: "Nouvelle preuve déposée : CCTV Evidence", user: "Marcus V." },
+    { date: "15 Mai, 09:00", action: "Ouverture du dossier", user: "Victoria C." }
+  ],
+  documents: [
+    { id: "HC-2024-001", name: "Conclusions de défense", status: "Signé", ver: "v3" },
+    { id: "HC-2024-002", name: "Requête en nullité", status: "Validé", ver: "v2" },
+    { id: "HC-2024-003", name: "Convention d'Honoraires", status: "Signé", ver: "v1" }
+  ],
+  evidence: [
+    { id: "EVI-882-01", name: "Vidéo CCTV - Union Depository", type: "Vidéo", conf: "Secret" },
+    { id: "EVI-882-02", name: "Relevés de compte Fleeca", type: "Document", conf: "Confidentiel" }
+  ],
+  tasks: [
+    { title: "Préparer interrogatoire témoin X", status: "En cours", p: "Critique" },
+    { title: "Signer acte de cautionnement", status: "Todo", p: "Haute" }
+  ]
+};
+
+const DossierDetail = () => {
+  const { id } = useParams();
+  const [activeTab, setActiveTab] = React.useState('overview');
+
+  return (
+    <LegalIntranetLayout>
+      <div className="p-10 space-y-8">
+        {/* Header Navigation */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <Link to="/cabinet/intranet/dossiers">
+              <Button variant="ghost" className="h-12 w-12 rounded-2xl border border-slate-200 text-slate-400 hover:text-[#c1a461]">
+                <ChevronLeft className="w-6 h-6" />
+              </Button>
+            </Link>
+            <div>
+              <div className="flex items-center gap-3 mb-1">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">{MOCK_DOSSIER.id}</span>
+                <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-2 py-0", 
+                  MOCK_DOSSIER.confidentiality === 'Confidentiel' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-600'
+                )}>
+                  {MOCK_DOSSIER.confidentiality}
+                </Badge>
+              </div>
+              <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter leading-none">{MOCK_DOSSIER.title}</h2>
+            </div>
+          </div>
+          
+          <div className="flex gap-4">
+            <Button variant="outline" className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-12 px-6 gap-2">
+              <Lock className="w-4 h-4" /> Sceller Dossier
+            </Button>
+            <Button className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 gap-2 shadow-xl shadow-black/10">
+              Actions Dossier <MoreVertical className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Tabs Navigation */}
+        <div className="border-b border-slate-100">
+          <div className="flex gap-12">
+            {[
+              { id: 'overview', label: 'Vue d\'ensemble' },
+              { id: 'documents', label: 'Documents' },
+              { id: 'evidence', label: 'Preuves (Vault)' },
+              { id: 'timeline', label: 'Timeline & Logs' },
+              { id: 'billing', label: 'Honoraires' }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  "pb-4 text-[10px] font-black uppercase tracking-[0.2em] relative transition-all",
+                  activeTab === tab.id ? "text-[#c1a461]" : "text-slate-400 hover:text-slate-600"
+                )}
+              >
+                {tab.label}
+                {activeTab === tab.id && (
+                  <div className="absolute bottom-0 left-0 w-full h-1 bg-[#c1a461] rounded-t-full" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* Left Column (Main Content) */}
+          <div className="lg:col-span-8 space-y-10">
+            {activeTab === 'overview' && (
+              <>
+                {/* Status & Summary */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Card className="bg-white border-none shadow-md p-6 rounded-[32px]">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Statut Actuel</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-[#c1a461] animate-pulse" />
+                      <p className="text-xl font-black text-slate-900 uppercase tracking-tight">{MOCK_DOSSIER.status}</p>
+                    </div>
+                  </Card>
+                  <Card className="bg-white border-none shadow-md p-6 rounded-[32px]">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Pôle Juridique</p>
+                    <p className="text-xl font-black text-slate-900 uppercase tracking-tight">{MOCK_DOSSIER.type}</p>
+                  </Card>
+                  <Card className="bg-[#0a0f18] text-white border-none shadow-xl p-6 rounded-[32px]">
+                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2 text-center">Progression</p>
+                    <div className="space-y-3">
+                       <div className="flex justify-between items-end">
+                         <span className="text-[9px] font-bold text-[#c1a461] uppercase tracking-widest">Phase 3/4</span>
+                         <span className="text-lg font-black tracking-tight">85%</span>
+                       </div>
+                       <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                         <div className="h-full bg-[#c1a461]" style={{ width: '85%' }} />
+                       </div>
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Upcoming Hearings */}
+                <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
+                  <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between">
+                    <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+                      <Gavel className="w-5 h-5 text-[#c1a461]" /> Audiences & Calendrier
+                    </CardTitle>
+                    <Button variant="ghost" className="text-[10px] font-black uppercase text-[#c1a461]">+ Ajouter</Button>
+                  </CardHeader>
+                  <CardContent className="p-8">
+                    <div className="flex gap-8 items-center bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                      <div className="text-center bg-slate-900 text-white rounded-2xl p-4 min-w-[80px]">
+                        <p className="text-2xl font-black leading-none">26</p>
+                        <p className="text-[10px] font-bold uppercase mt-1">Mai</p>
+                      </div>
+                      <div className="flex-grow space-y-1">
+                        <p className="text-lg font-black uppercase text-slate-900 leading-tight">Audience Préliminaire</p>
+                        <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                          <span>📍 Cour Supérieure de Los Santos</span>
+                          <span>⚖️ Juge Miller</span>
+                        </div>
+                      </div>
+                      <Badge className="bg-blue-600 text-white font-black uppercase text-[9px] px-4 py-1.5">CONFIRMÉ</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Latest Activity Preview */}
+                <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
+                  <CardHeader className="p-8 border-b border-slate-50">
+                    <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+                      <History className="w-5 h-5 text-[#c1a461]" /> Activité Récente
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="divide-y divide-slate-50">
+                      {MOCK_DOSSIER.timeline.slice(0, 3).map((item, idx) => (
+                        <div key={idx} className="p-6 flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#c1a461]" />
+                            <div className="space-y-0.5">
+                              <p className="text-sm font-bold text-slate-700 uppercase tracking-tight">{item.action}</p>
+                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.user} • {item.date}</p>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="icon" className="text-slate-300">
+                            <ChevronRight className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="p-6 border-t border-slate-50 text-center">
+                       <Button variant="link" className="text-[10px] font-black uppercase text-[#c1a461] tracking-widest" onClick={() => setActiveTab('timeline')}>
+                         Voir tout l'historique d'audit
+                       </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+
+            {activeTab === 'documents' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Index Documentaire</h3>
+                  <Button className="bg-[#c1a461] text-white text-[10px] font-black uppercase h-10 px-6">+ Nouveau</Button>
+                </div>
+                <div className="grid grid-cols-1 gap-4">
+                  {MOCK_DOSSIER.documents.map((doc, idx) => (
+                    <Card key={idx} className="border-none shadow-md hover:shadow-xl transition-all group p-6 rounded-[24px]">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-6">
+                          <div className="p-4 bg-slate-50 rounded-2xl text-slate-400 group-hover:text-[#c1a461] transition-colors">
+                            <FileText className="w-6 h-6" />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-base font-black text-slate-900 uppercase tracking-tight">{doc.name}</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{doc.id} • Version {doc.ver}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-6">
+                          <Badge className={cn("text-[9px] font-black uppercase tracking-widest px-3 py-1", 
+                            doc.status === 'Signé' ? 'bg-emerald-600 text-white' : 'bg-blue-600 text-white'
+                          )}>
+                            {doc.status}
+                          </Badge>
+                          <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                            <Download className="w-5 h-5" />
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'evidence' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center text-white p-10 rounded-[40px] bg-[#0a0f18] relative overflow-hidden">
+                  <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+                  <div className="relative z-10 space-y-2">
+                    <h3 className="text-2xl font-black uppercase tracking-tighter">Evidence Vault Access</h3>
+                    <p className="text-white/40 text-xs font-bold uppercase tracking-widest">Zone hautement sécurisée • Chiffrement AES-256</p>
+                  </div>
+                  <Button className="relative z-10 bg-[#c1a461] hover:bg-[#927843] text-white text-[10px] font-black uppercase h-12 px-8 rounded-xl shadow-2xl">
+                    Déposer Preuve
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {MOCK_DOSSIER.evidence.map((evi, idx) => (
+                    <Card key={idx} className="border-none shadow-md hover:shadow-xl transition-all p-8 rounded-[32px] bg-white group">
+                      <div className="flex justify-between items-start mb-6">
+                        <div className="p-4 bg-slate-50 rounded-2xl text-slate-400 group-hover:text-[#c1a461] transition-colors">
+                          <ShieldCheck className="w-8 h-8" />
+                        </div>
+                        <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-2 py-0.5", 
+                          evi.conf === 'Secret' ? 'bg-red-600 text-white' : 'bg-amber-600 text-white'
+                        )}>
+                          {evi.conf}
+                        </Badge>
+                      </div>
+                      <div className="space-y-1 mb-6">
+                        <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">{evi.type}</p>
+                        <h4 className="text-lg font-black text-slate-900 uppercase tracking-tighter leading-tight">{evi.name}</h4>
+                      </div>
+                      <div className="flex items-center justify-between border-t border-slate-50 pt-6">
+                        <span className="text-[10px] font-black text-slate-300 uppercase">{evi.id}</span>
+                        <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                          <Download className="w-5 h-5" />
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column (Sidebar Stats & Members) */}
+          <div className="lg:col-span-4 space-y-10">
+            {/* Team Members Section */}
+            <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
+              <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between">
+                <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                  <Users className="w-4 h-4 text-[#c1a461]" /> Équipe Assignée
+                </CardTitle>
+                <UserPlus className="w-4 h-4 text-slate-300 hover:text-[#c1a461] cursor-pointer transition-colors" />
+              </CardHeader>
+              <CardContent className="p-8 space-y-6">
+                {MOCK_DOSSIER.members.map((member, idx) => (
+                  <div key={idx} className="flex items-center gap-4">
+                    <Avatar className="h-10 w-10 ring-2 ring-slate-100">
+                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.avatar}`} />
+                      <AvatarFallback>{member.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-grow">
+                      <p className="text-xs font-black text-slate-900 uppercase tracking-tight">{member.name}</p>
+                      <p className="text-[9px] font-bold text-[#c1a461] uppercase tracking-widest">{member.role}</p>
+                    </div>
+                    {member.role === 'Associée' && <Badge className="bg-amber-100 text-amber-700 text-[8px] font-black uppercase px-2 py-0 border-none">LEAD</Badge>}
+                  </div>
+                ))}
+                <Button variant="outline" className="w-full mt-4 border-2 border-slate-900 text-slate-900 font-black uppercase text-[10px] tracking-widest h-12 rounded-xl">
+                  Gérer les Accès ACL
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Quick Communication Tool */}
+            <Card className="border-none shadow-xl rounded-[32px] bg-slate-900 text-white overflow-hidden">
+              <CardHeader className="p-8 bg-[#c1a461]/10 border-b border-white/5">
+                <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-[#c1a461]" /> Notes Internes
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="p-8 space-y-6 max-h-[300px] overflow-y-auto">
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <p className="text-[10px] font-black text-[#c1a461] uppercase mb-1">Victoria C. • Hier</p>
+                    <p className="text-xs text-white/70 leading-relaxed uppercase tracking-tight">Martin a validé les conclusions. On part sur une demande de médiation avant l'audience de lundi.</p>
+                  </div>
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <p className="text-[10px] font-black text-[#c1a461] uppercase mb-1">Marcus V. • 22 Mai</p>
+                    <p className="text-xs text-white/70 leading-relaxed uppercase tracking-tight">Le témoin principal est enfin localisé. Je prépare l'assignation.</p>
+                  </div>
+                </div>
+                <div className="p-6 bg-black/20 border-t border-white/5">
+                  <div className="relative group">
+                    <input type="text" placeholder="NOTER..." className="w-full h-12 bg-white/5 border-none rounded-xl pl-6 pr-12 text-[10px] font-bold text-white uppercase placeholder:text-white/20 focus:ring-1 ring-[#c1a461]/50 transition-all" />
+                    <Send className="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#c1a461] cursor-pointer" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions / Security */}
+            <div className="bg-[#c1a461]/10 border border-[#c1a461]/20 rounded-[32px] p-8 space-y-4">
+               <div className="flex items-center gap-3">
+                 <ShieldCheck className="w-5 h-5 text-[#c1a461]" />
+                 <p className="text-[10px] font-black text-[#c1a461] uppercase tracking-[0.2em]">Sécurité du Dossier</p>
+               </div>
+               <p className="text-[9px] font-bold text-slate-500 uppercase leading-relaxed">Ce dossier est sous surveillance d'audit critique. Tout accès non autorisé par un membre non assigné déclenche une alerte immédiate au pôle Administration.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </LegalIntranetLayout>
+  );
+};
+
+export default DossierDetail;

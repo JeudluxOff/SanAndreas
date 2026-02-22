@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import { 
   Scale, 
   Briefcase, 
@@ -32,7 +32,27 @@ import {
   SelectValue
 } from '@/components/ui/select';
 
-const ROLE_COLORS = {
+// RBAC Context for Simulation
+type LegalRole = 'Associé' | 'Avocat' | 'Juriste' | 'Secrétaire' | 'Comptable' | 'Stagiaire' | 'Auditeur';
+
+interface LegalRBACContextType {
+  activeRole: LegalRole;
+  setActiveRole: (role: LegalRole) => void;
+  isAssocié: boolean;
+  canSign: boolean;
+  canBill: boolean;
+  canAudit: boolean;
+}
+
+const LegalRBACContext = createContext<LegalRBACContextType | undefined>(undefined);
+
+export const useLegalRBAC = () => {
+  const context = useContext(LegalRBACContext);
+  if (!context) throw new Error('useLegalRBAC must be used within a LegalIntranetLayout');
+  return context;
+};
+
+const ROLE_COLORS: Record<LegalRole, string> = {
   'Associé': 'bg-amber-600 text-white',
   'Avocat': 'bg-blue-600 text-white',
   'Juriste': 'bg-slate-600 text-white',
@@ -55,7 +75,8 @@ const MENU_ITEMS = [
   { icon: <Settings className="w-4 h-4" />, label: "Administration", path: "/cabinet/intranet/admin" }
 ];
 
-export const Sidebar = ({ activeRole }: { activeRole: string }) => {
+export const Sidebar = () => {
+  const { activeRole } = useLegalRBAC();
   const location = useLocation();
 
   return (
@@ -101,7 +122,7 @@ export const Sidebar = ({ activeRole }: { activeRole: string }) => {
           </Avatar>
           <div className="overflow-hidden">
             <p className="text-[10px] font-black truncate">Julian Harrington</p>
-            <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-2 py-0 mt-1", ROLE_COLORS[activeRole as keyof typeof ROLE_COLORS])}>
+            <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-2 py-0 mt-1", ROLE_COLORS[activeRole])}>
               {activeRole}
             </Badge>
           </div>
@@ -111,67 +132,82 @@ export const Sidebar = ({ activeRole }: { activeRole: string }) => {
   );
 };
 
-export const Header = ({ activeRole, onRoleChange }: { activeRole: string, onRoleChange: (val: string) => void }) => (
-  <header className="h-20 bg-white border-b border-slate-100 sticky top-0 z-40 px-10 flex items-center justify-between shadow-sm">
-    <div className="flex items-center gap-8">
-      <Link to="/cabinet">
-        <Button variant="ghost" className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-[#c1a461] hover:bg-[#c1a461]/5 gap-2 group px-0">
-          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-          <span className="hidden md:inline">Sortir du Cabinet</span>
-        </Button>
-      </Link>
-
-      <div className="h-6 w-px bg-slate-100" />
-
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <input
-          type="text"
-          placeholder="RECHERCHER UN DOSSIER, UN CLIENT, UN DOCUMENT..."
-          className="w-96 h-10 bg-slate-50 border-none rounded-lg pl-10 text-[10px] font-bold uppercase tracking-widest placeholder:text-slate-400 focus:ring-2 ring-primary/5 transition-all"
-        />
-      </div>
-    </div>
-
-    <div className="flex items-center gap-6">
-      <div className="flex items-center gap-3 mr-4">
-        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Simulation Rôle:</span>
-        <Select value={activeRole} onValueChange={onRoleChange}>
-          <SelectTrigger className="w-32 h-8 text-[9px] font-black uppercase border-none bg-slate-50">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.keys(ROLE_COLORS).map(role => (
-              <SelectItem key={role} value={role} className="text-[9px] font-black uppercase">{role}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <button className="relative p-2 text-slate-400 hover:text-primary transition-colors">
-        <Bell className="w-5 h-5" />
-        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
-      </button>
-      <div className="h-8 w-px bg-slate-100" />
-      <Button className="bg-[#0a0f18] text-white font-black uppercase text-[10px] tracking-widest h-10 px-6 gap-2">
-        <Plus className="w-4 h-4" /> Nouveau Dossier
-      </Button>
-    </div>
-  </header>
-);
-
-export default function LegalIntranetLayout({ children }: { children: React.ReactNode }) {
-  const [activeRole, setActiveRole] = React.useState('Associé');
+export const Header = () => {
+  const { activeRole, setActiveRole } = useLegalRBAC();
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      <Sidebar activeRole={activeRole} />
-      <div className="flex-grow pl-64 flex flex-col min-h-screen">
-        <Header activeRole={activeRole} onRoleChange={setActiveRole} />
-        <main className="flex-grow">
-          {children}
-        </main>
+    <header className="h-20 bg-white border-b border-slate-100 sticky top-0 z-40 px-10 flex items-center justify-between shadow-sm">
+      <div className="flex items-center gap-8">
+        <Link to="/cabinet">
+          <Button variant="ghost" className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-[#c1a461] hover:bg-[#c1a461]/5 gap-2 group px-0">
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            <span className="hidden md:inline">Sortir du Cabinet</span>
+          </Button>
+        </Link>
+
+        <div className="h-6 w-px bg-slate-100" />
+
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="RECHERCHER UN DOSSIER, UN CLIENT, UN DOCUMENT..."
+            className="w-96 h-10 bg-slate-50 border-none rounded-lg pl-10 text-[10px] font-bold uppercase tracking-widest placeholder:text-slate-400 focus:ring-2 ring-primary/5 transition-all"
+          />
+        </div>
       </div>
-    </div>
+
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3 mr-4">
+          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Simulation Rôle:</span>
+          <Select value={activeRole} onValueChange={(val) => setActiveRole(val as LegalRole)}>
+            <SelectTrigger className="w-32 h-8 text-[9px] font-black uppercase border-none bg-slate-50">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.keys(ROLE_COLORS).map(role => (
+                <SelectItem key={role} value={role} className="text-[9px] font-black uppercase">{role}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <button className="relative p-2 text-slate-400 hover:text-primary transition-colors">
+          <Bell className="w-5 h-5" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+        </button>
+        <div className="h-8 w-px bg-slate-100" />
+        <Button className="bg-[#0a0f18] text-white font-black uppercase text-[10px] tracking-widest h-10 px-6 gap-2">
+          <Plus className="w-4 h-4" /> Nouveau Dossier
+        </Button>
+      </div>
+    </header>
+  );
+};
+
+export default function LegalIntranetLayout({ children }: { children: React.ReactNode }) {
+  const [activeRole, setActiveRole] = React.useState<LegalRole>('Associé');
+
+  const value = {
+    activeRole,
+    setActiveRole,
+    isAssocié: activeRole === 'Associé',
+    canSign: ['Associé', 'Avocat'].includes(activeRole),
+    canBill: ['Associé', 'Comptable'].includes(activeRole),
+    canAudit: ['Associé', 'Auditeur'].includes(activeRole)
+  };
+
+  return (
+    <LegalRBACContext.Provider value={value}>
+      <div className="min-h-screen bg-slate-50 flex">
+        <Sidebar />
+        <div className="flex-grow pl-64 flex flex-col min-h-screen">
+          <Header />
+          <main className="flex-grow">
+            {children}
+          </main>
+        </div>
+      </div>
+    </LegalRBACContext.Provider>
   );
 }

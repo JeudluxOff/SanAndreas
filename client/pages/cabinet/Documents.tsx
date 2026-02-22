@@ -46,7 +46,23 @@ const INITIAL_DOCS = [
   { id: "HC-2024-0882", name: "Conclusions Pénales - Madrazo", case: "Dossier #882", cat: "Conclusions", status: "Signé", ver: "v3" },
   { id: "HC-2024-0912", name: "Requête en Référé - LS Mairie", case: "Dossier #912", cat: "Requête", status: "Validé", ver: "v2" },
   { id: "HC-2024-0945", name: "Accord de Confidentialité UD", case: "Dossier #945", cat: "Convention", status: "Brouillon", ver: "v1" },
-  { id: "HC-2024-0988", name: "Mémoire en Défense - Duggan", case: "Dossier #988", cat: "Mémoire", status: "Validé", ver: "v4" }
+  { id: "HC-2024-0988", name: "Mémoire en Défense - Duggan", case: "Dossier #988", cat: "Mémoire", status: "Validé", ver: "v4" },
+  { id: "HC-2024-1001", name: "Acte de Cautionnement Fleeca", case: "Dossier #006", cat: "Acte", status: "Signé", ver: "v2" },
+  { id: "HC-2024-1002", name: "Sommation de Payer Ammunation", case: "Dossier #007", cat: "Courrier", status: "Validé", ver: "v1" },
+  { id: "HC-2024-1003", name: "Statuts LS Customs SAS", case: "Dossier #008", cat: "Convention", status: "Brouillon", ver: "v1" },
+  { id: "HC-2024-1004", name: "Recours Permis Benny's", case: "Dossier #009", cat: "Requête", status: "Signé", ver: "v3" },
+  { id: "HC-2024-1005", name: "Mandat de Représentation Ballas", case: "Dossier #010", cat: "Convention", status: "Signé", ver: "v1" },
+  { id: "HC-2024-1006", name: "Assignation Devant Tribunal", case: "Dossier #882", cat: "Acte", status: "Validé", ver: "v2" },
+  { id: "HC-2024-1007", name: "Bordereau de Pièces #1", case: "Dossier #882", cat: "Pièce", status: "Signé", ver: "v5" },
+  { id: "HC-2024-1008", name: "Note de Synthèse - Audit UD", case: "Dossier #945", cat: "Note", status: "Brouillon", ver: "v1" },
+  { id: "HC-2024-1009", name: "Procuration Thornton Duggan", case: "Dossier #988", cat: "Acte", status: "Signé", ver: "v1" },
+  { id: "HC-2024-1010", name: "Courrier au Procureur Général", case: "Dossier #882", cat: "Courrier", status: "Signé", ver: "v2" },
+  { id: "HC-2024-1011", name: "Conclusions Récapitulatives", case: "Dossier #912", cat: "Conclusions", status: "Validé", ver: "v3" },
+  { id: "HC-2024-1012", name: "Protocole d'Accord Transactionnel", case: "Dossier #007", cat: "Convention", status: "Brouillon", ver: "v1" },
+  { id: "HC-2024-1013", name: "Notification de Greffe", case: "Dossier #009", cat: "Acte", status: "Signé", ver: "v1" },
+  { id: "HC-2024-1014", name: "Engagement de Confidentialité", case: "Dossier #008", cat: "Convention", status: "Signé", ver: "v2" },
+  { id: "HC-2024-1015", name: "Réquisition de Documents", case: "Dossier #006", cat: "Courrier", status: "Validé", ver: "v1" },
+  { id: "HC-2024-1016", name: "Conclusions d'Appel Madrazo", case: "Dossier #882", cat: "Conclusions", status: "Brouillon", ver: "v1" }
 ];
 
 const Documents = () => {
@@ -160,7 +176,7 @@ const Documents = () => {
             <DialogFooter>
               <Button 
                 variant="ghost" 
-                onClick={() => setShowCreateModal(false)}
+                onClick={() => { setShowCreateModal(false); setNewDoc({ name: '', case: '', cat: 'Conclusions' }); }}
                 className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
               >
                 Annuler
@@ -198,97 +214,99 @@ const Documents = () => {
         <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
           <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between bg-slate-50/50">
             <div>
-              <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight">Documents Récents</CardTitle>
-              <CardDescription className="text-[10px] font-bold uppercase tracking-widest mt-1">Index des conclusions, requêtes et conventions</CardDescription>
+              <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight">Index des Documents Récents</CardTitle>
+              <CardDescription className="text-[10px] font-bold uppercase tracking-widest mt-1">Traçabilité complète et versioning AES-256</CardDescription>
             </div>
             <div className="flex items-center gap-4">
                <div className="relative">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                 <input type="text" placeholder="RECHERCHER..." className="bg-white border-slate-200 border rounded-lg pl-9 text-[9px] font-bold uppercase tracking-widest h-9" />
+                 <input type="text" placeholder="RECHERCHER UN DOCUMENT..." className="bg-white border-slate-200 border rounded-lg pl-9 text-[9px] font-bold uppercase tracking-widest h-9 w-64" />
                </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-slate-50/30 border-b border-slate-100">
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Numéro / Nom</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Dossier</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Catégorie</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Statut</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Version</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {docs.map((item, idx) => (
-                  <tr key={idx} className="group hover:bg-slate-50/50 transition-all cursor-pointer">
-                    <td className="px-8 py-6">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 bg-slate-50 rounded-xl text-slate-400 group-hover:text-[#c1a461] transition-colors">
-                          <FileText className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{item.name}</p>
-                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.id}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <p className="text-xs font-bold text-slate-600 uppercase tracking-tight">{item.case}</p>
-                    </td>
-                    <td className="px-8 py-6">
-                      <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-200">{item.cat}</Badge>
-                    </td>
-                    <td className="px-8 py-6">
-                      <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-3 py-1", 
-                        item.status === 'Signé' ? 'bg-emerald-600 text-white' : 
-                        item.status === 'Validé' ? 'bg-blue-600 text-white' : 
-                        item.status === 'Relu' ? 'bg-[#c1a461] text-white' : 'bg-slate-100 text-slate-600'
-                      )}>
-                        {item.status}
-                      </Badge>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="flex items-center gap-2">
-                         <span className="text-xs font-black text-slate-500 uppercase">{item.ver}</span>
-                         <History className="w-3 h-3 text-slate-300" />
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="flex gap-2">
-                        {item.status === 'Brouillon' && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={(e) => { e.stopPropagation(); handleUpdateStatus(idx, 'Validé'); }}
-                            className="text-slate-300 hover:text-blue-600"
-                          >
-                            <FileCheck className="w-4 h-4" />
-                          </Button>
-                        )}
-                        {item.status === 'Validé' && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={(e) => { e.stopPropagation(); handleUpdateStatus(idx, 'Signé'); }}
-                            className="text-slate-300 hover:text-emerald-600"
-                          >
-                            <FileSignature className="w-4 h-4" />
-                          </Button>
-                        )}
-                        <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
-                          <Download className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
-                          <MoreVertical className="w-5 h-5" />
-                        </Button>
-                      </div>
-                    </td>
+            <div className="max-h-[600px] overflow-y-auto">
+              <table className="w-full text-left">
+                <thead className="sticky top-0 z-10">
+                  <tr className="bg-slate-100 border-b border-slate-200">
+                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Numéro / Nom</th>
+                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Dossier</th>
+                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Catégorie</th>
+                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Statut</th>
+                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Version</th>
+                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {docs.map((item, idx) => (
+                    <tr key={idx} className="group hover:bg-slate-50/50 transition-all cursor-pointer">
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-4">
+                          <div className="p-3 bg-slate-50 rounded-xl text-slate-400 group-hover:text-[#c1a461] transition-colors">
+                            <FileText className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{item.name}</p>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.id}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <p className="text-xs font-bold text-slate-600 uppercase tracking-tight">{item.case}</p>
+                      </td>
+                      <td className="px-8 py-6">
+                        <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-200">{item.cat}</Badge>
+                      </td>
+                      <td className="px-8 py-6">
+                        <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-3 py-1", 
+                          item.status === 'Signé' ? 'bg-emerald-600 text-white' : 
+                          item.status === 'Validé' ? 'bg-blue-600 text-white' : 
+                          item.status === 'Relu' ? 'bg-[#c1a461] text-white' : 'bg-slate-100 text-slate-600'
+                        )}>
+                          {item.status}
+                        </Badge>
+                      </td>
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-2">
+                           <span className="text-xs font-black text-slate-500 uppercase">{item.ver}</span>
+                           <History className="w-3 h-3 text-slate-300" />
+                        </div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <div className="flex gap-2">
+                          {item.status === 'Brouillon' && (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={(e) => { e.stopPropagation(); handleUpdateStatus(idx, 'Validé'); }}
+                              className="text-slate-300 hover:text-blue-600"
+                            >
+                              <FileCheck className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {item.status === 'Validé' && (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={(e) => { e.stopPropagation(); handleUpdateStatus(idx, 'Signé'); }}
+                              className="text-slate-300 hover:text-emerald-600"
+                            >
+                              <FileSignature className="w-4 h-4" />
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                            <Download className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                            <MoreVertical className="w-5 h-5" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
       </div>
