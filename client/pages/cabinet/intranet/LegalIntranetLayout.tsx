@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 import {
@@ -143,6 +143,7 @@ export const Sidebar = () => {
 export const Header = () => {
   const { activeRole, setActiveRole } = useLegalRBAC();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <header className="h-20 bg-white border-b border-slate-100 sticky top-0 z-40 px-10 flex items-center justify-between shadow-sm">
@@ -188,7 +189,10 @@ export const Header = () => {
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
         </button>
         <div className="h-8 w-px bg-slate-100" />
-        <Button className="bg-[#0a0f18] text-white font-black uppercase text-[10px] tracking-widest h-10 px-6 gap-2">
+        <Button
+          onClick={() => navigate('/cabinet/intranet/dossiers?action=new')}
+          className="bg-[#0a0f18] text-white font-black uppercase text-[10px] tracking-widest h-10 px-6 gap-2"
+        >
           <Plus className="w-4 h-4" /> Nouveau Dossier
         </Button>
       </div>

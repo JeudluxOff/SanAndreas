@@ -31,7 +31,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useLegalRBAC } from './intranet/LegalIntranetLayout';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { legalStore } from '@/lib/legal-store';
 import { useAuth } from '@/contexts/AuthContext';
 import { Case, CaseType, ConfidentialityLevel } from '@shared/api';
@@ -39,19 +39,30 @@ import { Case, CaseType, ConfidentialityLevel } from '@shared/api';
 const Dossiers = () => {
   const { isAssocié } = useLegalRBAC();
   const { user } = useAuth();
+  const location = useLocation();
   const [showConflictModal, setShowConflictModal] = React.useState(false);
   const [showCreateModal, setShowCreateModal] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [conflictResult, setConflictResult] = React.useState<'none' | 'conflict' | null>(null);
+
+  // Handle "action=new" from Header
+  React.useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('action') === 'new') {
+      setShowConflictModal(true);
+    }
+  }, [location]);
   
   // Create Case Form State
   const [newCase, setNewCase] = React.useState<Partial<Case>>({
     title: '',
+    client_id: '',
     type: 'Pénal',
     confidentiality: 'Normal',
   });
 
   const [cases, setCases] = React.useState(legalStore.getCases());
+  const clients = legalStore.getClients();
 
   const handleConflictCheck = () => {
     if (!user) return;
@@ -71,12 +82,12 @@ const Dossiers = () => {
   };
 
   const handleCreateCase = () => {
-    if (!user || !newCase.title) return;
-    
+    if (!user || !newCase.title || !newCase.client_id) return;
+
     const caseToCreate: Case = {
       id: `HC-2024-${String(cases.length + 1).padStart(3, '0')}`,
       title: newCase.title,
-      client_id: 'cli-new', // Simple mock client for now
+      client_id: newCase.client_id,
       type: (newCase.type as CaseType) || 'Pénal',
       status: 'Ouvert',
       confidentiality: (newCase.confidentiality as ConfidentialityLevel) || 'Normal',
@@ -92,7 +103,7 @@ const Dossiers = () => {
     setShowConflictModal(false);
     setConflictResult(null);
     setSearchQuery('');
-    setNewCase({ title: '', type: 'Pénal', confidentiality: 'Normal' });
+    setNewCase({ title: '', client_id: '', type: 'Pénal', confidentiality: 'Normal' });
 
     legalStore.logAction({
       id: `LOG-${Date.now()}`,
@@ -261,6 +272,20 @@ const Dossiers = () => {
                   placeholder="EX: ÉTAT DE SA VS. JOHN DOE..."
                   className="h-14 bg-slate-50 border-none rounded-2xl px-6 text-sm font-bold uppercase tracking-widest focus:ring-2 ring-[#c1a461]/20 transition-all"
                 />
+              </div>
+
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Client Assigné</Label>
+                <Select value={newCase.client_id} onValueChange={(val) => setNewCase({ ...newCase, client_id: val })}>
+                  <SelectTrigger className="h-14 bg-slate-50 border-none rounded-2xl px-6 text-sm font-bold uppercase tracking-widest">
+                    <SelectValue placeholder="Sélectionner un client..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid grid-cols-2 gap-6">
