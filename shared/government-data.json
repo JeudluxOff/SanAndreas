@@ -548,6 +548,30 @@
   "messages": [],
   "auditLogs": [
     {
+      "id": "1772056349250",
+      "timestamp": "2026-02-25T21:52:29.250Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin_avocat"
+      }
+    },
+    {
+      "id": "1772056244517",
+      "timestamp": "2026-02-25T21:50:44.517Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Harrington",
+      "role": "admin",
+      "service_id": "JUSTICE",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin"
+      }
+    },
+    {
       "id": "1772039363166",
       "timestamp": "2026-02-25T17:09:23.166Z",
       "user_id": "admin_avocat",
@@ -856,5 +880,5 @@
       "link": "/sante"
     }
   ],
-  "emergencyMode": false
+  "emergencyMode": true
 }
