@@ -545,8 +545,54 @@
       "service_id": "SECURITE_PUBLIQUE"
     }
   ],
-  "messages": [],
+  "messages": [
+    {
+      "id": "MSG-1772627683830",
+      "channel_id": "cabinet",
+      "sender_id": "admin",
+      "sender_name": "Administrateur Système",
+      "sender_role": "admin",
+      "content": "gdf",
+      "timestamp": "2026-03-04T12:34:43.830Z"
+    }
+  ],
   "auditLogs": [
+    {
+      "id": "1772628160424",
+      "timestamp": "2026-03-04T12:42:40.424Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin_avocat"
+      }
+    },
+    {
+      "id": "1772627655267",
+      "timestamp": "2026-03-04T12:34:15.267Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin"
+      }
+    },
+    {
+      "id": "1772626194053",
+      "timestamp": "2026-03-04T12:09:54.053Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin"
+      }
+    },
     {
       "id": "1772056349250",
       "timestamp": "2026-02-25T21:52:29.250Z",
@@ -880,5 +926,5 @@
       "link": "/sante"
     }
   ],
-  "emergencyMode": true
+  "emergencyMode": false
 }
