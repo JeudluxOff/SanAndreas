@@ -558,6 +558,18 @@
   ],
   "auditLogs": [
     {
+      "id": "1772902159440",
+      "timestamp": "2026-03-07T16:49:19.440Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Harrington",
+      "role": "admin",
+      "service_id": "JUSTICE",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin_avocat"
+      }
+    },
+    {
       "id": "1772628160424",
       "timestamp": "2026-03-04T12:42:40.424Z",
       "user_id": "admin",

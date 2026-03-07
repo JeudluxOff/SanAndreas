@@ -75,6 +75,13 @@
   ],
   "clients": [
     {
+      "id": "cli-1772902196080",
+      "name": "xcxb",
+      "email": "",
+      "type": "Individu",
+      "created_at": "2026-03-07"
+    },
+    {
       "id": "cli-001",
       "name": "Martin Madrazo",
       "email": "m.madrazo@lafuente.sa",
@@ -144,45 +151,37 @@
       "created_at": "2024-05-01"
     }
   ],
-  "cases": [
-    {
-      "id": "HC-2024-001",
-      "title": "État de SA vs. Madrazo",
-      "client_id": "cli-001",
-      "type": "Pénal",
-      "status": "En cours",
-      "confidentiality": "Confidentiel",
-      "lead_id": "avocat_victoria",
-      "members": [
-        {
-          "user_id": "avocat_victoria",
-          "name": "Victoria Cole",
-          "role": "Associée",
-          "avatar": "Victoria"
-        },
-        {
-          "user_id": "avocat_marcus",
-          "name": "Marcus Vane",
-          "role": "Avocat Senior",
-          "avatar": "Marcus"
-        },
-        {
-          "user_id": "avocat_elena",
-          "name": "Elena Rossi",
-          "role": "Avocate",
-          "avatar": "Elena"
-        }
-      ],
-      "created_at": "2024-05-15T09:00:00Z",
-      "updated_at": "2024-05-24T09:42:00Z"
-    }
-  ],
+  "cases": [],
   "documents": [],
   "evidence": [],
   "tasks": [],
   "hearings": [],
   "invoices": [],
   "auditLogs": [
+    {
+      "id": "LOG-1772902267841",
+      "timestamp": "2026-03-07T16:51:07.841Z",
+      "user_id": "admin_avocat",
+      "user_name": "System",
+      "action": "Suppression du dossier",
+      "target_type": "Case",
+      "target_id": "HC-2024-001",
+      "metadata": {
+        "title": "État de SA vs. Madrazo"
+      }
+    },
+    {
+      "id": "LOG-1772902196081",
+      "timestamp": "2026-03-07T16:49:56.081Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Harrington",
+      "action": "Création client",
+      "target_type": "Client",
+      "target_id": "cli-1772902196080",
+      "metadata": {
+        "name": "xcxb"
+      }
+    },
     {
       "id": "LOG-1772628176921-DEL",
       "timestamp": "2026-03-04T12:42:56.921Z",
