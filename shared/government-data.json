@@ -59,6 +59,13 @@
       ],
       "documents": [
         {
+          "id": "DOC-CABINET-629",
+          "title": ";",
+          "type": "PDF",
+          "date": "8 mars",
+          "archived": false
+        },
+        {
           "id": "DEC-24-0042",
           "title": "Décret sur la régulation des commerces",
           "type": "Décret",
@@ -80,6 +87,12 @@
         }
       ],
       "dossiers": [
+        {
+          "id": "DOS-CABINET-2116",
+          "title": "kk",
+          "status": "En cours",
+          "archived": false
+        },
         {
           "id": "DOS-CAB-88",
           "title": "Réforme Constitutionnelle",
@@ -557,6 +570,54 @@
     }
   ],
   "auditLogs": [
+    {
+      "id": "1772980604008",
+      "timestamp": "2026-03-08T14:36:44.008Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Export des registres d'audit"
+    },
+    {
+      "id": "1772980426325",
+      "timestamp": "2026-03-08T14:33:46.325Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Archivage/Désarchivage du dossier ID : DOS-CABINET-2116"
+    },
+    {
+      "id": "1772980412546",
+      "timestamp": "2026-03-08T14:33:32.546Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Création du document : ;"
+    },
+    {
+      "id": "1772980370426",
+      "timestamp": "2026-03-08T14:32:50.426Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Archivage/Désarchivage du dossier ID : DOS-CABINET-2116"
+    },
+    {
+      "id": "1772980338651",
+      "timestamp": "2026-03-08T14:32:18.651Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Harrington",
+      "role": "admin",
+      "service_id": "JUSTICE",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin"
+      }
+    },
     {
       "id": "1772902159440",
       "timestamp": "2026-03-07T16:49:19.440Z",
