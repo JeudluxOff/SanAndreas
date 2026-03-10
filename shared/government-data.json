@@ -571,6 +571,18 @@
   ],
   "auditLogs": [
     {
+      "id": "1773159416789",
+      "timestamp": "2026-03-10T16:16:56.789Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Noxwood",
+      "role": "admin",
+      "service_id": "JUSTICE",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin_avocat"
+      }
+    },
+    {
       "id": "1773145985537",
       "timestamp": "2026-03-10T12:33:05.537Z",
       "user_id": "admin_avocat",
@@ -850,8 +862,8 @@
       "type": "government",
       "description": "Le centre du pouvoir exécutif de l'État de San Andreas. Bureaux du Gouverneur et du Cabinet.",
       "coords": {
-        "top": "74.792%",
-        "left": "48.042%"
+        "top": "59.688%",
+        "left": "41.506%"
       },
       "address": "Capital Boulevard, Los Santos",
       "phone": "555-GOV-01"
@@ -862,8 +874,8 @@
       "type": "government",
       "description": "Siège de l'autorité judiciaire. Cour supérieure et bureaux du Procureur Général.",
       "coords": {
-        "top": "75.417%",
-        "left": "48.667%"
+        "top": "73.182%",
+        "left": "47.500%"
       },
       "address": "Rockford Hills, Los Santos",
       "phone": "555-DOJ-02"
@@ -874,8 +886,8 @@
       "type": "police",
       "description": "Quartier général de la police de Los Santos. Centre de commandement principal.",
       "coords": {
-        "top": "74.829%",
-        "left": "53.543%"
+        "top": "78.608%",
+        "left": "49.460%"
       },
       "address": "Mission Row, Los Santos",
       "phone": "911-LSPD-01"
@@ -886,8 +898,8 @@
       "type": "police",
       "description": "Poste de police desservant les quartiers de Vespucci et Del Perro.",
       "coords": {
-        "top": "73.508%",
-        "left": "40.767%"
+        "top": "77.136%",
+        "left": "35.409%"
       },
       "address": "Vespucci Boulevard, Los Santos",
       "phone": "911-LSPD-02"
@@ -898,8 +910,8 @@
       "type": "sheriff",
       "description": "Bureau du shérif du comté de Blaine. Responsable de la sécurité rurale.",
       "coords": {
-        "top": "35.975%",
-        "left": "65.458%"
+        "top": "25.909%",
+        "left": "70.795%"
       },
       "address": "Alhambra Drive, Sandy Shores",
       "phone": "911-LSSD-01"
@@ -910,8 +922,8 @@
       "type": "sheriff",
       "description": "Poste avancé du shérif situé à l'extrémité nord de l'État.",
       "coords": {
-        "top": "16.575%",
-        "left": "46.333%"
+        "top": "14.773%",
+        "left": "41.364%"
       },
       "address": "Duluoz Avenue, Paleto Bay",
       "phone": "911-LSSD-02"
@@ -922,8 +934,8 @@
       "type": "hospital",
       "description": "Hôpital principal de l'État, spécialisé dans les urgences chirurgicales.",
       "coords": {
-        "top": "71.533%",
-        "left": "52.483%"
+        "top": "82.614%",
+        "left": "48.352%"
       },
       "address": "Capital Boulevard, Los Santos",
       "phone": "911-SAMS-01"
@@ -934,8 +946,8 @@
       "type": "hospital",
       "description": "Centre médical de renommée mondiale, leader en recherche et soins spécialisés.",
       "coords": {
-        "top": "69.500%",
-        "left": "46.258%"
+        "top": "75.000%",
+        "left": "42.500%"
       },
       "address": "Dorset Drive, Rockford Hills",
       "phone": "911-SAMS-02"
@@ -946,8 +958,8 @@
       "type": "hospital",
       "description": "Hôpital de proximité au cœur du centre-ville, ouvert 24h/24.",
       "coords": {
-        "top": "78.608%",
-        "left": "52.558%"
+        "top": "75.000%",
+        "left": "45.682%"
       },
       "address": "Elgin Avenue, Los Santos",
       "phone": "911-SAMS-03"
@@ -958,8 +970,8 @@
       "type": "hospital",
       "description": "Seul centre de soins disponible dans la région du désert de Grand Senora.",
       "coords": {
-        "top": "36.025%",
-        "left": "65.325%"
+        "top": "36.023%",
+        "left": "62.159%"
       },
       "address": "Panorama Drive, Sandy Shores",
       "phone": "911-SAMS-04"
