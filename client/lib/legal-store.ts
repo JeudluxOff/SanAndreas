@@ -13,7 +13,6 @@ import {
   CabinetSettings,
   NotificationSettings
 } from '@shared/api';
-import { governmentStore } from '@/lib/government-store';
 import { toast } from 'sonner';
 
 const STORE_KEY = 'hc_legal_store';
@@ -159,8 +158,6 @@ class LegalStoreManager {
     this.saveLocally();
     this.saveToServer();
     this.notify();
-    // Notify governmentStore to refresh its global views that include legal data
-    governmentStore.notify();
   }
 
   subscribe(listener: () => void) {

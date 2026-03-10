@@ -42,6 +42,11 @@ class GovernmentStoreManager {
     const saved = localStorage.getItem(STORE_KEY);
     this.data = saved ? JSON.parse(saved) : INITIAL_DATA;
     this.initSync();
+
+    // Subscribe to legalStore to refresh views when legal data changes
+    legalStore.subscribe(() => {
+      this.notify();
+    });
   }
 
   public stopSync() {

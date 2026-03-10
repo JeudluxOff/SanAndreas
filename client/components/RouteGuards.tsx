@@ -1,7 +1,6 @@
 import React from 'react';
 import { Navigate } from "react-router-dom";
 import { useAuth, Permission, ServiceID } from "@/contexts/AuthContext";
-console.log('[RouteGuards] useAuth imported');
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();

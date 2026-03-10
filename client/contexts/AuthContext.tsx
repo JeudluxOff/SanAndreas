@@ -1,68 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { governmentStore } from '@/lib/government-store';
+import { User, Role, Permission, ServiceID, UserStatus } from './AuthContextTypes';
+import { AuthContext, AuthContextType } from './AuthContextInstance';
 
-export type Role =
-  | 'gouverneur'
-  | 'vice_gouverneur'
-  | 'secretaire_etat_general'
-  | 'secretaire_securite'
-  | 'press_secretary'
-  | 'secretaire_sante'
-  | 'secretaire_justice'
-  | 'secretaire_securite_interieure'
-  | 'secretaire_tresor_commerce'
-  | 'avocat'
-  | 'admin';
-
-export type ServiceID =
-  | 'CABINET'
-  | 'SECURITE_PUBLIQUE'
-  | 'JUSTICE'
-  | 'SANTE_HUMAINS'
-  | 'SECURITE_INTERIEURE'
-  | 'TRESOR_COMMERCE'
-  | 'COMMUNICATION'
-  | 'ADMINISTRATION_GENERALE';
-
-export type Permission =
-  | 'intranet:view'
-  | 'dashboard:view'
-  | 'documents:view' | 'documents:create' | 'documents:edit' | 'documents:delete' | 'documents:submit_review' | 'documents:approve_service' | 'documents:approve_state' | 'documents:sign' | 'documents:publish' | 'documents:archive'
-  | 'dossiers:view' | 'dossiers:create' | 'dossiers:edit' | 'dossiers:close' | 'dossiers:assign_members' | 'dossiers:confidential_access'
-  | 'communication:view' | 'communication:post' | 'communication:announcements_post'
-  | 'planning:view' | 'planning:create' | 'planning:edit'
-  | 'directory:view'
-  | 'admin:users_manage' | 'admin:roles_manage'
-  | 'audit:logs_view' | 'audit:reports_export'
-  | 'lawyer:intranet_access';
-
-export type UserStatus = 'available' | 'busy' | 'away' | 'offline';
-
-export interface User {
-  id: string;
-  username: string;
-  role: Role;
-  service_id: ServiceID;
-  name: string;
-  service_name: string;
-  grade: string;
-  permissions: Permission[];
-  status: UserStatus;
-}
-
-interface AuthContextType {
-  user: User | null;
-  login: (username: string, password: string) => Promise<boolean>;
-  logout: () => void;
-  isLoading: boolean;
-  hasPermission: (permission: Permission) => boolean;
-  canAccessService: (serviceId: ServiceID) => boolean;
-  logAction: (action: string, metadata?: any) => void;
-  updateStatus: (status: UserStatus) => void;
-  updateUser: (updates: Partial<User>) => void;
-  emergencyMode: boolean;
-  toggleEmergencyMode: () => void;
-}
+export * from './AuthContextTypes';
+export { AuthContext };
 
 const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   'gouverneur': [
@@ -149,11 +91,7 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   ]
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-console.log('[AuthContext] Context created:', AuthContext);
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  console.log('[AuthContext] AuthProvider rendering');
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [emergencyMode, setEmergencyMode] = useState(false);
@@ -385,7 +323,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  console.log('[AuthContext] useAuth called, context:', context ? 'defined' : 'undefined');
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
