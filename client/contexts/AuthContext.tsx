@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { governmentStore } from '@/lib/government-store';
+import { legalStore } from '@/lib/legal-store';
 import { User, Role, Permission, ServiceID, UserStatus } from './AuthContextTypes';
 import { AuthContext, AuthContextType } from './AuthContextInstance';
 
