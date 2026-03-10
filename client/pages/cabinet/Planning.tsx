@@ -1,12 +1,13 @@
 import React from 'react';
-import { 
-  Calendar as CalendarIcon, 
-  Clock, 
-  Users, 
-  Gavel, 
-  Plus, 
-  ChevronLeft, 
-  ChevronRight, 
+import {
+  Bell,
+  Calendar as CalendarIcon,
+  Clock,
+  Users,
+  Gavel,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
   MoreVertical,
   MapPin,
   CheckCircle2,
@@ -17,7 +18,8 @@ import {
   UserCheck,
   Lock,
   Trash2,
-  CalendarDays
+  CalendarDays,
+  Settings2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -46,13 +48,15 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { format, addDays, startOfWeek, addWeeks, subWeeks, isSameDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { legalStore } from '@/lib/legal-store';
 import { useLegalStore } from '@/hooks/useLegalStore';
-import { Hearing } from '@shared/api';
+import { Hearing, NotificationSettings } from '@shared/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const Planning = () => {
   const store = useLegalStore();
@@ -64,7 +68,19 @@ const Planning = () => {
   // Modals state
   const [showCreateModal, setShowCreateModal] = React.useState(false);
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+  const [showNotificationModal, setShowNotificationModal] = React.useState(false);
   const [hearingToDelete, setHearingToDelete] = React.useState<string | null>(null);
+
+  // Notification Settings state
+  const [notifSettings, setNotifSettings] = React.useState<NotificationSettings>(store.getNotificationSettings());
+
+  const handleSaveNotifSettings = () => {
+    store.updateNotificationSettings(notifSettings);
+    toast.success("Paramètres mis à jour", {
+      description: "Vos préférences de notifications ont été enregistrées."
+    });
+    setShowNotificationModal(false);
+  };
 
   // Form state
   const [newHearing, setNewHearing] = React.useState({
@@ -418,7 +434,13 @@ const Planning = () => {
                     </p>
                   )}
                 </div>
-                <Button className="w-full bg-[#c1a461] hover:bg-[#927843] text-white text-[10px] font-black uppercase h-12 rounded-xl mt-4">
+                <Button
+                  onClick={() => {
+                    setNotifSettings(store.getNotificationSettings());
+                    setShowNotificationModal(true);
+                  }}
+                  className="w-full bg-[#c1a461] hover:bg-[#927843] text-white text-[10px] font-black uppercase h-12 rounded-xl mt-4"
+                >
                   Gérer les Notifications
                 </Button>
               </CardContent>
@@ -453,6 +475,64 @@ const Planning = () => {
             </div>
           </div>
         </div>
+
+        {/* Notification Management Modal */}
+        <Dialog open={showNotificationModal} onOpenChange={setShowNotificationModal}>
+          <DialogContent className="max-w-md bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-[#c1a461]/10 rounded-2xl">
+                  <Bell className="w-6 h-6 text-[#c1a461]" />
+                </div>
+                <div>
+                  <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Notifications</DialogTitle>
+                  <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                    Configurez vos alertes en temps réel
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+
+            <div className="space-y-6 my-8">
+              {[
+                { key: 'dossiers', label: 'Nouveaux Dossiers', desc: 'Alertes lors de la création de dossiers' },
+                { key: 'documents', label: 'Documents & Actes', desc: 'Dépôts et modifications de documents' },
+                { key: 'evidence', label: 'Pièces à Conviction', desc: 'Nouvelles preuves versées au dossier' },
+                { key: 'hearings', label: 'Audiences & Délais', desc: 'Rappels et nouvelles dates d\'audiences' },
+                { key: 'tasks', label: 'Tâches & Missions', desc: 'Assignations et mises à jour de tâches' },
+                { key: 'invoices', label: 'Facturation', desc: 'Émission et paiement de factures' }
+              ].map((item) => (
+                <div key={item.key} className="flex items-center justify-between group">
+                  <div className="space-y-1 text-left">
+                    <Label className="text-[11px] font-black text-slate-900 uppercase tracking-tight">{item.label}</Label>
+                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none">{item.desc}</p>
+                  </div>
+                  <Switch
+                    checked={(notifSettings as any)[item.key]}
+                    onCheckedChange={(checked) => setNotifSettings({...notifSettings, [item.key]: checked})}
+                    className="data-[state=checked]:bg-[#c1a461]"
+                  />
+                </div>
+              ))}
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="ghost"
+                onClick={() => setShowNotificationModal(false)}
+                className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleSaveNotifSettings}
+                className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl"
+              >
+                Enregistrer les Préférences
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
   );
 };

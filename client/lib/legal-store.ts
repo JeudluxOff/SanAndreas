@@ -10,9 +10,11 @@ import {
   Client,
   Message,
   StaffMember,
-  CabinetSettings
+  CabinetSettings,
+  NotificationSettings
 } from '@shared/api';
 import { governmentStore } from '@/lib/government-store';
+import { toast } from 'sonner';
 
 const STORE_KEY = 'hc_legal_store';
 const SYNC_INTERVAL = 5000; // Poll every 5 seconds
@@ -93,7 +95,29 @@ class LegalStoreManager {
     try {
       const res = await fetch('/api/legal');
       if (res.ok) {
-        const serverData = await res.json();
+        const serverData = await res.json() as LegalStore;
+
+        // Detect new items for notifications if this is not the first load
+        if (this.data.cases.length > 0) {
+          const newCases = serverData.cases.filter(sc => !this.data.cases.some(c => c.id === sc.id));
+          newCases.forEach(c => this.triggerNotification('dossiers', 'Nouveau Dossier (Sync)', `Dossier: ${c.title}`));
+
+          const newDocs = serverData.documents.filter(sd => !this.data.documents.some(d => d.id === sd.id));
+          newDocs.forEach(d => this.triggerNotification('documents', 'Nouveau Document (Sync)', `Doc: ${d.title}`));
+
+          const newEvidence = serverData.evidence.filter(se => !this.data.evidence.some(e => e.id === se.id));
+          newEvidence.forEach(e => this.triggerNotification('evidence', 'Nouvelle Preuve (Sync)', `Preuve: ${e.name}`));
+
+          const newHearings = serverData.hearings.filter(sh => !this.data.hearings.some(h => h.id === sh.id));
+          newHearings.forEach(h => this.triggerNotification('hearings', 'Nouvelle Audience (Sync)', `Audience: ${h.title}`));
+
+          const newTasks = serverData.tasks.filter(st => !this.data.tasks.some(t => t.id === st.id));
+          newTasks.forEach(t => this.triggerNotification('tasks', 'Nouvelle Tâche (Sync)', `Tâche: ${t.title}`));
+
+          const newInvoices = serverData.invoices.filter(si => !this.data.invoices.some(i => i.id === si.id));
+          newInvoices.forEach(inv => this.triggerNotification('invoices', 'Nouvelle Facture (Sync)', `Montant: ${inv.amount} ${inv.currency}`));
+        }
+
         // Simple merge: prefer server data for now to ensure all users see same thing
         this.data = serverData;
         this.saveLocally();
@@ -150,6 +174,21 @@ class LegalStoreManager {
     this.listeners.forEach(l => l());
   }
 
+  private triggerNotification(type: keyof NotificationSettings, title: string, description: string) {
+    const settings = this.getNotificationSettings();
+    if (settings[type]) {
+      toast(title, {
+        description,
+        style: {
+          background: '#0a0f18',
+          color: '#fff',
+          border: '1px solid rgba(193, 164, 97, 0.2)',
+        },
+        duration: 5000,
+      });
+    }
+  }
+
   // Clients
   getClients() { return this.data.clients; }
   getClient(id: string) { return this.data.clients.find(c => c.id === id); }
@@ -164,6 +203,7 @@ class LegalStoreManager {
   createCase(newCase: Case) {
     this.data.cases.unshift(newCase);
     this.save();
+    this.triggerNotification('dossiers', 'Nouveau Dossier', `Le dossier "${newCase.title}" a été créé.`);
   }
   updateCase(updated: Case) {
     const idx = this.data.cases.findIndex(c => c.id === updated.id);
@@ -181,6 +221,7 @@ class LegalStoreManager {
   createDocument(doc: LegalDocument) {
     this.data.documents.unshift(doc);
     this.save();
+    this.triggerNotification('documents', 'Nouveau Document', `Un nouveau document "${doc.title}" a été ajouté.`);
   }
   updateDocument(updated: LegalDocument) {
     const idx = this.data.documents.findIndex(d => d.id === updated.id);
@@ -197,6 +238,7 @@ class LegalStoreManager {
   addEvidence(evi: Evidence) {
     this.data.evidence.unshift(evi);
     this.save();
+    this.triggerNotification('evidence', 'Nouvelle Preuve', `Une pièce à conviction "${evi.name}" a été déposée.`);
   }
 
   // Tasks
@@ -209,6 +251,7 @@ class LegalStoreManager {
   createTask(task: Task) {
     this.data.tasks.unshift(task);
     this.save();
+    this.triggerNotification('tasks', 'Nouvelle Tâche', `La tâche "${task.title}" a été assignée.`);
   }
   updateTask(updated: Task) {
     const idx = this.data.tasks.findIndex(t => t.id === updated.id);
@@ -223,6 +266,7 @@ class LegalStoreManager {
   createHearing(h: Hearing) {
     this.data.hearings.unshift(h);
     this.save();
+    this.triggerNotification('hearings', 'Nouvelle Audience', `Une audience "${h.title}" a été programmée le ${new Date(h.date).toLocaleDateString()}.`);
   }
   updateHearing(updated: Hearing) {
     const idx = this.data.hearings.findIndex(h => h.id === updated.id);
@@ -255,6 +299,7 @@ class LegalStoreManager {
   createInvoice(inv: Invoice) {
     this.data.invoices.unshift(inv);
     this.save();
+    this.triggerNotification('invoices', 'Nouvelle Facture', `Une facture de ${inv.amount} ${inv.currency} a été générée.`);
   }
   updateInvoice(updated: Invoice) {
     const idx = this.data.invoices.findIndex(i => i.id === updated.id);
@@ -335,6 +380,20 @@ class LegalStoreManager {
 
   // Settings
   getSettings() { return this.data.settings; }
+  getNotificationSettings() {
+    return this.data.settings.notification_settings || {
+      dossiers: true,
+      documents: true,
+      evidence: true,
+      hearings: true,
+      tasks: true,
+      invoices: true
+    };
+  }
+  updateNotificationSettings(settings: NotificationSettings) {
+    this.data.settings.notification_settings = settings;
+    this.save();
+  }
   updateSettings(settings: CabinetSettings) {
     this.data.settings = settings;
     this.save();

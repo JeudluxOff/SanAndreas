@@ -172,6 +172,15 @@ export interface StaffMember {
   avatar?: string;
 }
 
+export interface NotificationSettings {
+  dossiers: boolean;
+  documents: boolean;
+  evidence: boolean;
+  hearings: boolean;
+  tasks: boolean;
+  invoices: boolean;
+}
+
 export interface CabinetSettings {
   name: string;
   address: string;
@@ -181,4 +190,5 @@ export interface CabinetSettings {
   phone: string;
   admin_id: string;
   audit_retention_days: number;
+  notification_settings?: NotificationSettings;
 }

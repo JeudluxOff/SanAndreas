@@ -6,7 +6,15 @@
     "iban": "SA00 1234 5678 9012 3456 7890 123",
     "phone": "+SA 555-0199",
     "admin_id": "admin_avocat",
-    "audit_retention_days": 365
+    "audit_retention_days": 365,
+    "notification_settings": {
+      "dossiers": true,
+      "documents": true,
+      "evidence": true,
+      "hearings": true,
+      "tasks": true,
+      "invoices": true
+    }
   },
   "staff": [
     {
