@@ -571,6 +571,18 @@
   ],
   "auditLogs": [
     {
+      "id": "1773161235975",
+      "timestamp": "2026-03-10T16:47:15.975Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Noxwood",
+      "role": "admin",
+      "service_id": "JUSTICE",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin_avocat"
+      }
+    },
+    {
       "id": "1773161012859",
       "timestamp": "2026-03-10T16:43:32.859Z",
       "user_id": "admin_avocat",

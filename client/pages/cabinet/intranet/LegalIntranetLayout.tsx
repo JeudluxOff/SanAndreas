@@ -276,11 +276,11 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
           </main>
         </div>
 
-        {/* Floating User Profile Button (Bottom Right) */}
-        <div className="fixed bottom-8 right-8 z-[60]">
+        {/* Floating User Profile Button (Bottom Left) */}
+        <div className="fixed bottom-8 left-8 z-[60]">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-4 p-2 bg-[#0a0f18] text-white rounded-full border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:bg-slate-900 transition-all group scale-110 md:scale-125 origin-bottom-right">
+              <button className="flex items-center gap-4 p-2 bg-[#0a0f18] text-white rounded-full border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:bg-slate-900 transition-all group scale-110 md:scale-125 origin-bottom-left">
                 <Avatar className="h-10 w-10 ring-2 ring-[#c1a461]/20 border border-white/5">
                   <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id || 'Julian'}`} />
                   <AvatarFallback className="bg-slate-800 text-white font-black">{user?.name?.substring(0, 2).toUpperCase() || 'JN'}</AvatarFallback>
@@ -294,7 +294,7 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
                 </div>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-[#0a0f18] text-white border-white/10 p-2 rounded-xl mb-4 shadow-2xl">
+            <DropdownMenuContent align="start" className="w-56 bg-[#0a0f18] text-white border-white/10 p-2 rounded-xl mb-4 shadow-2xl">
               <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-white/40 px-3 py-2">Compte Utilisateur</DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-white/5" />
               <DropdownMenuItem

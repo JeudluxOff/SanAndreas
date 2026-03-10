@@ -391,12 +391,12 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
-      {/* Floating User Profile Button (Bottom Right) */}
-      <div className="fixed bottom-8 right-8 z-[60]">
+      {/* Floating User Profile Button (Bottom Left) */}
+      <div className="fixed bottom-8 left-8 z-[60]">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className={cn(
-              "flex items-center gap-4 p-2 rounded-full border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all group scale-110 md:scale-125 origin-bottom-right",
+              "flex items-center gap-4 p-2 rounded-full border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all group scale-110 md:scale-125 origin-bottom-left",
               emergencyMode ? "bg-red-900 text-white" : "bg-slate-900 text-white hover:bg-slate-800"
             )}>
               <div className="relative">
@@ -419,7 +419,7 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
               </div>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 bg-slate-950 text-white border-slate-800 p-2 rounded-xl mb-4 shadow-2xl">
+          <DropdownMenuContent align="start" className="w-56 bg-slate-950 text-white border-slate-800 p-2 rounded-xl mb-4 shadow-2xl">
             <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-3 py-2">Mon Compte</DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-slate-800" />
             <DropdownMenuItem
