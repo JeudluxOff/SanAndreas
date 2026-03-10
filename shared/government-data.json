@@ -14,7 +14,7 @@
       ],
       "staff": [
         {
-          "name": "Arthur Vance",
+          "name": "Ethan Hunt",
           "role": "Gouverneur",
           "role_short": "Gov",
           "status": "available"
@@ -54,7 +54,7 @@
           "title": "Rappel : Réunion Hebdomadaire",
           "text": "Présence obligatoire de tous les membres demain à 9h.",
           "date": "Il y a 2h",
-          "author": "Arthur V."
+          "author": "Ethan H."
         }
       ],
       "documents": [
@@ -71,7 +71,7 @@
           "type": "Décret",
           "date": "22 Mai 2024",
           "status": "Signé",
-          "author": "Arthur Vance",
+          "author": "Ethan Hunt",
           "archived": false,
           "acl": []
         },
@@ -81,7 +81,7 @@
           "type": "Décret",
           "date": "08 Mai 2024",
           "status": "Signé",
-          "author": "Arthur Vance",
+          "author": "Ethan Hunt",
           "archived": false,
           "acl": []
         }
@@ -107,7 +107,7 @@
           "participants": [
             {
               "id": "governor",
-              "name": "Arthur Vance",
+              "name": "Ethan Hunt",
               "role": "Gouverneur"
             },
             {
@@ -131,7 +131,7 @@
           "participants": [
             {
               "id": "governor",
-              "name": "Arthur Vance",
+              "name": "Ethan Hunt",
               "role": "Gouverneur"
             }
           ]
@@ -402,14 +402,14 @@
       "description": "Fondateur historique du cabinet Noxwood & Partner."
     },
     {
-      "name": "Arthur Vance",
+      "name": "Ethan Hunt",
       "role": "Gouverneur",
       "service": "Cabinet",
       "grade": "Exécutif",
       "status": "En service",
-      "email": "a.vance@sa.gov",
+      "email": "e.hunt@sa.gov",
       "joinDate": "Jan 2024",
-      "image": "/placeholder.svg",
+      "image": "https://cdn.builder.io/api/v1/image/assets%2F4e331a0ce80644199f9cae8c33fdc854%2F825f5b55d529428f974a0a1f35c96f2c?format=webp&width=800&height=1200",
       "description": "Leader visionnaire dévoué à la sécurité et à la prospérité de San Andreas."
     },
     {

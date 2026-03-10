@@ -85,6 +85,19 @@
   "invoices": [],
   "auditLogs": [
     {
+      "id": "LOG-1773166392791",
+      "timestamp": "2026-03-10T18:13:12.791Z",
+      "user_id": "admin_avocat",
+      "user_name": "Mathieu Gerrin",
+      "action": "Vérification conflit intérêts",
+      "target_type": "ConflictCheck",
+      "target_id": "CC-1773166392790",
+      "metadata": {
+        "query": "dfbcv",
+        "result": "Pass"
+      }
+    },
+    {
       "id": "LOG-1773164852435",
       "timestamp": "2026-03-10T17:47:32.435Z",
       "user_id": "admin_avocat",
@@ -309,6 +322,14 @@
     }
   ],
   "conflictChecks": [
+    {
+      "id": "CC-1773166392790",
+      "timestamp": "2026-03-10T18:13:12.790Z",
+      "query": "dfbcv",
+      "result": "Pass",
+      "matched_entities": [],
+      "performed_by": "admin_avocat"
+    },
     {
       "id": "CC-1771775783702",
       "timestamp": "2026-02-22T15:56:23.702Z",

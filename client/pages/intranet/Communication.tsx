@@ -56,7 +56,7 @@ const allChannels = [
 ];
 
 const directMessages = [
-  { id: 'governor', name: 'Arthur Vance', role: 'Gouverneur', status: 'online' },
+  { id: 'governor', name: 'Ethan Hunt', role: 'Gouverneur', status: 'online' },
   { id: 'lt_governor', name: 'Elena Rodriguez', role: 'Lt-Gouverneur', status: 'online' },
   { id: 'sec_securite', name: 'Jackson Teller', role: 'Secrétaire Sécurité', status: 'offline' },
   { id: 'sec_justice', name: 'Thomas Vercetti', role: 'Secrétaire Justice', status: 'online' },
@@ -328,7 +328,7 @@ const Communication = () => {
                     {msg.isMe && (
                       <div className="flex items-center gap-1 mt-1 px-1">
                         <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Lu par Arthur V.</span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Lu par Ethan H.</span>
                       </div>
                     )}
                   </div>

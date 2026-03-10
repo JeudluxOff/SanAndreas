@@ -151,9 +151,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         'governor': {
           role: 'gouverneur',
           service_id: 'CABINET',
-          name: 'Arthur Vance',
+          name: 'Ethan Hunt',
           service_name: 'Cabinet du Gouverneur',
-          grade: 'Gouverneur de San Andreas'
+          grade: 'Gouverneur de San Andreas',
+          avatar: 'https://cdn.builder.io/api/v1/image/assets%2F4e331a0ce80644199f9cae8c33fdc854%2F825f5b55d529428f974a0a1f35c96f2c?format=webp&width=800&height=1200'
         },
         'lt_governor': {
           role: 'vice_gouverneur',

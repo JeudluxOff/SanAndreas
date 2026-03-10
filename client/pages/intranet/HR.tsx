@@ -408,7 +408,7 @@ const HR = () => {
               <CardContent className="relative z-10 space-y-4">
                 <div className="space-y-3">
                   {[
-                    { user: "Arthur Vance", action: "Nouveau Rôle : Secrétaire Travail", time: "10:30" },
+                    { user: "Ethan Hunt", action: "Nouveau Rôle : Secrétaire Travail", time: "10:30" },
                     { user: "Jackson Teller", action: "Accès Dossier Judiciaire #JD-41", time: "09:15" },
                     { user: "System", action: "Mise à jour permissions groupe 'Justice'", time: "Hier" }
                   ].map((log, i) => (
