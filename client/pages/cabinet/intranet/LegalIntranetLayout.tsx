@@ -37,6 +37,26 @@ import {
   SelectValue
 } from '@/components/ui/select';
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
 // RBAC Context for Simulation
 type LegalRole = 'Associé' | 'Avocat' | 'Juriste' | 'Secrétaire' | 'Comptable' | 'Stagiaire' | 'Auditeur';
 
@@ -125,21 +145,6 @@ export const Sidebar = () => {
           );
         })}
       </div>
-
-      <div className="p-6 bg-white/5 m-4 rounded-xl border border-white/5">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8 ring-2 ring-[#c1a461]/20">
-            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id || 'Julian'}`} />
-            <AvatarFallback>{user?.name?.substring(0, 2).toUpperCase() || 'JN'}</AvatarFallback>
-          </Avatar>
-          <div className="overflow-hidden">
-            <p className="text-[10px] font-black truncate">{user?.name || 'Julian Noxwood'}</p>
-            <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-2 py-0 mt-1", ROLE_COLORS[activeRole])}>
-              {activeRole}
-            </Badge>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
@@ -222,12 +227,34 @@ export const Header = () => {
 };
 
 export default function LegalIntranetLayout({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, updateUser, logout } = useAuth();
   const [activeRole, setActiveRole] = React.useState<LegalRole>(() => {
     if (user?.role === 'admin') return 'Associé';
     if (user?.role === 'avocat') return 'Avocat';
     return 'Juriste';
   });
+
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = React.useState(false);
+  const [newName, setNewName] = React.useState('');
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (user) {
+      setNewName(user.name);
+    }
+  }, [user]);
+
+  const handleUpdateName = () => {
+    if (newName.trim()) {
+      updateUser({ name: newName });
+      setIsProfileDialogOpen(false);
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/cabinet/login');
+  };
 
   const value = {
     activeRole,
@@ -240,7 +267,7 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
 
   return (
     <LegalRBACContext.Provider value={value}>
-      <div className="min-h-screen bg-slate-50 flex">
+      <div className="min-h-screen bg-slate-50 flex relative">
         <Sidebar />
         <div className="flex-grow pl-64 flex flex-col min-h-screen">
           <Header />
@@ -248,6 +275,75 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
             {children}
           </main>
         </div>
+
+        {/* Floating User Profile Button (Bottom Right) */}
+        <div className="fixed bottom-8 right-8 z-[60]">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-4 p-2 bg-[#0a0f18] text-white rounded-full border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:bg-slate-900 transition-all group scale-110 md:scale-125 origin-bottom-right">
+                <Avatar className="h-10 w-10 ring-2 ring-[#c1a461]/20 border border-white/5">
+                  <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id || 'Julian'}`} />
+                  <AvatarFallback className="bg-slate-800 text-white font-black">{user?.name?.substring(0, 2).toUpperCase() || 'JN'}</AvatarFallback>
+                </Avatar>
+                <div className="text-left pr-4">
+                  <p className="text-[10px] font-black uppercase tracking-tighter leading-none mb-1">{user?.name || 'Julian Noxwood'}</p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-[7px] font-bold text-white/40 uppercase tracking-[0.2em]">En Ligne</span>
+                  </div>
+                </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-[#0a0f18] text-white border-white/10 p-2 rounded-xl mb-4 shadow-2xl">
+              <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-white/40 px-3 py-2">Compte Utilisateur</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-white/5" />
+              <DropdownMenuItem
+                onClick={() => setIsProfileDialogOpen(true)}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 cursor-pointer"
+              >
+                <Settings className="w-4 h-4 text-[#c1a461]" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Modifier Profil</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-white/5" />
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-500/10 text-red-400 cursor-pointer"
+              >
+                <Zap className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Déconnexion</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
+          <DialogContent className="sm:max-w-[425px] bg-[#0a0f18] text-white border-white/5">
+            <DialogHeader>
+              <DialogTitle className="uppercase font-black tracking-tight text-xl">Profil Officiel</DialogTitle>
+              <DialogDescription className="italic font-medium text-white/40 text-xs">
+                Modifiez votre identité pour les documents et l'annuaire du cabinet.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-6 py-6">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-xs font-black uppercase tracking-widest text-white/40">
+                  Nom & Prénom
+                </Label>
+                <Input
+                  id="name"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white font-black uppercase placeholder:text-white/10"
+                  placeholder="EX: JULIAN NOXWOOD"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setIsProfileDialogOpen(false)} className="text-white/40 font-black uppercase text-[10px]">Annuler</Button>
+              <Button onClick={handleUpdateName} className="bg-[#c1a461] hover:bg-[#d1b471] text-white font-black uppercase text-[10px] px-8">Enregistrer</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </LegalRBACContext.Provider>
   );
