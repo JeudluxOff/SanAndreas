@@ -34,25 +34,23 @@ export default function Gouvernement() {
 
   return (
     <Layout>
-      <div className="bg-primary py-24 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-white/5 opacity-10 pointer-events-none transform -rotate-12 scale-150">
-          <img src="/placeholder.svg" alt="Pattern" className="w-full h-full object-cover" />
+      <div className="bg-[#0a0f18] py-32 text-white relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img
+            src="https://cdn.builder.io/api/v1/image/assets%2F4e331a0ce80644199f9cae8c33fdc854%2F5dcbd39c6c4842bdb3d0af4c134475de?format=webp&width=800&height=1200"
+            alt="San Andreas Skyline"
+            className="w-full h-full object-cover opacity-30"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0f18] via-[#0a0f18]/80 to-transparent" />
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl space-y-6">
             <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none border-l-8 border-secondary pl-8">
               Le Gouvernement <br /> <span className="text-secondary">de San Andreas</span>
             </h1>
-            <p className="text-xl md:text-2xl text-slate-300 font-medium leading-relaxed max-w-2xl">
+            <p className="text-xl md:text-2xl text-slate-300 font-medium leading-relaxed max-w-2xl italic">
               Une administration dévouée au service du public, assurant la stabilité et la prospérité de notre État à travers une gouvernance transparente.
             </p>
-            <div className="mt-12 rounded-2xl overflow-hidden border-4 border-white/10 shadow-2xl max-w-4xl group transition-transform hover:scale-[1.02]">
-              <img
-                src="https://cdn.builder.io/api/v1/image/assets%2F4e331a0ce80644199f9cae8c33fdc854%2F5dcbd39c6c4842bdb3d0af4c134475de?format=webp&width=800&height=1200"
-                alt="Skyline"
-                className="w-full h-auto object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-              />
-            </div>
           </div>
         </div>
       </div>
