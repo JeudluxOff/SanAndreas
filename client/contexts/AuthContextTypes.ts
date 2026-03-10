@@ -45,4 +45,6 @@ export interface User {
   grade: string;
   permissions: Permission[];
   status: UserStatus;
+  matricule?: string;
+  callsign?: string;
 }

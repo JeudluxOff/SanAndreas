@@ -127,8 +127,11 @@ const Admin = () => {
                         <AvatarFallback>{member.name[0]}</AvatarFallback>
                       </Avatar>
                       <div className="text-left">
-                        <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{member.name}</p>
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{member.role} • {member.email}</p>
+                        <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">
+                          {member.callsign && <span className="text-[#c1a461] mr-1">[{member.callsign}]</span>}
+                          {member.name}
+                        </p>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{member.role} • {member.email} {member.matricule && `• ${member.matricule}`}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-6">

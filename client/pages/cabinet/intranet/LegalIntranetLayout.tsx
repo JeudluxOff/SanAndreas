@@ -287,10 +287,13 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
                     <AvatarFallback className="bg-slate-800 text-white font-black">{user?.name?.substring(0, 2).toUpperCase() || 'JN'}</AvatarFallback>
                   </Avatar>
                   <div className="text-left pr-4">
-                    <p className="text-[10px] font-black uppercase tracking-tighter leading-none mb-1">{user?.name || 'Julian Noxwood'}</p>
+                    <p className="text-[10px] font-black uppercase tracking-tighter leading-none mb-1">
+                      {user?.callsign && <span className="text-[#c1a461] mr-1">[{user.callsign}]</span>}
+                      {user?.name || 'Julian Noxwood'}
+                    </p>
                     <div className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-[7px] font-bold text-white/40 uppercase tracking-[0.2em]">En Ligne</span>
+                      <span className="text-[7px] font-bold text-white/40 uppercase tracking-[0.2em]">En Ligne {user?.matricule && `• ${user.matricule}`}</span>
                     </div>
                   </div>
                 </button>
@@ -339,6 +342,28 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
                   placeholder="EX: JULIAN NOXWOOD"
                 />
               </div>
+
+              {user?.role === 'admin' && (
+                <div className="space-y-4 pt-4 border-t border-white/5">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-xs font-black uppercase tracking-widest text-[#c1a461]">Codes d'Action Système</Label>
+                    <Badge className="bg-[#c1a461]/20 text-[#c1a461] text-[8px] font-black uppercase border-none">Privilèges Fondateur</Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { code: "10-01", label: "Accès Total" },
+                      { code: "10-05", label: "Audit Global" },
+                      { code: "10-10", label: "Scellement" },
+                      { code: "10-99", label: "Admin Console" }
+                    ].map((c, i) => (
+                      <div key={i} className="flex items-center gap-3 p-2 bg-white/5 rounded-lg border border-white/5">
+                        <span className="text-[10px] font-black text-[#c1a461]">{c.code}</span>
+                        <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest">{c.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button variant="ghost" onClick={() => setIsProfileDialogOpen(false)} className="text-white/40 font-black uppercase text-[10px]">Annuler</Button>

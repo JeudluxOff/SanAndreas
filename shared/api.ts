@@ -170,6 +170,8 @@ export interface StaffMember {
   joined_at: string;
   last_active: string;
   avatar?: string;
+  matricule?: string;
+  callsign?: string;
 }
 
 export interface NotificationSettings {

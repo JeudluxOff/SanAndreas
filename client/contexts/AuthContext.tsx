@@ -215,14 +215,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           service_id: 'JUSTICE',
           name: 'Julian Noxwood',
           service_name: 'Noxwood & Partner',
-          grade: 'Associé Fondateur & Admin'
+          grade: 'Associé Fondateur & Admin',
+          matricule: 'JN-01',
+          callsign: 'A-2'
         },
         'reed_noxwood': {
           role: 'admin',
           service_id: 'JUSTICE',
           name: 'Reed Noxwood',
           service_name: 'Noxwood & Partner',
-          grade: 'Fondateur & Associé'
+          grade: 'Fondateur & Associé',
+          matricule: 'RN-01',
+          callsign: 'A-1'
         }
       };
 
@@ -237,7 +241,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           service_name: baseUser.service_name!,
           grade: baseUser.grade!,
           permissions: ROLE_PERMISSIONS[baseUser.role!],
-          status: 'available'
+          status: 'available',
+          matricule: baseUser.matricule,
+          callsign: baseUser.callsign
         };
 
         setUser(fullUser);

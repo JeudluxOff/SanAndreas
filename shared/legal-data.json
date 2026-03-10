@@ -24,7 +24,9 @@
       "email": "r.noxwood@np.sa",
       "status": "Actif",
       "joined_at": "2018-01-01",
-      "last_active": "2024-05-24T09:42:00Z"
+      "last_active": "2024-05-24T09:42:00Z",
+      "matricule": "RN-01",
+      "callsign": "A-1"
     },
     {
       "id": "admin_avocat",
@@ -33,7 +35,9 @@
       "email": "j.noxwood@np.sa",
       "status": "Actif",
       "joined_at": "2020-01-01",
-      "last_active": "2024-05-24T09:42:00Z"
+      "last_active": "2024-05-24T09:42:00Z",
+      "matricule": "JN-01",
+      "callsign": "A-2"
     },
     {
       "id": "avocat_victoria",
