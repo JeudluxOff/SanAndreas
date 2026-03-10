@@ -96,13 +96,6 @@
   ],
   "clients": [
     {
-      "id": "cli-004",
-      "name": "Gouvernement SA",
-      "email": "admin@gov.sa",
-      "type": "Entreprise",
-      "created_at": "2024-01-01"
-    },
-    {
       "id": "cli-005",
       "name": "Mairie de Los Santos",
       "email": "mayor@ls.sa",
@@ -145,6 +138,18 @@
   "hearings": [],
   "invoices": [],
   "auditLogs": [
+    {
+      "id": "LOG-1773164852435",
+      "timestamp": "2026-03-10T17:47:32.435Z",
+      "user_id": "admin_avocat",
+      "user_name": "System",
+      "action": "Suppression client",
+      "target_type": "Client",
+      "target_id": "cli-004",
+      "metadata": {
+        "name": "Gouvernement SA"
+      }
+    },
     {
       "id": "LOG-1773162798373",
       "timestamp": "2026-03-10T17:13:18.373Z",
@@ -375,5 +380,13 @@
       "performed_by": "admin_avocat"
     }
   ],
-  "messages": []
+  "messages": [
+    {
+      "id": "MSG-1773164780786",
+      "channel_id": "admin_avocat:reed_noxwood",
+      "sender_id": "admin_avocat",
+      "content": "jdueb",
+      "timestamp": "2026-03-10T17:46:20.786Z"
+    }
+  ]
 }

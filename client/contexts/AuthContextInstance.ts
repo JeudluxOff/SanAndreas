@@ -11,6 +11,7 @@ export interface AuthContextType {
   logAction: (action: string, metadata?: any) => void;
   updateStatus: (status: UserStatus) => void;
   updateUser: (updates: Partial<User>) => void;
+  registerUser: (userData: Omit<User, 'id' | 'permissions' | 'status'>, password: string) => void;
   emergencyMode: boolean;
   toggleEmergencyMode: () => void;
 }

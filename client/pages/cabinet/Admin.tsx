@@ -24,18 +24,84 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogDescription
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useLegalRBAC } from '@/pages/cabinet/intranet/LegalIntranetLayout';
 import { Link } from 'react-router-dom';
 import { legalStore } from '@/lib/legal-store';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const Admin = () => {
   const { isAssocié, canAudit } = useLegalRBAC();
-  const logs = legalStore.getAuditLogs();
-  const staff = legalStore.getStaff();
+  const { registerUser } = useAuth();
+
+  const [staff, setStaff] = React.useState(legalStore.getStaff());
+  const [logs, setLogs] = React.useState(legalStore.getAuditLogs());
   const settings = legalStore.getSettings();
 
+  React.useEffect(() => {
+    return legalStore.subscribe(() => {
+      setStaff([...legalStore.getStaff()]);
+      setLogs([...legalStore.getAuditLogs()]);
+    });
+  }, []);
+
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [newUserForm, setNewUserForm] = React.useState({
+    username: '',
+    password: '',
+    name: '',
+    role: 'avocat' as any,
+    service_id: 'JUSTICE' as any,
+    service_name: 'Noxwood & Partner',
+    grade: 'Avocat à la Cour',
+    matricule: '',
+    callsign: '',
+    avatar: ''
+  });
+
+  const handleCreateUser = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUserForm.username || !newUserForm.password || !newUserForm.name) {
+      toast.error("Veuillez remplir les champs obligatoires");
+      return;
+    }
+
+    registerUser(newUserForm, newUserForm.password);
+    toast.success("Utilisateur créé avec succès");
+    setIsDialogOpen(false);
+    setNewUserForm({
+      username: '',
+      password: '',
+      name: '',
+      role: 'avocat',
+      service_id: 'JUSTICE',
+      service_name: 'Noxwood & Partner',
+      grade: 'Avocat à la Cour',
+      matricule: '',
+      callsign: '',
+      avatar: ''
+    });
+  };
 
   const filteredStaff = staff.filter(s =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -72,9 +138,130 @@ const Admin = () => {
             <Button variant="outline" className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
               <Download className="w-4 h-4" /> Rapport Système
             </Button>
-            <Button className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
-              <UserPlus className="w-4 h-4" /> Nouvel Utilisateur
-            </Button>
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
+                  <UserPlus className="w-4 h-4" /> Nouvel Utilisateur
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl bg-white border-none shadow-2xl rounded-[32px] p-0 overflow-hidden">
+                <div className="bg-[#0a0f18] p-8 text-white">
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
+                      <div className="p-2 bg-[#c1a461] rounded-lg">
+                        <UserPlus className="w-5 h-5 text-[#0a0f18]" />
+                      </div>
+                      Création d'Utilisateur
+                    </DialogTitle>
+                    <DialogDescription className="text-white/40 font-bold uppercase text-[10px] tracking-[0.2em] mt-2">
+                      Enregistrement d'un nouveau membre dans l'intranet cabinet
+                    </DialogDescription>
+                  </DialogHeader>
+                </div>
+
+                <form onSubmit={handleCreateUser} className="p-8 space-y-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nom d'utilisateur</Label>
+                      <Input
+                        placeholder="EX: HARVEY_S"
+                        className="bg-slate-50 border-none h-12 text-xs font-bold uppercase tracking-widest rounded-xl focus-visible:ring-1 focus-visible:ring-[#c1a461]"
+                        value={newUserForm.username}
+                        onChange={(e) => setNewUserForm({...newUserForm, username: e.target.value.toLowerCase().replace(/\s/g, '_')})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Mot de passe</Label>
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        className="bg-slate-50 border-none h-12 text-xs font-bold uppercase tracking-widest rounded-xl focus-visible:ring-1 focus-visible:ring-[#c1a461]"
+                        value={newUserForm.password}
+                        onChange={(e) => setNewUserForm({...newUserForm, password: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nom Complet</Label>
+                      <Input
+                        placeholder="EX: HARVEY SPECTER"
+                        className="bg-slate-50 border-none h-12 text-xs font-bold uppercase tracking-widest rounded-xl focus-visible:ring-1 focus-visible:ring-[#c1a461]"
+                        value={newUserForm.name}
+                        onChange={(e) => setNewUserForm({...newUserForm, name: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Niveau d'Accès</Label>
+                      <Select
+                        value={newUserForm.role}
+                        onValueChange={(val) => setNewUserForm({...newUserForm, role: val})}
+                      >
+                        <SelectTrigger className="bg-slate-50 border-none h-12 text-xs font-bold uppercase tracking-widest rounded-xl focus:ring-1 focus:ring-[#c1a461]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-slate-100 rounded-xl">
+                          <SelectItem value="avocat" className="text-[10px] font-bold uppercase tracking-widest">Avocat (Standard)</SelectItem>
+                          <SelectItem value="admin" className="text-[10px] font-bold uppercase tracking-widest">Admin (Complet)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fonction / Grade</Label>
+                      <Input
+                        placeholder="EX: AVOCAT SENIOR"
+                        className="bg-slate-50 border-none h-12 text-xs font-bold uppercase tracking-widest rounded-xl focus-visible:ring-1 focus-visible:ring-[#c1a461]"
+                        value={newUserForm.grade}
+                        onChange={(e) => setNewUserForm({...newUserForm, grade: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Matricule</Label>
+                      <Input
+                        placeholder="EX: HS-01"
+                        className="bg-slate-50 border-none h-12 text-xs font-bold uppercase tracking-widest rounded-xl focus-visible:ring-1 focus-visible:ring-[#c1a461]"
+                        value={newUserForm.matricule}
+                        onChange={(e) => setNewUserForm({...newUserForm, matricule: e.target.value.toUpperCase()})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Code Action (Callsign)</Label>
+                      <Input
+                        placeholder="EX: A-5"
+                        className="bg-slate-50 border-none h-12 text-xs font-bold uppercase tracking-widest rounded-xl focus-visible:ring-1 focus-visible:ring-[#c1a461]"
+                        value={newUserForm.callsign}
+                        onChange={(e) => setNewUserForm({...newUserForm, callsign: e.target.value.toUpperCase()})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">URL Avatar</Label>
+                      <Input
+                        placeholder="HTTPS://..."
+                        className="bg-slate-50 border-none h-12 text-xs font-bold uppercase tracking-widest rounded-xl focus-visible:ring-1 focus-visible:ring-[#c1a461]"
+                        value={newUserForm.avatar}
+                        onChange={(e) => setNewUserForm({...newUserForm, avatar: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <DialogFooter className="pt-6">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsDialogOpen(false)}
+                      className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl"
+                    >
+                      Annuler
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="bg-[#c1a461] text-[#0a0f18] text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl hover:bg-[#c1a461]/90"
+                    >
+                      Confirmer la Création
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 

@@ -95,6 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [emergencyMode, setEmergencyMode] = useState(false);
+  const [registeredUsers, setRegisteredUsers] = useState<Record<string, { user: User, password: string }>>({});
 
   useEffect(() => {
     return governmentStore.subscribe(() => {
@@ -108,6 +109,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (savedEmergency === 'true') {
       setEmergencyMode(true);
+    }
+    const savedRegUsers = localStorage.getItem('sa_gov_registered_users');
+    if (savedRegUsers) {
+      setRegisteredUsers(JSON.parse(savedRegUsers));
     }
     if (savedUser) {
       try {
@@ -130,6 +135,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (username: string, password: string) => {
+    // Check registered users first
+    const regUser = registeredUsers[username];
+    if (regUser && regUser.password === password) {
+      setUser(regUser.user);
+      localStorage.setItem('sa_gov_user', JSON.stringify(regUser.user));
+      logAction('Connexion réussie (Dynamic)', { username });
+      return true;
+    }
+
     // Mock login system based on predefined roles
     if (password === 'admin') {
       const mockUsers: Record<string, Partial<User>> = {
@@ -335,10 +349,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logAction(newMode ? 'Activation Protocole Urgence' : 'Désactivation Protocole Urgence');
   };
 
+  const registerUser = (userData: Omit<User, 'id' | 'permissions' | 'status'>, password: string) => {
+    const newUser: User = {
+      ...userData,
+      id: userData.username,
+      permissions: ROLE_PERMISSIONS[userData.role] || [],
+      status: 'available'
+    };
+
+    const updatedRegUsers = {
+      ...registeredUsers,
+      [newUser.username]: { user: newUser, password }
+    };
+
+    setRegisteredUsers(updatedRegUsers);
+    localStorage.setItem('sa_gov_registered_users', JSON.stringify(updatedRegUsers));
+
+    // Also sync with legalStore
+    const legalRoleMap: Record<string, string> = {
+      'admin': 'Associé',
+      'avocat': 'Avocat'
+    };
+
+    legalStore.addStaff({
+      id: newUser.id,
+      name: newUser.name,
+      role: (legalRoleMap[newUser.role] || 'Avocat') as any,
+      email: `${newUser.username}@np.sa`,
+      status: 'Actif',
+      joined_at: new Date().toISOString(),
+      last_active: new Date().toISOString(),
+      matricule: newUser.matricule,
+      callsign: newUser.callsign,
+      avatar: newUser.avatar
+    });
+
+    logAction('Création nouvel utilisateur', { username: newUser.username, role: newUser.role });
+  };
+
   return (
     <AuthContext.Provider value={{
       user, login, logout, isLoading, hasPermission, canAccessService,
-      logAction, updateStatus, updateUser, emergencyMode, toggleEmergencyMode
+      logAction, updateStatus, updateUser, registerUser, emergencyMode, toggleEmergencyMode
     }}>
       {children}
     </AuthContext.Provider>
