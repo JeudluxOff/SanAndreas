@@ -44,7 +44,8 @@ const INITIAL_DATA: LegalStore = {
     audit_retention_days: 365
   },
   staff: [
-    { id: 'admin_avocat', name: 'Julian Noxwood', role: 'Associé', email: 'j.noxwood@np.sa', status: 'Actif', joined_at: '2020-01-01', last_active: new Date().toISOString() },
+    { id: 'reed_noxwood', name: 'Reed Noxwood', role: 'Associé', email: 'r.noxwood@np.sa', status: 'Actif', joined_at: '2018-01-01', last_active: new Date().toISOString(), matricule: 'RN-01', callsign: 'A-1' },
+    { id: 'admin_avocat', name: 'Julian Noxwood', role: 'Associé', email: 'j.noxwood@np.sa', status: 'Actif', joined_at: '2020-01-01', last_active: new Date().toISOString(), matricule: 'JN-01', callsign: 'A-2' },
     { id: 'avocat_victoria', name: 'Victoria Partner', role: 'Associée', email: 'v.partner@np.sa', status: 'Actif', joined_at: '2020-01-01', last_active: new Date().toISOString() },
     { id: 'avocat_marcus', name: 'Marcus Vane', role: 'Avocat Senior', email: 'm.vane@np.sa', status: 'Actif', joined_at: '2021-05-15', last_active: new Date().toISOString() },
     { id: 'avocat_elena', name: 'Elena Rossi', role: 'Avocate', email: 'e.rossi@np.sa', status: 'Actif', joined_at: '2022-03-10', last_active: new Date().toISOString() },

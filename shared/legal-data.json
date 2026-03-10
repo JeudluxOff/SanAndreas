@@ -146,6 +146,18 @@
   "invoices": [],
   "auditLogs": [
     {
+      "id": "LOG-1773162798373",
+      "timestamp": "2026-03-10T17:13:18.373Z",
+      "user_id": "admin_avocat",
+      "user_name": "System",
+      "action": "Suppression d'audience",
+      "target_type": "Hearing",
+      "target_id": "HR-1773162785691",
+      "metadata": {
+        "title": "Réunion Gouvernement"
+      }
+    },
+    {
       "id": "LOG-1773162097035",
       "timestamp": "2026-03-10T17:01:37.035Z",
       "user_id": "reed_noxwood",
