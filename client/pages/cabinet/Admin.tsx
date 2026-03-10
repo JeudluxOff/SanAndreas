@@ -5,7 +5,7 @@ import {
   Plus, 
   Filter, 
   MoreVertical, 
-  ChevronRight, 
+  ChevronRight,
   Lock,
   Download,
   Users,
@@ -18,7 +18,8 @@ import {
   Database,
   Globe,
   Mail,
-  Server
+  Server,
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -51,7 +52,7 @@ import { toast } from 'sonner';
 
 const Admin = () => {
   const { isAssocié, canAudit } = useLegalRBAC();
-  const { registerUser } = useAuth();
+  const { registerUser, deleteUser, user: currentUser } = useAuth();
 
   const [staff, setStaff] = React.useState(legalStore.getStaff());
   const [logs, setLogs] = React.useState(legalStore.getAuditLogs());
@@ -107,6 +108,18 @@ const Admin = () => {
       callsign: '',
       avatar: ''
     });
+  };
+
+  const handleDeleteStaff = (userId: string, name: string) => {
+    if (userId === currentUser?.id) {
+      toast.error("Vous ne pouvez pas supprimer votre propre compte.");
+      return;
+    }
+
+    if (confirm(`Êtes-vous sûr de vouloir supprimer le collaborateur ${name} ? Cette action est irréversible et il ne pourra plus se connecter.`)) {
+      deleteUser(userId);
+      toast.success(`${name} a été supprimé du système.`);
+    }
   };
 
   const filteredStaff = staff.filter(s =>
@@ -346,8 +359,17 @@ const Admin = () => {
                        <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-3 py-1",
                          member.status === 'Actif' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'
                        )}>{member.status}</Badge>
-                       <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
-                         <MoreVertical className="w-5 h-5" />
+
+                       <Button
+                         variant="ghost"
+                         size="icon"
+                         className="text-slate-300 hover:text-red-600"
+                         onClick={(e) => {
+                           e.stopPropagation();
+                           handleDeleteStaff(member.id, member.name);
+                         }}
+                       >
+                         <Trash2 className="w-4 h-4" />
                        </Button>
                     </div>
                   </div>

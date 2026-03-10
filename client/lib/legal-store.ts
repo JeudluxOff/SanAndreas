@@ -395,6 +395,13 @@ class LegalStoreManager {
     this.data.staff.push(member);
     this.save();
   }
+  removeStaff(userId: string) {
+    const idx = this.data.staff.findIndex(s => s.id === userId);
+    if (idx !== -1) {
+      this.data.staff.splice(idx, 1);
+      this.save();
+    }
+  }
   updateStaff(member: StaffMember) {
     const idx = this.data.staff.findIndex(s => s.id === member.id);
     if (idx !== -1) {

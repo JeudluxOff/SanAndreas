@@ -392,10 +392,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logAction('Création nouvel utilisateur', { username: newUser.username, role: newUser.role });
   };
 
+  const deleteUser = (userId: string) => {
+    const updatedRegUsers = { ...registeredUsers };
+    delete updatedRegUsers[userId];
+    setRegisteredUsers(updatedRegUsers);
+    localStorage.setItem('sa_gov_registered_users', JSON.stringify(updatedRegUsers));
+
+    // Also remove from legalStore staff list
+    legalStore.removeStaff(userId);
+
+    logAction('Suppression utilisateur', { userId });
+
+    // If the user being deleted is the current user, log them out
+    if (user?.id === userId) {
+      logout();
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user, login, logout, isLoading, hasPermission, canAccessService,
-      logAction, updateStatus, updateUser, registerUser, emergencyMode, toggleEmergencyMode
+      logAction, updateStatus, updateUser, registerUser, deleteUser, emergencyMode, toggleEmergencyMode
     }}>
       {children}
     </AuthContext.Provider>

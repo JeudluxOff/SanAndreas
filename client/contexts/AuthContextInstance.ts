@@ -12,6 +12,7 @@ export interface AuthContextType {
   updateStatus: (status: UserStatus) => void;
   updateUser: (updates: Partial<User>) => void;
   registerUser: (userData: Omit<User, 'id' | 'permissions' | 'status'>, password: string) => void;
+  deleteUser: (userId: string) => void;
   emergencyMode: boolean;
   toggleEmergencyMode: () => void;
 }
