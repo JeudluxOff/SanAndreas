@@ -15,7 +15,8 @@ import {
   TrendingUp,
   MapPin,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -41,10 +42,12 @@ import {
 import { cn } from '@/lib/utils';
 import { legalStore } from '@/lib/legal-store';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLegalRBAC } from '@/pages/cabinet/intranet/LegalIntranetLayout';
 import { Client } from '@shared/api';
 
 const Clients = () => {
   const { user } = useAuth();
+  const { activeRole } = useLegalRBAC();
   const [clients, setClients] = React.useState(legalStore.getClients());
   const [searchQuery, setSearchQuery] = React.useState('');
   const [showCreateModal, setShowCreateModal] = React.useState(false);
@@ -82,6 +85,14 @@ const Clients = () => {
       target_id: clientToCreate.id,
       metadata: { name: clientToCreate.name }
     });
+  };
+
+  const handleDeleteClient = (id: string) => {
+    if (!user) return;
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
+      legalStore.deleteClient(id, user.id);
+      setClients(legalStore.getClients());
+    }
   };
 
   const filteredClients = clients.filter(c => 
@@ -256,6 +267,19 @@ const Clients = () => {
                       </td>
                       <td className="px-8 py-6 text-right">
                          <div className="flex gap-2 justify-end">
+                           {(activeRole === 'Avocat' || activeRole === 'Associé') && (
+                             <Button
+                               variant="ghost"
+                               size="icon"
+                               className="text-slate-300 hover:text-red-600"
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleDeleteClient(item.id);
+                               }}
+                             >
+                               <Trash2 className="w-4 h-4" />
+                             </Button>
+                           )}
                            <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
                              <Mail className="w-4 h-4" />
                            </Button>

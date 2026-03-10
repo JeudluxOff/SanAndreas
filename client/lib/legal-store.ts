@@ -194,6 +194,25 @@ class LegalStoreManager {
     this.save();
   }
 
+  deleteClient(id: string, userId: string) {
+    const idx = this.data.clients.findIndex(c => c.id === id);
+    if (idx !== -1) {
+      const client = this.data.clients[idx];
+      this.data.clients.splice(idx, 1);
+      this.save();
+      this.logAction({
+        id: `LOG-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user_id: userId,
+        user_name: 'System',
+        action: 'Suppression client',
+        target_type: 'Client',
+        target_id: id,
+        metadata: { name: client.name }
+      });
+    }
+  }
+
   // Cases
   getCases() { return this.data.cases; }
   getCase(id: string) { return this.data.cases.find(c => c.id === id); }
