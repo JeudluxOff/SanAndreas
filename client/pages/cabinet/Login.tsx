@@ -49,7 +49,7 @@ export default function CabinetLogin() {
           </Link>
           <div className="space-y-2">
             <h1 className="text-3xl font-black text-white uppercase tracking-[0.2em]">Accès Sécurisé</h1>
-            <p className="text-[10px] font-bold text-[#c1a461] uppercase tracking-[0.4em]">Harrington & Cole — Intranet Avocats</p>
+            <p className="text-[10px] font-bold text-[#c1a461] uppercase tracking-[0.4em]">Noxwood & Partner — Intranet Avocats</p>
           </div>
         </div>
 
@@ -68,7 +68,7 @@ export default function CabinetLogin() {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="EX: J.HARRINGTON"
+                  placeholder="EX: J.NOXWOOD"
                   className="bg-white/5 border-white/10 h-14 rounded-2xl text-white placeholder:text-white/10 focus:ring-[#c1a461]/20 focus:border-[#c1a461]/40 transition-all font-medium"
                 />
               </div>

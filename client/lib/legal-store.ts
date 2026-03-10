@@ -34,7 +34,7 @@ interface LegalStore {
 
 const INITIAL_DATA: LegalStore = {
   settings: {
-    name: 'Harrington & Cole',
+    name: 'Noxwood & Partner',
     address: '15, Rue de la Paix, Los Santos',
     vat_number: 'SA-FR-123456789',
     iban: 'SA00 1234 5678 9012 3456 7890 123',
@@ -43,13 +43,13 @@ const INITIAL_DATA: LegalStore = {
     audit_retention_days: 365
   },
   staff: [
-    { id: 'admin_avocat', name: 'Julian Harrington', role: 'Associé', email: 'j.harrington@hc.sa', status: 'Actif', joined_at: '2020-01-01', last_active: new Date().toISOString() },
-    { id: 'avocat_victoria', name: 'Victoria Cole', role: 'Associée', email: 'v.cole@hc.sa', status: 'Actif', joined_at: '2020-01-01', last_active: new Date().toISOString() },
-    { id: 'avocat_marcus', name: 'Marcus Vane', role: 'Avocat Senior', email: 'm.vane@hc.sa', status: 'Actif', joined_at: '2021-05-15', last_active: new Date().toISOString() },
-    { id: 'avocat_elena', name: 'Elena Rossi', role: 'Avocate', email: 'e.rossi@hc.sa', status: 'Actif', joined_at: '2022-03-10', last_active: new Date().toISOString() },
-    { id: 'staff_thomas', name: 'Thomas Miller', role: 'Comptable', email: 't.miller@hc.sa', status: 'Actif', joined_at: '2023-01-05', last_active: new Date().toISOString() },
-    { id: 'staff_sarah', name: 'Sarah Jenkins', role: 'Secrétaire', email: 's.jenkins@hc.sa', status: 'Actif', joined_at: '2022-11-20', last_active: new Date().toISOString() },
-    { id: 'staff_lucas', name: 'Lucas Dupont', role: 'Juriste', email: 'l.dupont@hc.sa', status: 'Actif', joined_at: '2023-06-01', last_active: new Date().toISOString() }
+    { id: 'admin_avocat', name: 'Julian Noxwood', role: 'Associé', email: 'j.noxwood@np.sa', status: 'Actif', joined_at: '2020-01-01', last_active: new Date().toISOString() },
+    { id: 'avocat_victoria', name: 'Victoria Partner', role: 'Associée', email: 'v.partner@np.sa', status: 'Actif', joined_at: '2020-01-01', last_active: new Date().toISOString() },
+    { id: 'avocat_marcus', name: 'Marcus Vane', role: 'Avocat Senior', email: 'm.vane@np.sa', status: 'Actif', joined_at: '2021-05-15', last_active: new Date().toISOString() },
+    { id: 'avocat_elena', name: 'Elena Rossi', role: 'Avocate', email: 'e.rossi@np.sa', status: 'Actif', joined_at: '2022-03-10', last_active: new Date().toISOString() },
+    { id: 'staff_thomas', name: 'Thomas Miller', role: 'Comptable', email: 't.miller@np.sa', status: 'Actif', joined_at: '2023-01-05', last_active: new Date().toISOString() },
+    { id: 'staff_sarah', name: 'Sarah Jenkins', role: 'Secrétaire', email: 's.jenkins@np.sa', status: 'Actif', joined_at: '2022-11-20', last_active: new Date().toISOString() },
+    { id: 'staff_lucas', name: 'Lucas Dupont', role: 'Juriste', email: 'l.dupont@np.sa', status: 'Actif', joined_at: '2023-06-01', last_active: new Date().toISOString() }
   ],
   clients: [],
   cases: [],

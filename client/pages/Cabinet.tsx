@@ -41,9 +41,9 @@ const Hero = () => (
             <span className="text-[10px] font-black uppercase tracking-[0.5em]">Élite Juridique • San Andreas</span>
           </div>
           <h1 className="text-6xl md:text-9xl font-black text-white uppercase tracking-tighter leading-none">
-            Harrington <br /> 
+            Noxwood <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#c1a461] via-[#927843] to-[#c1a461]">
-              & Cole
+              & Partner
             </span>
           </h1>
         </div>
@@ -274,7 +274,7 @@ const Testimonials = () => (
             <CardContent className="p-0 space-y-8">
               <BookOpen className="w-12 h-12 text-[#c1a461] opacity-20" />
               <p className="text-xl text-slate-700 font-medium italic leading-relaxed">
-                "Dans un dossier de droit des affaires qui semblait perdu d'avance, le cabinet Harrington & Cole a su déployer une stratégie d'une finesse incroyable. Leur discrétion est absolue et leur efficacité redoutable."
+                "Dans un dossier de droit des affaires qui semblait perdu d'avance, le cabinet Noxwood & Partner a su déployer une stratégie d'une finesse incroyable. Leur discrétion est absolue et leur efficacité redoutable."
               </p>
               <div className="flex items-center gap-4 border-t border-slate-100 pt-8">
                 <div className="w-12 h-12 rounded-full bg-slate-900 flex items-center justify-center text-white font-black text-xs">CL</div>

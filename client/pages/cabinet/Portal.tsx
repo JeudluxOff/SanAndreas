@@ -50,7 +50,7 @@ const Portal = () => {
               <Scale className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xs font-black tracking-[0.2em] uppercase text-white leading-none">Harrington <span className="text-[#c1a461]">&</span> Cole</h1>
+              <h1 className="text-xs font-black tracking-[0.2em] uppercase text-white leading-none">Noxwood <span className="text-[#c1a461]">&</span> Partner</h1>
               <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mt-1">Portail Client Sécurisé</p>
             </div>
           </Link>
@@ -120,7 +120,7 @@ const Portal = () => {
               <div className="space-y-6 relative">
                 <div className="absolute left-10 top-0 bottom-0 w-px bg-white/10 hidden md:block" />
                 {[
-                  { date: "Hier, 14:30", action: "Conclusions pénales déposées par Maître Cole", status: "completed" },
+                  { date: "Hier, 14:30", action: "Conclusions pénales déposées par Maître Partner", status: "completed" },
                   { date: "22 Mai, 10:00", action: "Revue stratégique au cabinet", status: "completed" },
                   { date: "26 Mai, 09:00", action: "Audience Préliminaire — Cour Supérieure", status: "pending" }
                 ].map((item, idx) => (
@@ -184,7 +184,7 @@ const Portal = () => {
                   <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Victoria`} />
                 </Avatar>
                 <div>
-                  <h4 className="text-xl font-black uppercase leading-none">Victoria Cole</h4>
+                  <h4 className="text-xl font-black uppercase leading-none">Victoria Partner</h4>
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-2 opacity-70">Avocate en charge</p>
                 </div>
               </div>
@@ -192,7 +192,7 @@ const Portal = () => {
                 "Martin, vos conclusions ont été transmises ce matin. Le juge Miller semble ouvert à une médiation, nous restons sur notre stratégie."
               </p>
               <Button className="w-full bg-white text-[#c1a461] hover:bg-white/90 font-black uppercase text-[10px] tracking-widest h-14 rounded-2xl shadow-xl">
-                Contacter Maître Cole
+                Contacter Maître Partner
               </Button>
             </Card>
 
@@ -234,7 +234,7 @@ const Portal = () => {
 
       {/* Portal Footer */}
       <footer className="container mx-auto px-6 py-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">
-        <p>© 2024 Harrington & Cole — Portail Client Sécurisé.</p>
+        <p>© 2024 Noxwood & Partner — Portail Client Sécurisé.</p>
         <div className="flex gap-8">
           <span>Assistance 24/7</span>
           <span>Sécurité des données</span>

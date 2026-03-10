@@ -146,7 +146,7 @@ class GovernmentStoreManager {
       email: s.email,
       joinDate: new Date(s.joined_at).toLocaleDateString(),
       image: s.avatar ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${s.avatar}` : undefined,
-      description: `Membre du Cabinet Harrington & Cole. Dernière activité: ${new Date(s.last_active).toLocaleString()}`
+      description: `Membre du Cabinet Noxwood & Partner. Dernière activité: ${new Date(s.last_active).toLocaleString()}`
     }));
 
     return [...govEmployees, ...legalStaff];
@@ -267,7 +267,7 @@ class GovernmentStoreManager {
       type: d.category,
       date: new Date(d.created_at).toLocaleDateString(),
       status: d.status,
-      author: 'Cabinet H&C',
+      author: 'Cabinet N&P',
       archived: d.status === 'Archivé',
       acl: [],
       service_name: 'Cabinet Juridique',
@@ -367,7 +367,7 @@ class GovernmentStoreManager {
         progress: legalCase.progression || 0,
         service_name: 'Cabinet Juridique',
         service_id: 'JUSTICE',
-        owner: 'Victoria Cole'
+        owner: 'Victoria Partner'
       };
     }
 

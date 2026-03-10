@@ -99,7 +99,7 @@ export const Sidebar = () => {
             <Scale className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-xs font-black tracking-[0.2em] uppercase">Harrington <span className="text-[#c1a461]">&</span> Cole</h1>
+            <h1 className="text-xs font-black tracking-[0.2em] uppercase">Noxwood <span className="text-[#c1a461]">&</span> Partner</h1>
             <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mt-1">Intranet Legal</p>
           </div>
         </div>
@@ -130,10 +130,10 @@ export const Sidebar = () => {
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8 ring-2 ring-[#c1a461]/20">
             <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id || 'Julian'}`} />
-            <AvatarFallback>{user?.name?.substring(0, 2).toUpperCase() || 'JH'}</AvatarFallback>
+            <AvatarFallback>{user?.name?.substring(0, 2).toUpperCase() || 'JN'}</AvatarFallback>
           </Avatar>
           <div className="overflow-hidden">
-            <p className="text-[10px] font-black truncate">{user?.name || 'Julian Harrington'}</p>
+            <p className="text-[10px] font-black truncate">{user?.name || 'Julian Noxwood'}</p>
             <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-2 py-0 mt-1", ROLE_COLORS[activeRole])}>
               {activeRole}
             </Badge>

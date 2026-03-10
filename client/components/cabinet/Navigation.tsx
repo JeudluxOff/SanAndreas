@@ -39,7 +39,7 @@ export const Navigation = () => {
               <Scale className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-black text-white tracking-[0.2em] uppercase leading-none">Harrington <span className="text-[#c1a461]">&</span> Cole</h1>
+              <h1 className="text-lg font-black text-white tracking-[0.2em] uppercase leading-none">Noxwood <span className="text-[#c1a461]">&</span> Partner</h1>
               <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.3em] mt-1">Cabinet d'Avocats</p>
             </div>
           </Link>

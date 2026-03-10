@@ -272,8 +272,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         'admin_avocat': {
           role: 'admin',
           service_id: 'JUSTICE',
-          name: 'Julian Harrington',
-          service_name: 'Harrington & Cole',
+          name: 'Julian Noxwood',
+          service_name: 'Noxwood & Partner',
           grade: 'Associé Fondateur & Admin'
         }
       };

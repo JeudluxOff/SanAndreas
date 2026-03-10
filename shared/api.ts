@@ -1,4 +1,4 @@
-// Harrington & Cole - Shared Types
+// Noxwood & Partner - Shared Types
 
 export type LegalRole = 'Associé' | 'Avocat' | 'Juriste' | 'Secrétaire' | 'Comptable' | 'Stagiaire' | 'Auditeur';
 
@@ -62,7 +62,7 @@ export interface DocumentVersion {
 }
 
 export interface LegalDocument {
-  id: string; // Format: HC-YYYY-XXXX
+  id: string; // Format: NP-YYYY-XXXX
   case_id: string;
   title: string;
   content?: string;

@@ -1,6 +1,6 @@
 {
   "settings": {
-    "name": "Harrington & Cole",
+    "name": "Noxwood & Partner",
     "address": "15, Rue de la Paix, Los Santos",
     "vat_number": "SA-FR-123456789",
     "iban": "SA00 1234 5678 9012 3456 7890 123",
@@ -11,18 +11,18 @@
   "staff": [
     {
       "id": "admin_avocat",
-      "name": "Julian Harrington",
+      "name": "Julian Noxwood",
       "role": "Associé",
-      "email": "j.harrington@hc.sa",
+      "email": "j.noxwood@np.sa",
       "status": "Actif",
       "joined_at": "2020-01-01",
       "last_active": "2024-05-24T09:42:00Z"
     },
     {
       "id": "avocat_victoria",
-      "name": "Victoria Cole",
+      "name": "Victoria Partner",
       "role": "Associée",
-      "email": "v.cole@hc.sa",
+      "email": "v.partner@np.sa",
       "status": "Actif",
       "joined_at": "2020-01-01",
       "last_active": "2024-05-24T09:42:00Z"
@@ -31,7 +31,7 @@
       "id": "avocat_marcus",
       "name": "Marcus Vane",
       "role": "Avocat Senior",
-      "email": "m.vane@hc.sa",
+      "email": "m.vane@np.sa",
       "status": "Actif",
       "joined_at": "2021-05-15",
       "last_active": "2024-05-24T09:42:00Z"
@@ -40,7 +40,7 @@
       "id": "avocat_elena",
       "name": "Elena Rossi",
       "role": "Avocate",
-      "email": "e.rossi@hc.sa",
+      "email": "e.rossi@np.sa",
       "status": "Actif",
       "joined_at": "2022-03-10",
       "last_active": "2024-05-24T09:42:00Z"
@@ -49,7 +49,7 @@
       "id": "staff_thomas",
       "name": "Thomas Miller",
       "role": "Comptable",
-      "email": "t.miller@hc.sa",
+      "email": "t.miller@np.sa",
       "status": "Actif",
       "joined_at": "2023-01-05",
       "last_active": "2024-05-24T09:42:00Z"
@@ -58,7 +58,7 @@
       "id": "staff_sarah",
       "name": "Sarah Jenkins",
       "role": "Secrétaire",
-      "email": "s.jenkins@hc.sa",
+      "email": "s.jenkins@np.sa",
       "status": "Actif",
       "joined_at": "2022-11-20",
       "last_active": "2024-05-24T09:42:00Z"
@@ -67,7 +67,7 @@
       "id": "staff_lucas",
       "name": "Lucas Dupont",
       "role": "Juriste",
-      "email": "l.dupont@hc.sa",
+      "email": "l.dupont@np.sa",
       "status": "Actif",
       "joined_at": "2023-06-01",
       "last_active": "2024-05-24T09:42:00Z"
@@ -174,7 +174,7 @@
       "id": "LOG-1772902196081",
       "timestamp": "2026-03-07T16:49:56.081Z",
       "user_id": "admin_avocat",
-      "user_name": "Julian Harrington",
+      "user_name": "Julian Noxwood",
       "action": "Création client",
       "target_type": "Client",
       "target_id": "cli-1772902196080",
@@ -186,7 +186,7 @@
       "id": "LOG-1772628176921-DEL",
       "timestamp": "2026-03-04T12:42:56.921Z",
       "user_id": "admin_avocat",
-      "user_name": "Julian Harrington",
+      "user_name": "Julian Noxwood",
       "action": "Suppression Facture (avec motif)",
       "target_type": "Invoice",
       "target_id": "INV-2024-3388",
@@ -211,7 +211,7 @@
       "id": "LOG-1771775783703",
       "timestamp": "2026-02-22T15:56:23.703Z",
       "user_id": "admin_avocat",
-      "user_name": "Julian Harrington",
+      "user_name": "Julian Noxwood",
       "action": "Vérification conflit intérêts",
       "target_type": "ConflictCheck",
       "target_id": "CC-1771775783702",
@@ -224,7 +224,7 @@
       "id": "LOG-1771726386924",
       "timestamp": "2026-02-22T02:13:06.924Z",
       "user_id": "admin_avocat",
-      "user_name": "Julian Harrington",
+      "user_name": "Julian Noxwood",
       "action": "Facture payée",
       "target_type": "Invoice",
       "target_id": "INV-2024-3388",
@@ -248,7 +248,7 @@
       "id": "LOG-1771726343478",
       "timestamp": "2026-02-22T02:12:23.478Z",
       "user_id": "admin_avocat",
-      "user_name": "Julian Harrington",
+      "user_name": "Julian Noxwood",
       "action": "Changement statut document: Signé",
       "target_type": "Document",
       "target_id": "HC-2024-5802"
@@ -257,7 +257,7 @@
       "id": "LOG-1771726331371",
       "timestamp": "2026-02-22T02:12:11.371Z",
       "user_id": "admin_avocat",
-      "user_name": "Julian Harrington",
+      "user_name": "Julian Noxwood",
       "action": "Création document",
       "target_type": "Document",
       "target_id": "HC-2024-5802",
@@ -282,7 +282,7 @@
       "id": "LOG-1771726312115",
       "timestamp": "2026-02-22T02:11:52.115Z",
       "user_id": "admin_avocat",
-      "user_name": "Julian Harrington",
+      "user_name": "Julian Noxwood",
       "action": "Changement statut document: Signé",
       "target_type": "Document",
       "target_id": "HC-2024-5302"
@@ -291,7 +291,7 @@
       "id": "LOG-1771726307807",
       "timestamp": "2026-02-22T02:11:47.807Z",
       "user_id": "admin_avocat",
-      "user_name": "Julian Harrington",
+      "user_name": "Julian Noxwood",
       "action": "Changement statut document: Validé",
       "target_type": "Document",
       "target_id": "HC-2024-5302"
@@ -300,7 +300,7 @@
       "id": "LOG-1771726300653",
       "timestamp": "2026-02-22T02:11:40.653Z",
       "user_id": "admin_avocat",
-      "user_name": "Julian Harrington",
+      "user_name": "Julian Noxwood",
       "action": "Création document",
       "target_type": "Document",
       "target_id": "HC-2024-5302",

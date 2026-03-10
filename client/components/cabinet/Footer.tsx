@@ -17,7 +17,7 @@ export const Footer = () => (
             <div className="p-2 bg-[#c1a461] rounded shadow-lg">
               <Scale className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-lg font-black text-white tracking-[0.2em] uppercase leading-none">Harrington <span className="text-[#c1a461]">&</span> Cole</h1>
+            <h1 className="text-lg font-black text-white tracking-[0.2em] uppercase leading-none">Noxwood <span className="text-[#c1a461]">&</span> Partner</h1>
           </Link>
           <p className="text-sm text-white/40 font-medium leading-relaxed uppercase tracking-tight">
             L'excellence juridique au service des intérêts les plus sensibles de San Andreas.
@@ -88,14 +88,14 @@ export const Footer = () => (
             </div>
             <div className="flex items-center gap-4">
               <Mail className="w-5 h-5 text-[#c1a461]" />
-              <p className="text-[11px] font-bold text-white/60 uppercase tracking-widest">contact@harrington-cole.sa</p>
+              <p className="text-[11px] font-bold text-white/60 uppercase tracking-widest">contact@noxwood-partner.sa</p>
             </div>
           </div>
         </div>
       </div>
 
       <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">
-        <p>© 2024 Harrington & Cole. Tous droits réservés.</p>
+        <p>© 2024 Noxwood & Partner. Tous droits réservés.</p>
         <div className="flex gap-8">
           <span className="hover:text-white transition-colors cursor-pointer">Mentions Légales</span>
           <span className="hover:text-white transition-colors cursor-pointer">Politique de Confidentialité</span>
