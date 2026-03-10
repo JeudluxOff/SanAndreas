@@ -86,12 +86,14 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
   const [isSyncing, setIsSyncing] = React.useState(false);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const [newName, setNewName] = useState('');
+  const [newAvatar, setNewAvatar] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
 
   React.useEffect(() => {
     if (user) {
       setNewName(user.name);
+      setNewAvatar(user.avatar || '');
     }
   }, [user]);
 
@@ -104,9 +106,12 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
 
   if (!user) return null;
 
-  const handleUpdateName = () => {
+  const handleUpdateProfile = () => {
     if (newName.trim()) {
-      updateUser({ name: newName });
+      updateUser({
+        name: newName,
+        avatar: newAvatar.trim() || undefined
+      });
       setIsProfileDialogOpen(false);
     }
   };
@@ -405,7 +410,7 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
               )}>
                 <div className="relative">
                   <Avatar className="h-10 w-10 ring-2 ring-white/10 border border-white/5">
-                    <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} />
+                    <AvatarImage src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} />
                     <AvatarFallback className="bg-primary text-white font-black">{user.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className={cn(
@@ -470,22 +475,40 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
               Modifiez votre identité officielle sur l'intranet.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right text-xs font-black uppercase">
+          <div className="grid gap-6 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="avatar" className="text-xs font-black uppercase text-slate-500">
+                URL Photo de Profil
+              </Label>
+              <div className="flex gap-4 items-center">
+                <Avatar className="h-12 w-12 border border-slate-200">
+                  <AvatarImage src={newAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} />
+                  <AvatarFallback>{newName?.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <Input
+                  id="avatar"
+                  value={newAvatar}
+                  onChange={(e) => setNewAvatar(e.target.value)}
+                  className="flex-grow font-bold"
+                  placeholder="https://..."
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-xs font-black uppercase text-slate-500">
                 Nom Complet
               </Label>
               <Input
                 id="name"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                className="col-span-3 font-bold"
+                className="font-bold"
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsProfileDialogOpen(false)} className="font-bold uppercase text-[10px]">Annuler</Button>
-            <Button onClick={handleUpdateName} className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold uppercase text-[10px]">Sauvegarder</Button>
+            <Button onClick={handleUpdateProfile} className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold uppercase text-[10px]">Sauvegarder</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

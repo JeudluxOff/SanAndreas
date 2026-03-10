@@ -47,4 +47,5 @@ export interface User {
   status: UserStatus;
   matricule?: string;
   callsign?: string;
+  avatar?: string;
 }

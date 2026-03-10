@@ -236,17 +236,22 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
 
   const [isProfileDialogOpen, setIsProfileDialogOpen] = React.useState(false);
   const [newName, setNewName] = React.useState('');
+  const [newAvatar, setNewAvatar] = React.useState('');
   const navigate = useNavigate();
 
   React.useEffect(() => {
     if (user) {
       setNewName(user.name);
+      setNewAvatar(user.avatar || '');
     }
   }, [user]);
 
-  const handleUpdateName = () => {
+  const handleUpdateProfile = () => {
     if (newName.trim()) {
-      updateUser({ name: newName });
+      updateUser({
+        name: newName,
+        avatar: newAvatar.trim() || undefined
+      });
       setIsProfileDialogOpen(false);
     }
   };
@@ -283,7 +288,7 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-4 p-2 bg-[#0a0f18] text-white rounded-full border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:bg-slate-900 transition-all group scale-110 md:scale-125">
                   <Avatar className="h-10 w-10 ring-2 ring-[#c1a461]/20 border border-white/5">
-                    <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id || 'Julian'}`} />
+                    <AvatarImage src={user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id || 'Julian'}`} />
                     <AvatarFallback className="bg-slate-800 text-white font-black">{user?.name?.substring(0, 2).toUpperCase() || 'JN'}</AvatarFallback>
                   </Avatar>
                   <div className="text-left pr-4">
@@ -331,6 +336,25 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
             </DialogHeader>
             <div className="grid gap-6 py-6">
               <div className="space-y-2">
+                <Label htmlFor="avatar" className="text-xs font-black uppercase tracking-widest text-white/40">
+                  URL Photo de Profil
+                </Label>
+                <div className="flex gap-4 items-center">
+                  <Avatar className="h-12 w-12 border border-white/10">
+                    <AvatarImage src={newAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`} />
+                    <AvatarFallback>{newName?.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <Input
+                    id="avatar"
+                    value={newAvatar}
+                    onChange={(e) => setNewAvatar(e.target.value)}
+                    className="bg-white/5 border-white/10 text-white font-black placeholder:text-white/10"
+                    placeholder="URL DE L'IMAGE (HTTPS://...)"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="name" className="text-xs font-black uppercase tracking-widest text-white/40">
                   Nom & Prénom
                 </Label>
@@ -367,7 +391,7 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
             </div>
             <DialogFooter>
               <Button variant="ghost" onClick={() => setIsProfileDialogOpen(false)} className="text-white/40 font-black uppercase text-[10px]">Annuler</Button>
-              <Button onClick={handleUpdateName} className="bg-[#c1a461] hover:bg-[#d1b471] text-white font-black uppercase text-[10px] px-8">Enregistrer</Button>
+              <Button onClick={handleUpdateProfile} className="bg-[#c1a461] hover:bg-[#d1b471] text-white font-black uppercase text-[10px] px-8">Enregistrer</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

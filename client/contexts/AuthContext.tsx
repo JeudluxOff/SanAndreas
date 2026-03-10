@@ -304,12 +304,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       updatedUser.permissions = ROLE_PERMISSIONS[updates.role] || [];
     }
 
-    // Sync with government store if name or role changed
-    if (updates.name || updates.role) {
+    // Sync with stores if name, role or avatar changed
+    if (updates.name || updates.role || updates.avatar) {
       const govUpdate: any = {};
       if (updates.name) govUpdate.name = updates.name;
       if (updates.role) govUpdate.role = updates.role;
+      if (updates.avatar) govUpdate.image = updates.avatar;
       governmentStore.updateEmployee(user.name, govUpdate);
+
+      // Also sync with legalStore
+      const staffMember = legalStore.getStaff().find(s => s.id === user.id);
+      if (staffMember) {
+        legalStore.updateStaff({
+          ...staffMember,
+          name: updates.name || staffMember.name,
+          avatar: updates.avatar || staffMember.avatar
+        });
+      }
     }
 
     setUser(updatedUser);
