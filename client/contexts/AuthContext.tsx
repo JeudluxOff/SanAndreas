@@ -149,8 +149,10 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+console.log('[AuthContext] Context created:', AuthContext);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  console.log('[AuthContext] AuthProvider rendering');
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [emergencyMode, setEmergencyMode] = useState(false);
@@ -360,6 +362,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
+  console.log('[AuthContext] useAuth called, context:', context ? 'defined' : 'undefined');
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate } from "react-router-dom";
 import { useAuth, Permission, ServiceID } from "@/contexts/AuthContext";
+console.log('[RouteGuards] useAuth imported');
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
@@ -12,6 +13,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const PermissionRoute = ({ children, permission }: { children: React.ReactNode, permission: Permission }) => {
+  console.log('[RouteGuards] PermissionRoute rendering');
   const { user, hasPermission, isLoading } = useAuth();
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white font-bold">Chargement...</div>;
