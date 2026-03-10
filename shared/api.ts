@@ -107,7 +107,7 @@ export interface Task {
 
 export interface Hearing {
   id: string;
-  case_id: string;
+  case_id?: string;
   title: string;
   date: string;
   location: string;

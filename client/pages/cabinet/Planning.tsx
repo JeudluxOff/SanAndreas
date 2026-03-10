@@ -155,12 +155,13 @@ const Planning = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2 text-left">
-                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dossier Assigné</Label>
-                  <Select value={newHearing.case_id} onValueChange={(val) => setNewHearing({...newHearing, case_id: val})}>
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dossier Assigné (Optionnel)</Label>
+                  <Select value={newHearing.case_id} onValueChange={(val) => setNewHearing({...newHearing, case_id: val === 'none' ? '' : val})}>
                     <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
                       <SelectValue placeholder="Choisir un dossier..." />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="none" className="text-slate-400 italic font-bold">-- AUCUN DOSSIER --</SelectItem>
                       {cases.map(c => (
                         <SelectItem key={c.id} value={c.id}>{c.id} - {c.title}</SelectItem>
                       ))}
@@ -225,7 +226,7 @@ const Planning = () => {
               </Button>
               <Button
                 onClick={() => {
-                  if (!user || !newHearing.title || !newHearing.case_id) return;
+                  if (!user || !newHearing.title) return;
                   const h: Hearing = {
                     id: `HR-${Date.now()}`,
                     ...newHearing,
@@ -241,7 +242,7 @@ const Planning = () => {
                     action: 'Planification Audience',
                     target_type: 'Hearing',
                     target_id: h.id,
-                    metadata: { title: h.title, case_id: h.case_id }
+                    metadata: { title: h.title, case_id: h.case_id || 'none' }
                   });
 
                   setShowCreateModal(false);
@@ -254,7 +255,7 @@ const Planning = () => {
                     type: 'Pénal'
                   });
                 }}
-                disabled={!newHearing.title || !newHearing.case_id}
+                disabled={!newHearing.title}
                 className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl"
               >
                 Enregistrer au Planning
@@ -347,7 +348,7 @@ const Planning = () => {
                   {/* Events Overlay (Simplified for UI) */}
                   <div className="ml-20 p-10 space-y-6">
                     {hearings.length > 0 ? hearings.map((event) => {
-                      const caseObj = store.getCase(event.case_id);
+                      const caseObj = event.case_id ? store.getCase(event.case_id) : null;
                       return (
                         <div key={event.id} className="flex gap-8 group">
                           <div className="w-24 text-right pt-1">
@@ -366,7 +367,9 @@ const Planning = () => {
                                   )}>
                                     {event.type}
                                   </Badge>
-                                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{caseObj?.title || event.case_id}</span>
+                                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                    {caseObj ? `${caseObj.id} - ${caseObj.title}` : (event.case_id || "RENDEZ-VOUS HORS DOSSIER")}
+                                  </span>
                                 </div>
                                 <h4 className="text-lg font-black text-slate-900 uppercase tracking-tighter text-left">{event.title}</h4>
                                 <div className="flex items-center gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
