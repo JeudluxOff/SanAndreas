@@ -16,7 +16,8 @@ import {
   MapPin,
   Clock,
   ArrowRight,
-  Trash2
+  Trash2,
+  Edit2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -51,11 +52,13 @@ const Clients = () => {
   const [clients, setClients] = React.useState(legalStore.getClients());
   const [searchQuery, setSearchQuery] = React.useState('');
   const [showCreateModal, setShowCreateModal] = React.useState(false);
+  const [showEditModal, setShowEditModal] = React.useState(false);
   const [newClient, setNewClient] = React.useState<Partial<Client>>({
     name: '',
     email: '',
     type: 'Individu'
   });
+  const [editingClient, setEditingClient] = React.useState<Client | null>(null);
 
   const cases = legalStore.getCases();
 
@@ -84,6 +87,26 @@ const Clients = () => {
       target_type: 'Client',
       target_id: clientToCreate.id,
       metadata: { name: clientToCreate.name }
+    });
+  };
+
+  const handleEditClient = () => {
+    if (!editingClient || !user) return;
+
+    legalStore.updateClient(editingClient);
+    setClients(legalStore.getClients());
+    setShowEditModal(false);
+    setEditingClient(null);
+
+    legalStore.logAction({
+      id: `LOG-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      user_id: user.id,
+      user_name: user.name,
+      action: 'Modification client',
+      target_type: 'Client',
+      target_id: editingClient.id,
+      metadata: { name: editingClient.name }
     });
   };
 
@@ -190,6 +213,76 @@ const Clients = () => {
           </DialogContent>
         </Dialog>
 
+        {/* Edit Client Modal */}
+        <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+          <DialogContent className="max-w-xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Modifier Client</DialogTitle>
+              <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                Mettez à jour les informations de l'entité.
+              </DialogDescription>
+            </DialogHeader>
+
+            {editingClient && (
+              <div className="space-y-6 my-6">
+                <div className="space-y-2 text-left">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nom complet ou Raison Sociale</Label>
+                  <Input
+                    value={editingClient.name}
+                    onChange={(e) => setEditingClient({...editingClient, name: e.target.value})}
+                    placeholder="EX: JOHN DOE..."
+                    className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2 text-left">
+                    <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</Label>
+                    <Select
+                      value={editingClient.type}
+                      onValueChange={(val) => setEditingClient({...editingClient, type: val as any})}
+                    >
+                      <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Individu">Individu</SelectItem>
+                        <SelectItem value="Entreprise">Entreprise</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2 text-left">
+                    <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email (Facultatif)</Label>
+                    <Input
+                      value={editingClient.email || ''}
+                      onChange={(e) => setEditingClient({...editingClient, email: e.target.value})}
+                      placeholder="CLIENT@EMAIL.SA"
+                      className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button
+                variant="ghost"
+                onClick={() => setShowEditModal(false)}
+                className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleEditClient}
+                disabled={!editingClient?.name}
+                className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl shadow-xl shadow-black/10"
+              >
+                Enregistrer les modifications
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {[
             { label: "Individus", value: clients.filter(c => c.type === 'Individu').length, icon: <Users className="w-5 h-5" />, color: "text-blue-600", bg: "bg-blue-50" },
@@ -268,17 +361,31 @@ const Clients = () => {
                       <td className="px-8 py-6 text-right">
                          <div className="flex gap-2 justify-end">
                            {(activeRole === 'Avocat' || activeRole === 'Associé') && (
-                             <Button
-                               variant="ghost"
-                               size="icon"
-                               className="text-slate-300 hover:text-red-600"
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                 handleDeleteClient(item.id);
-                               }}
-                             >
-                               <Trash2 className="w-4 h-4" />
-                             </Button>
+                             <>
+                               <Button
+                                 variant="ghost"
+                                 size="icon"
+                                 className="text-slate-300 hover:text-blue-600"
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   setEditingClient(item);
+                                   setShowEditModal(true);
+                                 }}
+                               >
+                                 <Edit2 className="w-4 h-4" />
+                               </Button>
+                               <Button
+                                 variant="ghost"
+                                 size="icon"
+                                 className="text-slate-300 hover:text-red-600"
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   handleDeleteClient(item.id);
+                                 }}
+                               >
+                                 <Trash2 className="w-4 h-4" />
+                               </Button>
+                             </>
                            )}
                            <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
                              <Mail className="w-4 h-4" />

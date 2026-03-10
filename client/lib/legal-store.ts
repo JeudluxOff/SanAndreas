@@ -194,6 +194,14 @@ class LegalStoreManager {
     this.save();
   }
 
+  updateClient(updated: Client) {
+    const idx = this.data.clients.findIndex(c => c.id === updated.id);
+    if (idx !== -1) {
+      this.data.clients[idx] = updated;
+      this.save();
+    }
+  }
+
   deleteClient(id: string, userId: string) {
     const idx = this.data.clients.findIndex(c => c.id === id);
     if (idx !== -1) {
