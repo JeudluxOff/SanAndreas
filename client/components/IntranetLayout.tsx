@@ -391,68 +391,75 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
-      {/* Floating User Profile Button (Bottom Left) */}
-      <div className="fixed bottom-8 left-8 z-[60]">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className={cn(
-              "flex items-center gap-4 p-2 rounded-full border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all group scale-110 md:scale-125 origin-bottom-left",
-              emergencyMode ? "bg-red-900 text-white" : "bg-slate-900 text-white hover:bg-slate-800"
-            )}>
-              <div className="relative">
-                <Avatar className="h-10 w-10 ring-2 ring-white/10 border border-white/5">
-                  <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} />
-                  <AvatarFallback className="bg-primary text-white font-black">{user.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div className={cn(
-                  "absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-2 border-slate-900 rounded-full",
-                  statusColors[user.status || 'available']
-                )} />
-              </div>
-              <div className="text-left pr-4">
-                <p className="text-[10px] font-black uppercase tracking-tighter leading-none mb-1">{user.name}</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-[7px] font-bold text-white/40 uppercase tracking-[0.2em]">
-                    {statusLabels[user.status || 'available']}
-                  </span>
+      {/* Floating User Profile Button (Centered in Sidebar) */}
+      <div className={cn(
+        "fixed bottom-10 left-0 flex justify-center z-[60] transition-all duration-300 pointer-events-none",
+        sidebarOpen ? "w-64" : "w-20"
+      )}>
+        <div className="pointer-events-auto">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className={cn(
+                "flex items-center gap-4 p-2 rounded-full border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all group scale-110 md:scale-125",
+                emergencyMode ? "bg-red-900 text-white" : "bg-slate-900 text-white hover:bg-slate-800"
+              )}>
+                <div className="relative">
+                  <Avatar className="h-10 w-10 ring-2 ring-white/10 border border-white/5">
+                    <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} />
+                    <AvatarFallback className="bg-primary text-white font-black">{user.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className={cn(
+                    "absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-2 border-slate-900 rounded-full",
+                    statusColors[user.status || 'available']
+                  )} />
                 </div>
-              </div>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56 bg-slate-950 text-white border-slate-800 p-2 rounded-xl mb-4 shadow-2xl">
-            <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-3 py-2">Mon Compte</DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-slate-800" />
-            <DropdownMenuItem
-              onClick={() => setIsProfileDialogOpen(true)}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 cursor-pointer"
-            >
-              <Edit2 className="w-4 h-4 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-widest">Modifier Profil</span>
-            </DropdownMenuItem>
-
-            <DropdownMenuSeparator className="bg-slate-800" />
-            <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-3 py-2">Changer Statut</DropdownMenuLabel>
-            {Object.entries(statusLabels).map(([key, label]) => (
+                {sidebarOpen && (
+                  <div className="text-left pr-4">
+                    <p className="text-[10px] font-black uppercase tracking-tighter leading-none mb-1">{user.name}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[7px] font-bold text-white/40 uppercase tracking-[0.2em]">
+                        {statusLabels[user.status || 'available']}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" side="top" className="w-56 bg-slate-950 text-white border-slate-800 p-2 rounded-xl mb-4 shadow-2xl">
+              <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-3 py-2">Mon Compte</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-slate-800" />
               <DropdownMenuItem
-                key={key}
-                onClick={() => updateStatus(key as UserStatus)}
+                onClick={() => setIsProfileDialogOpen(true)}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 cursor-pointer"
               >
-                <div className={cn("w-2 h-2 rounded-full", statusColors[key as UserStatus])} />
-                <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
+                <Edit2 className="w-4 h-4 text-primary" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Modifier Profil</span>
               </DropdownMenuItem>
-            ))}
 
-            <DropdownMenuSeparator className="bg-slate-800" />
-            <DropdownMenuItem
-              onClick={handleLogout}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-500/10 text-red-400 cursor-pointer"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="text-[10px] font-black uppercase tracking-widest">Déconnexion</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuSeparator className="bg-slate-800" />
+              <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-3 py-2">Changer Statut</DropdownMenuLabel>
+              {Object.entries(statusLabels).map(([key, label]) => (
+                <DropdownMenuItem
+                  key={key}
+                  onClick={() => updateStatus(key as UserStatus)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 cursor-pointer"
+                >
+                  <div className={cn("w-2 h-2 rounded-full", statusColors[key as UserStatus])} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
+                </DropdownMenuItem>
+              ))}
+
+              <DropdownMenuSeparator className="bg-slate-800" />
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-500/10 text-red-400 cursor-pointer"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Déconnexion</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
