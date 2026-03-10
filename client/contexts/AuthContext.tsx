@@ -350,6 +350,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logAction(newMode ? 'Activation Protocole Urgence' : 'Désactivation Protocole Urgence');
   };
 
+  const updateOtherUser = (userId: string, updates: Partial<User>) => {
+    const regEntry = registeredUsers[userId];
+    if (!regEntry) return;
+
+    const oldName = regEntry.user.name;
+    const updatedUser = { ...regEntry.user, ...updates };
+
+    if (updates.role) {
+      updatedUser.permissions = ROLE_PERMISSIONS[updates.role] || [];
+    }
+
+    const updatedRegUsers = {
+      ...registeredUsers,
+      [userId]: { ...regEntry, user: updatedUser }
+    };
+
+    setRegisteredUsers(updatedRegUsers);
+    localStorage.setItem('sa_gov_registered_users', JSON.stringify(updatedRegUsers));
+
+    // Also sync with legalStore
+    const staffMember = legalStore.getStaff().find(s => s.id === userId);
+    if (staffMember) {
+      const legalRoleMap: Record<string, string> = {
+        'admin': 'Associé',
+        'avocat': 'Avocat',
+        'gouverneur': 'Associé',
+        'vice_gouverneur': 'Associé',
+        'secretaire_justice': 'Avocat',
+        'secretaire_etat_general': 'Auditeur',
+        'secretaire_tresor_commerce': 'Comptable'
+      };
+
+      legalStore.updateStaff({
+        ...staffMember,
+        name: updates.name || staffMember.name,
+        role: updates.role ? (legalRoleMap[updates.role] || staffMember.role) as any : staffMember.role,
+        avatar: updates.avatar !== undefined ? updates.avatar : staffMember.avatar,
+        matricule: updates.matricule !== undefined ? updates.matricule : staffMember.matricule,
+        callsign: updates.callsign !== undefined ? updates.callsign : staffMember.callsign
+      });
+    }
+
+    // Sync with governmentStore
+    if (updates.name || updates.role || updates.avatar) {
+      const govUpdate: any = {};
+      if (updates.name) govUpdate.name = updates.name;
+      if (updates.role) govUpdate.role = updates.role;
+      if (updates.avatar) govUpdate.image = updates.avatar;
+      governmentStore.updateEmployee(oldName, govUpdate);
+    }
+
+    // If the user being updated is the current user, update current session too
+    if (user?.id === userId) {
+      setUser(updatedUser);
+      localStorage.setItem('sa_gov_user', JSON.stringify(updatedUser));
+    }
+
+    logAction('Mise à jour utilisateur (Admin)', { userId, updates });
+  };
+
   const registerUser = (userData: Omit<User, 'id' | 'permissions' | 'status'>, password: string) => {
     const newUser: User = {
       ...userData,
@@ -413,7 +473,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider value={{
       user, login, logout, isLoading, hasPermission, canAccessService,
-      logAction, updateStatus, updateUser, registerUser, deleteUser, emergencyMode, toggleEmergencyMode
+      logAction, updateStatus, updateUser, registerUser, updateOtherUser, deleteUser, emergencyMode, toggleEmergencyMode
     }}>
       {children}
     </AuthContext.Provider>

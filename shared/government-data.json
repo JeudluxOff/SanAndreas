@@ -582,6 +582,66 @@
   ],
   "auditLogs": [
     {
+      "id": "1773166094302",
+      "timestamp": "2026-03-10T18:08:14.302Z",
+      "user_id": "admin_avocat",
+      "user_name": "Mathieu Gerrin",
+      "role": "admin",
+      "service_id": "JUSTICE",
+      "action": "Suppression utilisateur",
+      "metadata": {
+        "userId": "avocat_victoria"
+      }
+    },
+    {
+      "id": "1773166089493",
+      "timestamp": "2026-03-10T18:08:09.493Z",
+      "user_id": "admin_avocat",
+      "user_name": "Mathieu Gerrin",
+      "role": "admin",
+      "service_id": "JUSTICE",
+      "action": "Suppression utilisateur",
+      "metadata": {
+        "userId": "avocat_elena"
+      }
+    },
+    {
+      "id": "1773166087850",
+      "timestamp": "2026-03-10T18:08:07.850Z",
+      "user_id": "admin_avocat",
+      "user_name": "Mathieu Gerrin",
+      "role": "admin",
+      "service_id": "JUSTICE",
+      "action": "Suppression utilisateur",
+      "metadata": {
+        "userId": "staff_thomas"
+      }
+    },
+    {
+      "id": "1773166085841",
+      "timestamp": "2026-03-10T18:08:05.841Z",
+      "user_id": "admin_avocat",
+      "user_name": "Mathieu Gerrin",
+      "role": "admin",
+      "service_id": "JUSTICE",
+      "action": "Suppression utilisateur",
+      "metadata": {
+        "userId": "staff_sarah"
+      }
+    },
+    {
+      "id": "1773166082351",
+      "timestamp": "2026-03-10T18:08:02.351Z",
+      "user_id": "admin_avocat",
+      "user_name": "Mathieu Gerrin",
+      "role": "admin",
+      "service_id": "JUSTICE",
+      "action": "Suppression utilisateur",
+      "metadata": {
+        "userId": "staff_lucas"
+      }
+    },
+    {
       "id": "1773161900405",
       "timestamp": "2026-03-10T16:58:20.405Z",
       "user_id": "admin_avocat",

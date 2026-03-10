@@ -19,7 +19,8 @@ import {
   Globe,
   Mail,
   Server,
-  Trash2
+  Trash2,
+  Edit2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -52,7 +53,7 @@ import { toast } from 'sonner';
 
 const Admin = () => {
   const { isAssocié, canAudit } = useLegalRBAC();
-  const { registerUser, deleteUser, user: currentUser } = useAuth();
+  const { registerUser, updateOtherUser, deleteUser, user: currentUser } = useAuth();
 
   const [staff, setStaff] = React.useState(legalStore.getStaff());
   const [logs, setLogs] = React.useState(legalStore.getAuditLogs());
@@ -67,6 +68,9 @@ const Admin = () => {
 
   const [searchTerm, setSearchTerm] = React.useState('');
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+  const [editingUserId, setEditingUserId] = React.useState<string | null>(null);
+
   const [newUserForm, setNewUserForm] = React.useState({
     username: '',
     password: '',
@@ -75,6 +79,15 @@ const Admin = () => {
     service_id: 'JUSTICE' as any,
     service_name: 'Noxwood & Partner',
     grade: 'Avocat à la Cour',
+    matricule: '',
+    callsign: '',
+    avatar: ''
+  });
+
+  const [editUserForm, setEditUserForm] = React.useState({
+    name: '',
+    role: 'avocat' as any,
+    grade: '',
     matricule: '',
     callsign: '',
     avatar: ''
@@ -108,6 +121,52 @@ const Admin = () => {
       callsign: '',
       avatar: ''
     });
+  };
+
+  const handleEditClick = (member: any) => {
+    setEditingUserId(member.id);
+
+    // Find the actual role from AuthContext if possible, or try to map it back
+    // For now, we'll try to find it in registeredUsers if we had access, but we don't directly here
+    // Let's assume the role in staff is the display role, we might need to map it back or just use what we have
+
+    const roleMapping: Record<string, string> = {
+      'Associé': 'admin',
+      'Avocat': 'avocat',
+      'Auditeur': 'secretaire_etat_general',
+      'Comptable': 'secretaire_tresor_commerce'
+    };
+
+    setEditUserForm({
+      name: member.name,
+      role: roleMapping[member.role] || 'avocat',
+      grade: member.role, // Current display role
+      matricule: member.matricule || '',
+      callsign: member.callsign || '',
+      avatar: member.avatar || ''
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateUser = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUserId || !editUserForm.name) {
+      toast.error("Le nom est obligatoire");
+      return;
+    }
+
+    updateOtherUser(editingUserId, {
+      name: editUserForm.name,
+      role: editUserForm.role,
+      grade: editUserForm.grade,
+      matricule: editUserForm.matricule,
+      callsign: editUserForm.callsign,
+      avatar: editUserForm.avatar.trim() || undefined
+    });
+
+    toast.success("Profil mis à jour avec succès");
+    setIsEditDialogOpen(false);
+    setEditingUserId(null);
   };
 
   const handleDeleteStaff = (userId: string, name: string) => {
@@ -319,6 +378,121 @@ const Admin = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+            <DialogContent className="max-w-2xl bg-white border-none shadow-2xl rounded-[32px] p-0 overflow-hidden">
+              <div className="bg-[#c1a461] p-8 text-[#0a0f18]">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
+                    <div className="p-2 bg-[#0a0f18] rounded-lg">
+                      <Edit2 className="w-5 h-5 text-[#c1a461]" />
+                    </div>
+                    Modification d'Utilisateur
+                  </DialogTitle>
+                  <DialogDescription className="text-[#0a0f18]/60 font-bold uppercase text-[10px] tracking-[0.2em] mt-2">
+                    Mise à jour des informations du collaborateur
+                  </DialogDescription>
+                </DialogHeader>
+              </div>
+
+              <form onSubmit={handleUpdateUser} className="p-8 space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nom Complet</Label>
+                    <Input
+                      placeholder="EX: HARVEY SPECTER"
+                      className="bg-slate-50 border-none h-12 text-xs font-bold uppercase tracking-widest rounded-xl focus-visible:ring-1 focus-visible:ring-[#c1a461]"
+                      value={editUserForm.name}
+                      onChange={(e) => setEditUserForm({...editUserForm, name: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Niveau d'Accès</Label>
+                    <Select
+                      value={editUserForm.role}
+                      onValueChange={(val) => setEditUserForm({...editUserForm, role: val})}
+                    >
+                      <SelectTrigger className="bg-slate-50 border-none h-12 text-xs font-bold uppercase tracking-widest rounded-xl focus:ring-1 focus:ring-[#c1a461]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-slate-100 rounded-xl max-h-[300px]">
+                        {[
+                          { value: 'admin', label: 'Administrateur Cabinet' },
+                          { value: 'avocat', label: 'Avocat' },
+                          { value: 'gouverneur', label: 'Gouverneur' },
+                          { value: 'vice_gouverneur', label: 'Vice-Gouverneur' },
+                          { value: 'secretaire_etat_general', label: 'Secrétaire d\'État Général' },
+                          { value: 'secretaire_securite', label: 'Secrétaire Sécurité Publique' },
+                          { value: 'press_secretary', label: 'Secrétaire Presse' },
+                          { value: 'secretaire_sante', label: 'Secrétaire Santé' },
+                          { value: 'secretaire_justice', label: 'Secrétaire Justice' },
+                          { value: 'secretaire_securite_interieure', label: 'Secrétaire Sécurité Intérieure' },
+                          { value: 'secretaire_tresor_commerce', label: 'Secrétaire Trésor & Commerce' }
+                        ].map((role) => (
+                          <SelectItem key={role.value} value={role.value} className="text-[10px] font-bold uppercase tracking-widest">
+                            {role.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fonction / Grade</Label>
+                    <Input
+                      placeholder="EX: AVOCAT SENIOR"
+                      className="bg-slate-50 border-none h-12 text-xs font-bold uppercase tracking-widest rounded-xl focus-visible:ring-1 focus-visible:ring-[#c1a461]"
+                      value={editUserForm.grade}
+                      onChange={(e) => setEditUserForm({...editUserForm, grade: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Matricule</Label>
+                    <Input
+                      placeholder="EX: HS-01"
+                      className="bg-slate-50 border-none h-12 text-xs font-bold uppercase tracking-widest rounded-xl focus-visible:ring-1 focus-visible:ring-[#c1a461]"
+                      value={editUserForm.matricule}
+                      onChange={(e) => setEditUserForm({...editUserForm, matricule: e.target.value.toUpperCase()})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Code Action (Callsign)</Label>
+                    <Input
+                      placeholder="EX: A-5"
+                      className="bg-slate-50 border-none h-12 text-xs font-bold uppercase tracking-widest rounded-xl focus-visible:ring-1 focus-visible:ring-[#c1a461]"
+                      value={editUserForm.callsign}
+                      onChange={(e) => setEditUserForm({...editUserForm, callsign: e.target.value.toUpperCase()})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">URL Avatar (Optionnel)</Label>
+                    <Input
+                      placeholder="HTTPS://... (VIDE POUR PAR DÉFAUT)"
+                      className="bg-slate-50 border-none h-12 text-xs font-bold uppercase tracking-widest rounded-xl focus-visible:ring-1 focus-visible:ring-[#c1a461]"
+                      value={editUserForm.avatar}
+                      onChange={(e) => setEditUserForm({...editUserForm, avatar: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <DialogFooter className="pt-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsEditDialogOpen(false)}
+                    className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl"
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl hover:bg-[#0a0f18]/90"
+                  >
+                    Sauvegarder les Changements
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+
           <Card className="border-none shadow-xl rounded-[32px] overflow-hidden bg-white">
             <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between bg-slate-50/50">
               <div className="text-left">
@@ -360,17 +534,31 @@ const Admin = () => {
                          member.status === 'Actif' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'
                        )}>{member.status}</Badge>
 
-                       <Button
-                         variant="ghost"
-                         size="icon"
-                         className="text-slate-300 hover:text-red-600"
-                         onClick={(e) => {
-                           e.stopPropagation();
-                           handleDeleteStaff(member.id, member.name);
-                         }}
-                       >
-                         <Trash2 className="w-4 h-4" />
-                       </Button>
+                       <div className="flex items-center gap-2">
+                         <Button
+                           variant="ghost"
+                           size="icon"
+                           className="text-slate-300 hover:text-[#c1a461]"
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             handleEditClick(member);
+                           }}
+                         >
+                           <Edit2 className="w-4 h-4" />
+                         </Button>
+
+                         <Button
+                           variant="ghost"
+                           size="icon"
+                           className="text-slate-300 hover:text-red-600"
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             handleDeleteStaff(member.id, member.name);
+                           }}
+                         >
+                           <Trash2 className="w-4 h-4" />
+                         </Button>
+                       </div>
                     </div>
                   </div>
                 ))}
