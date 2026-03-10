@@ -59,6 +59,7 @@ interface AuthContextType {
   canAccessService: (serviceId: ServiceID) => boolean;
   logAction: (action: string, metadata?: any) => void;
   updateStatus: (status: UserStatus) => void;
+  updateUser: (updates: Partial<User>) => void;
   emergencyMode: boolean;
   toggleEmergencyMode: () => void;
 }
@@ -343,6 +344,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logAction('Mise à jour statut', { status });
   };
 
+  const updateUser = (updates: Partial<User>) => {
+    if (!user) return;
+    const updatedUser = { ...user, ...updates };
+
+    // If role changed, re-calculate permissions
+    if (updates.role) {
+      updatedUser.permissions = ROLE_PERMISSIONS[updates.role] || [];
+    }
+
+    // Sync with government store if name or role changed
+    if (updates.name || updates.role) {
+      const govUpdate: any = {};
+      if (updates.name) govUpdate.name = updates.name;
+      if (updates.role) govUpdate.role = updates.role;
+      governmentStore.updateEmployee(user.name, govUpdate);
+    }
+
+    setUser(updatedUser);
+    localStorage.setItem('sa_gov_user', JSON.stringify(updatedUser));
+    logAction('Mise à jour profil', updates);
+  };
+
   const toggleEmergencyMode = () => {
     const newMode = !emergencyMode;
     setEmergencyMode(newMode);
@@ -353,7 +376,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider value={{
       user, login, logout, isLoading, hasPermission, canAccessService,
-      logAction, updateStatus, emergencyMode, toggleEmergencyMode
+      logAction, updateStatus, updateUser, emergencyMode, toggleEmergencyMode
     }}>
       {children}
     </AuthContext.Provider>

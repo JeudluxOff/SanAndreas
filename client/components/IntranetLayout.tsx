@@ -20,7 +20,8 @@ import {
   User,
   Activity,
   Briefcase,
-  ShieldAlert
+  ShieldAlert,
+  Edit2
 } from 'lucide-react';
 import { useAuth, Role, Permission, ServiceID, UserStatus } from '@/contexts/AuthContext';
 import { useGovernmentStore } from '@/hooks/useGovernmentStore';
@@ -38,6 +39,16 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface SidebarItem {
   label: string;
@@ -70,11 +81,19 @@ const workspaceServices: { id: ServiceID, label: string, color: string }[] = [
 
 export function IntranetLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { user, logout, hasPermission, canAccessService, updateStatus, emergencyMode, toggleEmergencyMode } = useAuth();
+  const { user, logout, hasPermission, canAccessService, updateStatus, updateUser, emergencyMode, toggleEmergencyMode } = useAuth();
   const store = useGovernmentStore();
   const [isSyncing, setIsSyncing] = React.useState(false);
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [newName, setNewName] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (user) {
+      setNewName(user.name);
+    }
+  }, [user]);
 
   React.useEffect(() => {
     return store.subscribe(() => {
@@ -84,6 +103,13 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
   }, [store]);
 
   if (!user) return null;
+
+  const handleUpdateName = () => {
+    if (newName.trim()) {
+      updateUser({ name: newName });
+      setIsProfileDialogOpen(false);
+    }
+  };
 
   const statusColors = {
     available: 'bg-emerald-500',
@@ -241,7 +267,12 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
                       <ChevronRight className="w-2.5 h-2.5 rotate-90" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-40 font-bold text-[10px] uppercase tracking-widest">
+                  <DropdownMenuContent align="start" className="w-56 font-bold text-[10px] uppercase tracking-widest">
+                    <DropdownMenuLabel>Paramètres Profil</DropdownMenuLabel>
+                    <DropdownMenuItem className="flex items-center gap-2" onClick={() => setIsProfileDialogOpen(true)}>
+                      <Edit2 className="w-3.5 h-3.5" /> Modifier Nom
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuLabel>Changer Statut</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="flex items-center gap-2" onClick={() => updateStatus('available')}>
@@ -405,6 +436,34 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
           </div>
         </main>
       </div>
+
+      <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="uppercase font-black tracking-tight">Modifier mon profil</DialogTitle>
+            <DialogDescription className="italic font-medium">
+              Modifiez votre identité officielle sur l'intranet.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right text-xs font-black uppercase">
+                Nom Complet
+              </Label>
+              <Input
+                id="name"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                className="col-span-3 font-bold"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsProfileDialogOpen(false)} className="font-bold uppercase text-[10px]">Annuler</Button>
+            <Button onClick={handleUpdateName} className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold uppercase text-[10px]">Sauvegarder</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

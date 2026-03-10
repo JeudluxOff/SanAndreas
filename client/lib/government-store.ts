@@ -156,6 +156,16 @@ class GovernmentStoreManager {
     this.save();
   }
 
+  updateEmployee(oldName: string, updates: Partial<GovEmployee>) {
+    const index = this.data.employees.findIndex(e => e.name === oldName);
+    if (index !== -1) {
+      this.data.employees[index] = { ...this.data.employees[index], ...updates };
+      this.save();
+      return true;
+    }
+    return false;
+  }
+
   // Notifications
   getNotifications() { return this.data.notifications; }
   

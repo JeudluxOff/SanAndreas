@@ -29,24 +29,46 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, Role } from "@/contexts/AuthContext";
 import { useGovernmentStore } from "@/hooks/useGovernmentStore";
+import { governmentStore } from "@/lib/government-store";
 
 const HR = () => {
-  const { user, hasPermission, logAction } = useAuth();
+  const { user, hasPermission, logAction, updateUser } = useAuth();
   const store = useGovernmentStore();
   const canManageUsers = hasPermission('admin:users_manage');
   const canManageRoles = hasPermission('admin:roles_manage');
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Role Management State
+  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [newRole, setNewRole] = useState<Role | "">("");
 
   const employees = store.getEmployees();
 
@@ -59,6 +81,28 @@ const HR = () => {
 
   const handleAdminAction = (action: string, target?: string) => {
     logAction(`${action}${target ? ' sur ' + target : ''}`);
+  };
+
+  const openRoleDialog = (emp: any) => {
+    setSelectedEmployee(emp);
+    // Find matching role key or default to current
+    setNewRole(emp.role as Role);
+    setIsRoleDialogOpen(true);
+  };
+
+  const handleUpdateRole = () => {
+    if (selectedEmployee && newRole) {
+      // Update in store
+      governmentStore.updateEmployee(selectedEmployee.name, { role: newRole });
+
+      // If we are updating ourselves, update AuthContext too
+      if (selectedEmployee.name === user?.name) {
+        updateUser({ role: newRole as Role });
+      }
+
+      logAction(`Changement de rôle pour ${selectedEmployee.name}`, { role: newRole });
+      setIsRoleDialogOpen(false);
+    }
   };
 
   // Sync current user status in list
@@ -278,7 +322,7 @@ const HR = () => {
                                 <DropdownMenuSeparator />
                                 {canManageRoles && (
                                   <>
-                                    <DropdownMenuItem className="flex items-center gap-2" onClick={() => handleAdminAction('Modification rôle', emp.name)}>
+                                    <DropdownMenuItem className="flex items-center gap-2" onClick={() => openRoleDialog(emp)}>
                                       <UserCog className="w-4 h-4" /> Modifier Rôle
                                     </DropdownMenuItem>
                                     <DropdownMenuItem className="flex items-center gap-2" onClick={() => handleAdminAction('Audit permissions', emp.name)}>
@@ -401,6 +445,54 @@ const HR = () => {
           </div>
         </div>
       </div>
+
+      <Dialog open={isRoleDialogOpen} onOpenChange={setIsRoleDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="uppercase font-black tracking-tight">Modifier le rôle de l'agent</DialogTitle>
+            <DialogDescription className="italic font-medium text-xs">
+              Mettez à jour les responsabilités et les accès de l'agent <strong>{selectedEmployee?.name}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            <div className="space-y-2">
+              <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Nouveau Rôle Officiel</Label>
+              <Select value={newRole} onValueChange={(value) => setNewRole(value as Role)}>
+                <SelectTrigger className="w-full font-bold">
+                  <SelectValue placeholder="Sélectionner un rôle" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin" className="font-bold">Administrateur Global</SelectItem>
+                  <SelectItem value="gouverneur" className="font-bold">Gouverneur</SelectItem>
+                  <SelectItem value="vice_gouverneur" className="font-bold">Vice-Gouverneur</SelectItem>
+                  <SelectItem value="secretaire_etat_general" className="font-bold">Secrétaire d'État Général</SelectItem>
+                  <SelectItem value="secretaire_justice" className="font-bold">Secrétaire à la Justice</SelectItem>
+                  <SelectItem value="secretaire_securite" className="font-bold">Secrétaire à la Sécurité</SelectItem>
+                  <SelectItem value="secretaire_sante" className="font-bold">Secrétaire à la Santé</SelectItem>
+                  <SelectItem value="secretaire_securite_interieure" className="font-bold">Secrétaire à la Sécurité Intérieure</SelectItem>
+                  <SelectItem value="secretaire_tresor_commerce" className="font-bold">Secrétaire au Trésor</SelectItem>
+                  <SelectItem value="press_secretary" className="font-bold">Press Secretary</SelectItem>
+                  <SelectItem value="avocat" className="font-bold">Avocat</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="p-3 bg-amber-50 border border-amber-100 rounded-md">
+              <div className="flex gap-3">
+                <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                <p className="text-[10px] font-bold text-amber-800 leading-relaxed italic">
+                  Attention: La modification du rôle entraîne un changement immédiat des permissions RBAC.
+                  L'agent devra peut-être se reconnecter pour voir certains changements.
+                </p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsRoleDialogOpen(false)} className="font-bold uppercase text-[10px]">Annuler</Button>
+            <Button onClick={handleUpdateRole} className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold uppercase text-[10px]">Appliquer le Rôle</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </IntranetLayout>
   );
 };
