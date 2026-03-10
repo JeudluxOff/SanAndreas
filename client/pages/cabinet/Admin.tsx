@@ -86,7 +86,13 @@ const Admin = () => {
       return;
     }
 
-    registerUser(newUserForm, newUserForm.password);
+    // Ensure empty avatar URL is handled as undefined
+    const userData = {
+      ...newUserForm,
+      avatar: newUserForm.avatar.trim() || undefined
+    };
+
+    registerUser(userData, newUserForm.password);
     toast.success("Utilisateur créé avec succès");
     setIsDialogOpen(false);
     setNewUserForm({
@@ -199,9 +205,24 @@ const Admin = () => {
                         <SelectTrigger className="bg-slate-50 border-none h-12 text-xs font-bold uppercase tracking-widest rounded-xl focus:ring-1 focus:ring-[#c1a461]">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-slate-100 rounded-xl">
-                          <SelectItem value="avocat" className="text-[10px] font-bold uppercase tracking-widest">Avocat (Standard)</SelectItem>
-                          <SelectItem value="admin" className="text-[10px] font-bold uppercase tracking-widest">Admin (Complet)</SelectItem>
+                        <SelectContent className="bg-white border-slate-100 rounded-xl max-h-[300px]">
+                          {[
+                            { value: 'admin', label: 'Administrateur Cabinet' },
+                            { value: 'avocat', label: 'Avocat' },
+                            { value: 'gouverneur', label: 'Gouverneur' },
+                            { value: 'vice_gouverneur', label: 'Vice-Gouverneur' },
+                            { value: 'secretaire_etat_general', label: 'Secrétaire d\'État Général' },
+                            { value: 'secretaire_securite', label: 'Secrétaire Sécurité Publique' },
+                            { value: 'press_secretary', label: 'Secrétaire Presse' },
+                            { value: 'secretaire_sante', label: 'Secrétaire Santé' },
+                            { value: 'secretaire_justice', label: 'Secrétaire Justice' },
+                            { value: 'secretaire_securite_interieure', label: 'Secrétaire Sécurité Intérieure' },
+                            { value: 'secretaire_tresor_commerce', label: 'Secrétaire Trésor & Commerce' }
+                          ].map((role) => (
+                            <SelectItem key={role.value} value={role.value} className="text-[10px] font-bold uppercase tracking-widest">
+                              {role.label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -233,9 +254,9 @@ const Admin = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">URL Avatar</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">URL Avatar (Optionnel)</Label>
                       <Input
-                        placeholder="HTTPS://..."
+                        placeholder="HTTPS://... (VIDE POUR PAR DÉFAUT)"
                         className="bg-slate-50 border-none h-12 text-xs font-bold uppercase tracking-widest rounded-xl focus-visible:ring-1 focus-visible:ring-[#c1a461]"
                         value={newUserForm.avatar}
                         onChange={(e) => setNewUserForm({...newUserForm, avatar: e.target.value})}

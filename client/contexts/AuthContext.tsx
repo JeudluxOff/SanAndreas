@@ -368,7 +368,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Also sync with legalStore
     const legalRoleMap: Record<string, string> = {
       'admin': 'Associé',
-      'avocat': 'Avocat'
+      'avocat': 'Avocat',
+      'gouverneur': 'Associé',
+      'vice_gouverneur': 'Associé',
+      'secretaire_justice': 'Avocat',
+      'secretaire_etat_general': 'Auditeur',
+      'secretaire_tresor_commerce': 'Comptable'
     };
 
     legalStore.addStaff({
