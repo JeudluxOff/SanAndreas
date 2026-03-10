@@ -46,6 +46,13 @@ export default function Gouvernement() {
             <p className="text-xl md:text-2xl text-slate-300 font-medium leading-relaxed max-w-2xl">
               Une administration dévouée au service du public, assurant la stabilité et la prospérité de notre État à travers une gouvernance transparente.
             </p>
+            <div className="mt-12 rounded-2xl overflow-hidden border-4 border-white/10 shadow-2xl max-w-4xl group transition-transform hover:scale-[1.02]">
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2F4e331a0ce80644199f9cae8c33fdc854%2F5dcbd39c6c4842bdb3d0af4c134475de?format=webp&width=800&height=1200"
+                alt="Skyline"
+                className="w-full h-auto object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+              />
+            </div>
           </div>
         </div>
       </div>
