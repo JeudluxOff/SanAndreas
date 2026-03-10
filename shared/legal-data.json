@@ -18,6 +18,15 @@
   },
   "staff": [
     {
+      "id": "reed_noxwood",
+      "name": "Reed Noxwood",
+      "role": "Associé",
+      "email": "r.noxwood@np.sa",
+      "status": "Actif",
+      "joined_at": "2018-01-01",
+      "last_active": "2024-05-24T09:42:00Z"
+    },
+    {
       "id": "admin_avocat",
       "name": "Julian Noxwood",
       "role": "Associé",

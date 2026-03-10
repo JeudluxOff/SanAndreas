@@ -391,6 +391,17 @@
   },
   "employees": [
     {
+      "name": "Reed Noxwood",
+      "role": "Associé Fondateur",
+      "service": "Noxwood & Partner",
+      "grade": "Fondateur",
+      "status": "En service",
+      "email": "r.noxwood@np.sa",
+      "joinDate": "Jan 2018",
+      "image": "/placeholder.svg",
+      "description": "Fondateur historique du cabinet Noxwood & Partner."
+    },
+    {
       "name": "Arthur Vance",
       "role": "Gouverneur",
       "service": "Cabinet",
@@ -570,6 +581,18 @@
     }
   ],
   "auditLogs": [
+    {
+      "id": "1773161392735",
+      "timestamp": "2026-03-10T16:49:52.735Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Noxwood",
+      "role": "admin",
+      "service_id": "JUSTICE",
+      "action": "Mise à jour profil",
+      "metadata": {
+        "name": "Mathieu Gerrin"
+      }
+    },
     {
       "id": "1773161235975",
       "timestamp": "2026-03-10T16:47:15.975Z",

@@ -216,6 +216,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           name: 'Julian Noxwood',
           service_name: 'Noxwood & Partner',
           grade: 'Associé Fondateur & Admin'
+        },
+        'reed_noxwood': {
+          role: 'admin',
+          service_id: 'JUSTICE',
+          name: 'Reed Noxwood',
+          service_name: 'Noxwood & Partner',
+          grade: 'Fondateur & Associé'
         }
       };
 
