@@ -39,7 +39,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { useLegalRBAC } from './intranet/LegalIntranetLayout';
+import { useLegalRBAC } from '@/pages/cabinet/intranet/LegalIntranetLayout';
 import { Link, useLocation } from 'react-router-dom';
 import { legalStore } from '@/lib/legal-store';
 import { useLegalStore } from '@/hooks/useLegalStore';

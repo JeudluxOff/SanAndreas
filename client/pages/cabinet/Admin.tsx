@@ -25,7 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import { useLegalRBAC } from './intranet/LegalIntranetLayout';
+import { useLegalRBAC } from '@/pages/cabinet/intranet/LegalIntranetLayout';
 import { Link } from 'react-router-dom';
 import { legalStore } from '@/lib/legal-store';
 

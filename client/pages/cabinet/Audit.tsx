@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { useLegalRBAC } from './intranet/LegalIntranetLayout';
+import { useLegalRBAC } from '@/pages/cabinet/intranet/LegalIntranetLayout';
 import { Link } from 'react-router-dom';
 import { legalStore } from '@/lib/legal-store';
 

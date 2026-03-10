@@ -36,7 +36,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { useLegalRBAC } from './intranet/LegalIntranetLayout';
+import { useLegalRBAC } from '@/pages/cabinet/intranet/LegalIntranetLayout';
 import { Link } from 'react-router-dom';
 import { legalStore } from '@/lib/legal-store';
 import { useLegalStore } from '@/hooks/useLegalStore';
