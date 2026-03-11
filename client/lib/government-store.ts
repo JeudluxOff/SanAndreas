@@ -68,43 +68,53 @@ class GovernmentStoreManager {
     }, 1000);
   }
 
-  private async fetchFromServer(retries = 3) {
-    if (this.isSyncing && retries === 3) return;
+  private async fetchFromServer(retries = 1) {
+    if (this.isSyncing && retries === 1) return;
     this.isSyncing = true;
     try {
-      const res = await fetch('/api/government');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+      const res = await fetch('/api/government', { signal: controller.signal });
+      clearTimeout(timeoutId);
+
       if (res.ok) {
         const serverData = await res.json();
         this.data = serverData;
         this.saveLocally();
         this.notify();
-      } else {
-        console.warn(`Government Sync: Server returned ${res.status}`);
       }
-      this.isSyncing = false; // Successfully finished
-    } catch (e) {
-      if (retries > 0) {
+      this.isSyncing = false; // Successfully finished or server error
+    } catch (e: any) {
+      // Silently handle network errors - app will work with local data
+      if (retries > 0 && e.name !== 'AbortError') {
         // Schedule retry without locking up
         setTimeout(() => {
           this.isSyncing = false; // Unlock to allow retry
           this.fetchFromServer(retries - 1);
-        }, 1000);
+        }, 2000);
       } else {
-        console.error("Government Sync error after retries:", e);
         this.isSyncing = false; // Final unlock
+        // App will continue working with cached localStorage data
       }
     }
   }
 
   private async saveToServer() {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
       await fetch('/api/government', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(this.data)
+        body: JSON.stringify(this.data),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
     } catch (e) {
-      console.error("Government Save error:", e);
+      // Silently handle network errors - data is already saved locally
+      clearTimeout(0);
     }
   }
 

@@ -52,19 +52,41 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   // Subscribe to WebSocket events for real-time notifications
   useEffect(() => {
-    const syncClient = getSyncClient();
+    try {
+      const syncClient = getSyncClient();
 
-    if (syncClient.isConnected()) {
-      // Listen to notification events
-      const unsubscribe = syncClient.on('notification:new', (event) => {
-        const { title, message, type } = event.data;
-        notificationSystem.addNotification(type, title, message, {
-          priority: 'normal',
-          data: event.data
-        });
-      });
+      // Setup listener if connected, otherwise wait for connection
+      const setupListener = () => {
+        if (syncClient.isConnected()) {
+          return syncClient.on('notification:new', (event) => {
+            const { title, message, type } = event.data;
+            notificationSystem.addNotification(type, title, message, {
+              priority: 'normal',
+              data: event.data
+            });
+          });
+        }
+        return null;
+      };
 
-      return unsubscribe;
+      let unsubscribe = setupListener();
+
+      // Try to setup listener after a delay if not connected
+      const timeout = setTimeout(() => {
+        if (!unsubscribe) {
+          unsubscribe = setupListener();
+        }
+      }, 2000);
+
+      return () => {
+        clearTimeout(timeout);
+        if (unsubscribe) {
+          unsubscribe();
+        }
+      };
+    } catch (error) {
+      // Silently handle WebSocket errors
+      return undefined;
     }
   }, []);
 

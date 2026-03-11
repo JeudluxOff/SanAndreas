@@ -49,7 +49,7 @@ export class WebSocketSyncClient {
   }
 
   /**
-   * Connect to WebSocket server
+   * Connect to WebSocket server with exponential backoff
    */
   connect(userId: string, role?: string): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -62,9 +62,10 @@ export class WebSocketSyncClient {
         }
 
         this.ws = new WebSocket(this.url);
+        let connected = false;
 
         this.ws.onopen = () => {
-          console.log('[WS] Connected to server');
+          connected = true;
           this.reconnectAttempts = 0;
 
           // Authenticate with server
@@ -86,36 +87,33 @@ export class WebSocketSyncClient {
 
             if (data.type === 'auth:success') {
               this.isAuthenticated = true;
-              console.log('[WS] Authentication successful');
             } else if (data.type === 'pong') {
-              // Heartbeat response
-              console.log('[WS] Heartbeat received');
-            } else {
-              // Emit event to listeners
+              // Heartbeat response - do nothing
+            } else if (data.type !== 'ping') {
+              // Emit event to listeners (skip ping messages)
               this.emit(data.type as SyncEventType, data);
             }
           } catch (error) {
-            console.error('[WS] Message parse error:', error);
+            // Silently ignore parse errors
           }
         };
 
-        this.ws.onerror = (error: Event) => {
-          console.error('[WS] Connection error:', error);
-          reject(error);
+        this.ws.onerror = (_error: Event) => {
+          // Silently handle errors - will be handled in onclose
+          if (!connected) {
+            reject(new Error('WebSocket connection failed'));
+          }
         };
 
         this.ws.onclose = () => {
-          console.log('[WS] Connection closed');
           this.isAuthenticated = false;
           this.stopHeartbeat();
 
-          // Attempt to reconnect
+          // Attempt to reconnect with exponential backoff
           if (this.reconnectAttempts < this.maxReconnectAttempts) {
             this.reconnectAttempts++;
-            console.log(
-              `[WS] Reconnecting (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`
-            );
-            setTimeout(() => this.connect(userId, role), this.reconnectDelay);
+            const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
+            setTimeout(() => this.connect(userId, role).catch(() => {}), Math.min(delay, 30000));
           }
         };
       } catch (error) {

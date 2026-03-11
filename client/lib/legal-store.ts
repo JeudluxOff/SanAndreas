@@ -91,11 +91,16 @@ class LegalStoreManager {
     }, 1000);
   }
 
-  private async fetchFromServer(retries = 3) {
-    if (this.isSyncing && retries === 3) return;
+  private async fetchFromServer(retries = 1) {
+    if (this.isSyncing && retries === 1) return;
     this.isSyncing = true;
     try {
-      const res = await fetch('/api/legal');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+      const res = await fetch('/api/legal', { signal: controller.signal });
+      clearTimeout(timeoutId);
+
       if (res.ok) {
         const serverData = await res.json() as LegalStore;
 
@@ -125,19 +130,19 @@ class LegalStoreManager {
         this.data = this.mergeDataWithTimestamps(this.data, serverData);
         this.saveLocally();
         this.notify();
-      } else {
-        console.warn(`Legal Sync: Server returned ${res.status}`);
       }
       this.isSyncing = false;
-    } catch (e) {
-      if (retries > 0) {
+    } catch (e: any) {
+      // Silently handle network errors - app will work with local data
+      // Only retry once to avoid spamming logs
+      if (retries > 0 && e.name !== 'AbortError') {
         setTimeout(() => {
           this.isSyncing = false;
           this.fetchFromServer(retries - 1);
-        }, 1000);
+        }, 2000);
       } else {
-        console.error("Legal Sync error after retries:", e);
         this.isSyncing = false;
+        // App will continue working with cached localStorage data
       }
     }
   }
