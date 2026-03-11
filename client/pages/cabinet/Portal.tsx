@@ -438,18 +438,12 @@ const Portal = () => {
                       ? `Votre dossier ${activeCases[0].id} en cours de traitement.`
                       : 'Nous sommes disponibles pour vous assister.'}
                   </p>
-                  <Button className="w-full bg-white text-[#c1a461] hover:bg-white/90 font-black uppercase text-[9px] md:text-[10px] tracking-widest h-12 md:h-14 rounded-xl md:rounded-2xl shadow-xl">
-                    Contacter {assignedStaff.name.split(' ')[0]}
-                  </Button>
                 </>
               ) : (
-                <div className="text-center space-y-4 py-2 md:py-4">
+                <div className="text-center space-y-2 py-2 md:py-4">
                   <p className="text-xs md:text-sm font-medium leading-relaxed uppercase tracking-tight opacity-90">
                     Aucun avocat assigné
                   </p>
-                  <Button className="w-full bg-white text-[#c1a461] hover:bg-white/90 font-black uppercase text-[9px] md:text-[10px] tracking-widest h-12 md:h-14 rounded-xl md:rounded-2xl shadow-xl">
-                    Demander Consultation
-                  </Button>
                 </div>
               )}
             </Card>
