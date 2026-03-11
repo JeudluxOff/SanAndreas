@@ -4,6 +4,7 @@ import cors from "cors";
 import fs from "fs";
 import path from "path";
 import { handleDemo } from "./routes/demo";
+import { handlePublish, handleGetPublishHistory } from "./routes/admin";
 
 const SHARED_LOCATIONS_PATH = path.resolve(process.cwd(), "shared", "locations.json");
 const SHARED_LEGAL_PATH = path.resolve(process.cwd(), "shared", "legal-data.json");
@@ -99,6 +100,10 @@ export function createServer() {
       res.status(500).json({ error: "Internal server error" });
     }
   });
+
+  // Admin Routes
+  app.post("/api/admin/publish", handlePublish);
+  app.get("/api/admin/publish-history", handleGetPublishHistory);
 
   return app;
 }

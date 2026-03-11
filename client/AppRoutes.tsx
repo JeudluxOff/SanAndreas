@@ -44,6 +44,7 @@ import HR from "@/pages/intranet/HR";
 import AuditLogs from "@/pages/intranet/AuditLogs";
 import Communication from "@/pages/intranet/Communication";
 import LegalIntranetLayout from "@/pages/cabinet/intranet/LegalIntranetLayout";
+import AdminPublish from "@/pages/AdminPublish";
 import { ProtectedRoute, PermissionRoute } from "@/components/RouteGuards";
 
 export const AppRoutes = () => (
@@ -93,6 +94,11 @@ export const AppRoutes = () => (
     <Route path="/sante" element={<Health />} />
     <Route path="/services" element={<Services />} />
     <Route path="/login" element={<Login />} />
+    <Route path="/admin/publish" element={
+      <ProtectedRoute>
+        <AdminPublish />
+      </ProtectedRoute>
+    } />
 
     {/* Intranet Protected Routes */}
     <Route 

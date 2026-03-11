@@ -16,6 +16,8 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdmin } from "@/contexts/AdminContext";
+import { AlertCircle } from "lucide-react";
 
 const navItems = [
   { label: "Accueil", path: "/", icon: <Building2 className="w-4 h-4" /> },
@@ -32,6 +34,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { emergencyMode } = useAuth();
+  const { pendingPublications, hasPendingChanges } = useAdmin();
 
   const publicNavItems = navItems.filter(item => !item.isEmployee);
   const employeeItem = navItems.find(item => item.isEmployee);
@@ -67,6 +70,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
              </div>
            ))}
         </div>
+      )}
+
+      {/* Pending Changes Notification */}
+      {hasPendingChanges() && (
+        <Link to="/admin/publish" className="block bg-amber-500 hover:bg-amber-600 text-white py-2.5 px-4 z-[60] transition-colors">
+          <div className="container mx-auto px-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5" />
+              <span className="font-black uppercase text-sm tracking-widest">
+                ⚠️ {pendingPublications} changement{pendingPublications > 1 ? 's' : ''} non publié{pendingPublications > 1 ? 's' : ''} - Cliquez pour revue et publication
+              </span>
+            </div>
+            <span className="text-xs font-bold">→</span>
+          </div>
+        </Link>
       )}
 
       {/* Header */}
