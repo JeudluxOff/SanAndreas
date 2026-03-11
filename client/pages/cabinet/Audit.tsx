@@ -1,31 +1,72 @@
 import React from 'react';
-import { 
-  Lock, 
-  Search, 
-  ShieldAlert, 
-  Activity, 
-  MoreVertical, 
-  ChevronRight, 
+import {
+  Lock,
+  Search,
+  ShieldAlert,
+  Activity,
+  MoreVertical,
+  ChevronRight,
   Download,
   ShieldCheck,
   Zap,
   Clock,
   ArrowRight,
   Eye,
-  AlertTriangle
+  AlertTriangle,
+  ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { useLegalRBAC } from '@/pages/cabinet/intranet/LegalIntranetLayout';
 import { Link } from 'react-router-dom';
 import { legalStore } from '@/lib/legal-store';
+import { exportToCSV, exportToJSON, exportToPDF, formatAuditLogsForExport, generateTableHTML } from '@/lib/export-utils';
+import { toast } from 'sonner';
 
 const Audit = () => {
   const { isAssocié, canAudit } = useLegalRBAC();
   const logs = legalStore.getAuditLogs();
   const sealedAccessLogs = logs.filter(l => l.action === 'Accès Dossier Scellé');
+  const [exportFormat, setExportFormat] = React.useState<'csv' | 'json' | 'pdf'>('csv');
+
+  const handleExport = (format: 'csv' | 'json' | 'pdf') => {
+    try {
+      const formatted = formatAuditLogsForExport(logs);
+      const timestamp = new Date().toISOString().split('T')[0];
+
+      switch(format) {
+        case 'csv':
+          exportToCSV(formatted, `Audit-Logs-${timestamp}.csv`);
+          toast.success('Logs exported to CSV');
+          break;
+        case 'json':
+          exportToJSON(logs, `Audit-Logs-${timestamp}.json`);
+          toast.success('Logs exported to JSON');
+          break;
+        case 'pdf':
+          const table = generateTableHTML(formatted);
+          exportToPDF(
+            'Audit & Sécurité Système',
+            `Journalisation - ${new Date().toLocaleDateString('fr-FR')}`,
+            table,
+            `Audit-Logs-${timestamp}.html`
+          );
+          toast.success('Logs exported to PDF');
+          break;
+      }
+    } catch (error) {
+      toast.error('Export failed');
+      console.error(error);
+    }
+  };
 
   if (!isAssocié && !canAudit) {
     return (
@@ -57,9 +98,25 @@ const Audit = () => {
             <Button variant="outline" className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
               <ShieldAlert className="w-4 h-4" /> Analyse Vulnérabilités
             </Button>
-            <Button className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
-              <Download className="w-4 h-4" /> Exporter Logs (PDF/JSON)
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
+                  <Download className="w-4 h-4" /> Exporter
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="uppercase font-bold text-[10px]">
+                <DropdownMenuItem onClick={() => handleExport('csv')} className="gap-2">
+                  CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('json')} className="gap-2">
+                  JSON
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('pdf')} className="gap-2">
+                  PDF Report
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 

@@ -20,6 +20,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Download, ChevronDown } from 'lucide-react';
+import { exportToCSV, exportToPDF, formatCasesForExport, generateTableHTML } from '@/lib/export-utils';
+import { toast } from 'sonner';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -84,6 +87,30 @@ const Dossiers = () => {
 
   const cases = store.getCases().filter(c => c.status !== 'Archivé');
   const clients = store.getClients();
+
+  const handleExportCases = (format: 'csv' | 'pdf') => {
+    try {
+      const formatted = formatCasesForExport(cases);
+      const timestamp = new Date().toISOString().split('T')[0];
+
+      if (format === 'csv') {
+        exportToCSV(formatted, `Dossiers-${timestamp}.csv`);
+        toast.success('Dossiers exported to CSV');
+      } else if (format === 'pdf') {
+        const table = generateTableHTML(formatted);
+        exportToPDF(
+          'Gestion des Dossiers',
+          `Liste des Dossiers Actifs - ${new Date().toLocaleDateString('fr-FR')}`,
+          table,
+          `Dossiers-${timestamp}.html`
+        );
+        toast.success('Dossiers exported to PDF');
+      }
+    } catch (error) {
+      toast.error('Export failed');
+      console.error(error);
+    }
+  };
 
   const handleQuickAddClient = () => {
     if (!newClient.name || !user) return;
@@ -198,6 +225,22 @@ const Dossiers = () => {
             <Button variant="outline" className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
               <Filter className="w-4 h-4" /> Filtrer
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
+                  <Download className="w-4 h-4" /> Exporter
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="uppercase font-bold text-[10px]">
+                <DropdownMenuItem onClick={() => handleExportCases('csv')} className="gap-2">
+                  CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExportCases('pdf')} className="gap-2">
+                  PDF Report
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               onClick={() => setShowQuickClientModal(true)}
               variant="outline"

@@ -26,6 +26,15 @@ import {
   DialogDescription,
   DialogFooter
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ChevronDown } from 'lucide-react';
+import { exportToCSV, formatAuditLogsForExport } from '@/lib/export-utils';
+import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -50,11 +59,17 @@ const Billing = () => {
   const invoices = store.getInvoices();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [showCreateModal, setShowCreateModal] = React.useState(false);
+  const [showEditModal, setShowEditModal] = React.useState(false);
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = React.useState<string | null>(null);
+  const [invoiceToEdit, setInvoiceToEdit] = React.useState<string | null>(null);
   const [deleteReason, setDeleteReason] = React.useState('');
   const [newInvoice, setNewInvoice] = React.useState({
     case_id: '',
+    amount: '',
+    description: ''
+  });
+  const [editInvoice, setEditInvoice] = React.useState({
     amount: '',
     description: ''
   });
@@ -164,6 +179,36 @@ const Billing = () => {
     }
   };
 
+  const handleEditInvoice = () => {
+    if (!user || !invoiceToEdit || !editInvoice.amount) return;
+
+    const inv = store.getInvoices().find(i => i.id === invoiceToEdit);
+    if (!inv) return;
+
+    const updated = {
+      ...inv,
+      amount: Number(editInvoice.amount),
+      items: [{ description: editInvoice.description || inv.items[0]?.description || 'Honoraires juridiques', amount: Number(editInvoice.amount) }]
+    };
+
+    store.updateInvoice(updated);
+
+    store.logAction({
+      id: `LOG-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      user_id: user.id,
+      user_name: user.name,
+      action: 'Modification facture',
+      target_type: 'Invoice',
+      target_id: invoiceToEdit,
+      metadata: { amount: updated.amount }
+    });
+
+    setShowEditModal(false);
+    setInvoiceToEdit(null);
+    setEditInvoice({ amount: '', description: '' });
+  };
+
   const handleDeleteInvoice = () => {
     if (!user || !invoiceToDelete || !deleteReason.trim()) return;
 
@@ -186,6 +231,27 @@ const Billing = () => {
     setDeleteReason('');
   };
 
+  const handleExportInvoices = () => {
+    try {
+      const data = filteredInvoices.map(inv => ({
+        'ID': inv.id,
+        'Dossier': store.getCase(inv.case_id)?.title || '-',
+        'Client': store.getClient(inv.client_id)?.name || '-',
+        'Montant': `${inv.amount} ${inv.currency}`,
+        'Statut': inv.status,
+        'Date due': new Date(inv.due_date).toLocaleDateString('fr-FR'),
+        'Création': new Date(inv.created_at).toLocaleDateString('fr-FR'),
+      }));
+
+      const timestamp = new Date().toISOString().split('T')[0];
+      exportToCSV(data, `Invoices-${timestamp}.csv`);
+      toast.success('Invoices exported to CSV');
+    } catch (error) {
+      toast.error('Export failed');
+      console.error(error);
+    }
+  };
+
   const filteredInvoices = invoices.filter(inv => {
     const client = store.getClient(inv.client_id);
     const caseObj = store.getCase(inv.case_id);
@@ -206,9 +272,19 @@ const Billing = () => {
             </p>
           </div>
           <div className="flex gap-4">
-            <Button variant="outline" className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
-              <Download className="w-4 h-4" /> Rapport Financier
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="border-slate-200 text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2">
+                  <Download className="w-4 h-4" /> Rapport
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="uppercase font-bold text-[10px]">
+                <DropdownMenuItem onClick={handleExportInvoices} className="gap-2">
+                  Export Factures (CSV)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               onClick={() => setShowCreateModal(true)}
               className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 gap-2"
@@ -415,25 +491,43 @@ const Billing = () => {
                               <FileCheck className="w-4 h-4" />
                             </Button>
                           )}
-                          <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
-                            <Download className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
-                            <MoreVertical className="w-5 h-5" />
-                          </Button>
-                          <Button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setInvoiceToDelete(item.id);
-                              setShowDeleteModal(true);
-                            }}
-                            variant="ghost"
-                            size="icon"
-                            className="text-slate-300 hover:text-red-600"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="text-slate-300 hover:text-[#c1a461]">
+                                <MoreVertical className="w-5 h-5" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="uppercase font-bold text-[10px]">
+                              {item.status !== 'Payé' && (
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    const inv = store.getInvoices().find(i => i.id === item.id);
+                                    if (inv) {
+                                      setEditInvoice({ amount: inv.amount.toString(), description: inv.items[0]?.description || '' });
+                                      setInvoiceToEdit(item.id);
+                                      setShowEditModal(true);
+                                    }
+                                  }}
+                                  className="gap-2"
+                                >
+                                  Modifier
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setInvoiceToDelete(item.id);
+                                  setShowDeleteModal(true);
+                                }}
+                                className="gap-2 text-red-600"
+                              >
+                                Supprimer
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </td>
                     </tr>
@@ -443,6 +537,61 @@ const Billing = () => {
             </table>
           </CardContent>
         </Card>
+
+        {/* Edit Invoice Modal */}
+        <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+          <DialogContent className="max-w-xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Modifier la Facture</DialogTitle>
+              <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                Mettez à jour le montant et la description de la facture.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 my-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Montant</Label>
+                <Input
+                  type="number"
+                  value={editInvoice.amount}
+                  onChange={(e) => setEditInvoice({...editInvoice, amount: e.target.value})}
+                  placeholder="MONTANT EN SA$..."
+                  className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Description</Label>
+                <Input
+                  value={editInvoice.description}
+                  onChange={(e) => setEditInvoice({...editInvoice, description: e.target.value})}
+                  placeholder="EX: HONORAIRES JURIDIQUES..."
+                  className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowEditModal(false);
+                  setInvoiceToEdit(null);
+                  setEditInvoice({ amount: '', description: '' });
+                }}
+                className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleEditInvoice}
+                disabled={!editInvoice.amount}
+                className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl"
+              >
+                Enregistrer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Delete Confirmation Modal */}
         <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
