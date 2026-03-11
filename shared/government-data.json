@@ -582,6 +582,30 @@
   ],
   "auditLogs": [
     {
+      "id": "1773250956691",
+      "timestamp": "2026-03-11T17:42:36.691Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Noxwood",
+      "role": "admin",
+      "service_id": "JUSTICE",
+      "action": "Connexion Client",
+      "metadata": {
+        "email": "test@client.fr"
+      }
+    },
+    {
+      "id": "1773250931057",
+      "timestamp": "2026-03-11T17:42:11.057Z",
+      "user_id": "cli-1773249787523",
+      "user_name": "test",
+      "role": "none",
+      "service_id": "none",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin_avocat"
+      }
+    },
+    {
       "id": "1773250642386",
       "timestamp": "2026-03-11T17:37:22.386Z",
       "user_id": "admin_avocat",
