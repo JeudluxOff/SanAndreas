@@ -582,6 +582,105 @@
   ],
   "auditLogs": [
     {
+      "id": "1773249760057",
+      "timestamp": "2026-03-11T17:22:40.057Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Noxwood",
+      "role": "admin",
+      "service_id": "JUSTICE",
+      "action": "Mise à jour profil",
+      "metadata": {
+        "name": "Mathieu Gerrin"
+      }
+    },
+    {
+      "id": "1773249749682",
+      "timestamp": "2026-03-11T17:22:29.682Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin_avocat"
+      }
+    },
+    {
+      "id": "1773249679607",
+      "timestamp": "2026-03-11T17:21:19.607Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Désactivation Protocole Urgence"
+    },
+    {
+      "id": "1773249674337",
+      "timestamp": "2026-03-11T17:21:14.337Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin"
+      }
+    },
+    {
+      "id": "1773249645744",
+      "timestamp": "2026-03-11T17:20:45.744Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Activation Protocole Urgence"
+    },
+    {
+      "id": "1773249643349",
+      "timestamp": "2026-03-11T17:20:43.349Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Désactivation Protocole Urgence"
+    },
+    {
+      "id": "1773249489350",
+      "timestamp": "2026-03-11T17:18:09.350Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin"
+      }
+    },
+    {
+      "id": "1773249464399",
+      "timestamp": "2026-03-11T17:17:44.399Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin"
+      }
+    },
+    {
+      "id": "1773249162473",
+      "timestamp": "2026-03-11T17:12:42.473Z",
+      "user_id": "admin_avocat",
+      "user_name": "Mathieu Gerrin",
+      "role": "admin",
+      "service_id": "JUSTICE",
+      "action": "Connexion Client",
+      "metadata": {
+        "email": "test@client.fr"
+      }
+    },
+    {
       "id": "1773248447865",
       "timestamp": "2026-03-11T17:00:47.865Z",
       "user_id": "admin_avocat",

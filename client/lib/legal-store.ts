@@ -369,6 +369,44 @@ class LegalStoreManager {
     window.dispatchEvent(new Event('clientDeleted'));
   }
 
+  getClientCredentials(clientId: string) {
+    const registeredClientUsers = JSON.parse(localStorage.getItem('sa_client_users') || '{}');
+
+    // Find credentials by clientId
+    for (const email in registeredClientUsers) {
+      if (registeredClientUsers[email].user.client_id === clientId) {
+        return {
+          email,
+          password: registeredClientUsers[email].password
+        };
+      }
+    }
+    return null;
+  }
+
+  updateClientCredentials(clientId: string, oldEmail: string, newEmail: string, newPassword: string) {
+    const registeredClientUsers = JSON.parse(localStorage.getItem('sa_client_users') || '{}');
+
+    // Get the old user data
+    const oldUserData = registeredClientUsers[oldEmail];
+    if (!oldUserData) return false;
+
+    // Delete old entry
+    delete registeredClientUsers[oldEmail];
+
+    // Create new entry with updated email and password
+    registeredClientUsers[newEmail] = {
+      user: {
+        ...oldUserData.user,
+        username: newEmail
+      },
+      password: newPassword
+    };
+
+    localStorage.setItem('sa_client_users', JSON.stringify(registeredClientUsers));
+    return true;
+  }
+
   // Cases
   getCases() { return this.data.cases; }
   getCase(id: string) { return this.data.cases.find(c => c.id === id); }

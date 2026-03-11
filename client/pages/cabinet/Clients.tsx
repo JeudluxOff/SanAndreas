@@ -1,11 +1,11 @@
 import React from 'react';
-import { 
-  Users, 
-  Search, 
-  Plus, 
-  Filter, 
-  MoreVertical, 
-  ChevronRight, 
+import {
+  Users,
+  Search,
+  Plus,
+  Filter,
+  MoreVertical,
+  ChevronRight,
   Lock,
   Download,
   Mail,
@@ -17,7 +17,10 @@ import {
   Clock,
   ArrowRight,
   Trash2,
-  Edit2
+  Edit2,
+  Eye,
+  EyeOff,
+  Copy
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -45,6 +48,7 @@ import { legalStore } from '@/lib/legal-store';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLegalRBAC } from '@/pages/cabinet/intranet/LegalIntranetLayout';
 import { Client } from '@shared/api';
+import { toast } from 'sonner';
 
 const Clients = () => {
   const { user } = useAuth();
@@ -53,12 +57,17 @@ const Clients = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [showCreateModal, setShowCreateModal] = React.useState(false);
   const [showEditModal, setShowEditModal] = React.useState(false);
+  const [showAccessModal, setShowAccessModal] = React.useState(false);
   const [newClient, setNewClient] = React.useState<Partial<Client>>({
     name: '',
     email: '',
     type: 'Individu'
   });
   const [editingClient, setEditingClient] = React.useState<Client | null>(null);
+  const [selectedClientForAccess, setSelectedClientForAccess] = React.useState<Client | null>(null);
+  const [clientEmail, setClientEmail] = React.useState('');
+  const [clientPassword, setClientPassword] = React.useState('');
+  const [showPassword, setShowPassword] = React.useState(false);
 
   const cases = legalStore.getCases();
 
@@ -116,6 +125,56 @@ const Clients = () => {
       legalStore.deleteClient(id, user.id);
       setClients(legalStore.getClients());
     }
+  };
+
+  const handleOpenAccessModal = (client: Client) => {
+    setSelectedClientForAccess(client);
+    const credentials = legalStore.getClientCredentials(client.id);
+    if (credentials) {
+      setClientEmail(credentials.email);
+      setClientPassword(credentials.password);
+    } else {
+      setClientEmail('');
+      setClientPassword('');
+    }
+    setShowAccessModal(true);
+  };
+
+  const handleSaveCredentials = () => {
+    if (!selectedClientForAccess || !user) return;
+
+    const oldCredentials = legalStore.getClientCredentials(selectedClientForAccess.id);
+    if (oldCredentials) {
+      const success = legalStore.updateClientCredentials(
+        selectedClientForAccess.id,
+        oldCredentials.email,
+        clientEmail,
+        clientPassword
+      );
+
+      if (success) {
+        legalStore.logAction({
+          id: `LOG-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          user_id: user.id,
+          user_name: user.name,
+          action: 'Modification identifiants client',
+          target_type: 'Client',
+          target_id: selectedClientForAccess.id,
+          metadata: { name: selectedClientForAccess.name }
+        });
+
+        setShowAccessModal(false);
+        setSelectedClientForAccess(null);
+      }
+    }
+  };
+
+  const handleCopyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copié dans le presse-papiers', {
+      duration: 2000,
+    });
   };
 
   const filteredClients = clients.filter(c => 
@@ -208,6 +267,92 @@ const Clients = () => {
                 className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl shadow-xl shadow-black/10"
               >
                 Créer la Fiche
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Client Access Modal */}
+        <Dialog open={showAccessModal} onOpenChange={setShowAccessModal}>
+          <DialogContent className="max-w-xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">
+                Accès Portail Client
+              </DialogTitle>
+              <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                {selectedClientForAccess?.name} • Identifiants de connexion
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 my-6">
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email de Connexion</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={clientEmail}
+                    onChange={(e) => setClientEmail(e.target.value)}
+                    placeholder="CLIENT@CLIENT.FR"
+                    className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase flex-1"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleCopyToClipboard(clientEmail)}
+                    className="border-slate-200 h-12 w-12"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-left">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mot de Passe</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    value={clientPassword}
+                    onChange={(e) => setClientPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase flex-1"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="border-slate-200 h-12 w-12"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleCopyToClipboard(clientPassword)}
+                    className="border-slate-200 h-12 w-12"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl text-[9px] text-blue-700 space-y-2">
+                <p className="font-bold uppercase tracking-widest">Information</p>
+                <p>Ces identifiants sont utilisés pour accéder au portail client. Assurez-vous de les communiquer de manière sécurisée au client.</p>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="ghost"
+                onClick={() => setShowAccessModal(false)}
+                className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+              >
+                Fermer
+              </Button>
+              <Button
+                onClick={handleSaveCredentials}
+                className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl shadow-xl shadow-black/10"
+              >
+                Enregistrer
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -362,6 +507,18 @@ const Clients = () => {
                          <div className="flex gap-2 justify-end">
                            {(activeRole === 'Avocat' || activeRole === 'Associé') && (
                              <>
+                               <Button
+                                 variant="ghost"
+                                 size="icon"
+                                 className="text-slate-300 hover:text-green-600"
+                                 title="Gérer les accès"
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   handleOpenAccessModal(item);
+                                 }}
+                               >
+                                 <Lock className="w-4 h-4" />
+                               </Button>
                                <Button
                                  variant="ghost"
                                  size="icon"
