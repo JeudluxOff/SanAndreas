@@ -5,6 +5,11 @@ import fs from "fs";
 import path from "path";
 import { handleDemo } from "./routes/demo";
 import { handlePublish, handleGetPublishHistory } from "./routes/admin";
+import { cloudStorage } from "./lib/s3-storage";
+import { authRouter } from "./routes/api-v2-auth";
+import { casesRouter } from "./routes/api-v2-cases";
+import { auditRouter } from "./routes/api-v2-audit";
+import { errorHandler } from "./middleware/auth";
 
 const SHARED_LOCATIONS_PATH = path.resolve(process.cwd(), "shared", "locations.json");
 const SHARED_LEGAL_PATH = path.resolve(process.cwd(), "shared", "legal-data.json");
@@ -101,7 +106,7 @@ export function createServer() {
     }
   });
 
-  // File upload endpoint
+  // File upload endpoint (base64 / local storage)
   app.post("/api/files", (req, res) => {
     try {
       const { filename, content, type } = req.body;
@@ -110,42 +115,103 @@ export function createServer() {
         return res.status(400).json({ error: "Missing filename or content" });
       }
 
-      // Generate a unique file ID
-      const fileId = `FILE-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      // Decode base64 content
+      const buffer = Buffer.from(content, 'base64');
 
-      // In a production app, you'd save to disk or cloud storage
-      // For now, we'll generate a data URL or placeholder that includes the file info
-      const file_url = `/api/files/${fileId}`;
-
-      res.json({
-        file_id: fileId,
-        file_url,
-        filename,
-        uploaded_at: new Date().toISOString()
+      cloudStorage.uploadFile(filename, buffer, {
+        contentType: type || 'application/octet-stream'
+      }).then(file => {
+        res.json(file);
+      }).catch(error => {
+        res.status(500).json({ error: "File upload failed", details: error.message });
       });
     } catch (error) {
       res.status(500).json({ error: "File upload failed" });
     }
   });
 
-  // File retrieval endpoint (placeholder)
+  // Cloud storage upload endpoint (FormData / multipart)
+  app.post("/api/files/upload-cloud", (req, res) => {
+    try {
+      // This would handle multipart/form-data in production
+      // For now, return an error directing users to use the base64 endpoint
+      res.status(400).json({
+        error: "Cloud upload not configured",
+        message: "Please configure AWS S3 credentials in environment variables"
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Cloud upload failed" });
+    }
+  });
+
+  // Get file metadata
+  app.get("/api/files", (_req, res) => {
+    try {
+      const files = cloudStorage.listFiles();
+      res.json(files);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to list files" });
+    }
+  });
+
+  // File retrieval endpoint
   app.get("/api/files/:fileId", (req, res) => {
     try {
       const { fileId } = req.params;
-      // In production, retrieve file from storage
-      // For now, return a placeholder
-      res.json({
-        file_id: fileId,
-        message: "File retrieval endpoint"
-      });
+      const file = cloudStorage.getFileMetadata(fileId);
+
+      if (!file) {
+        return res.status(404).json({ error: "File not found" });
+      }
+
+      res.json(file);
     } catch (error) {
       res.status(500).json({ error: "File retrieval failed" });
+    }
+  });
+
+  // Get presigned URL for file
+  app.get("/api/files/:fileId/presigned", (req, res) => {
+    try {
+      const { fileId } = req.params;
+      const expires = parseInt(req.query.expires as string) || 3600;
+
+      cloudStorage.getPresignedUrl(fileId, expires).then(presigned_url => {
+        res.json({ presigned_url });
+      }).catch(error => {
+        res.status(404).json({ error: error.message });
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to generate presigned URL" });
+    }
+  });
+
+  // Delete file
+  app.delete("/api/files/:fileId", (req, res) => {
+    try {
+      const { fileId } = req.params;
+
+      cloudStorage.deleteFile(fileId).then(() => {
+        res.json({ message: "File deleted successfully" });
+      }).catch(error => {
+        res.status(404).json({ error: error.message });
+      });
+    } catch (error) {
+      res.status(500).json({ error: "File deletion failed" });
     }
   });
 
   // Admin Routes
   app.post("/api/admin/publish", handlePublish);
   app.get("/api/admin/publish-history", handleGetPublishHistory);
+
+  // API v2 Routes with Authentication
+  app.use("/api/v2/auth", authRouter);
+  app.use("/api/v2/cases", casesRouter);
+  app.use("/api/v2/audit", auditRouter);
+
+  // Error handling middleware (must be last)
+  app.use(errorHandler);
 
   return app;
 }
