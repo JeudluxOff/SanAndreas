@@ -53,7 +53,9 @@ import { cn } from '@/lib/utils';
 import { legalStore } from '@/lib/legal-store';
 import { useAuth } from '@/contexts/AuthContext';
 import { LegalDocument, DocumentCategory, DocumentStatus } from '@shared/api';
+import { uploadFile, validateFile } from '@/lib/file-upload';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const Documents = () => {
   const { user } = useAuth();
@@ -68,8 +70,10 @@ const Documents = () => {
     title: '',
     case_id: '',
     category: 'Conclusions' as DocumentCategory,
-    content: ''
+    content: '',
+    file: null as File | null
   });
+  const [isUploading, setIsUploading] = React.useState(false);
   const [editingDoc, setEditingDoc] = React.useState({
     title: '',
     case_id: '',
@@ -79,44 +83,72 @@ const Documents = () => {
 
   const cases = legalStore.getCases();
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!user || !newDoc.title || !newDoc.case_id) return;
 
-    const doc: LegalDocument = {
-      id: `HC-2024-${Math.floor(Math.random() * 9000) + 1000}`,
-      case_id: newDoc.case_id,
-      title: newDoc.title,
-      content: newDoc.content,
-      category: newDoc.category,
-      status: 'Brouillon',
-      current_version: 1,
-      versions: [{
-        version: 1,
-        file_url: '#',
-        created_at: new Date().toISOString(),
-        created_by: user.id,
-        change_note: 'Version initiale'
-      }],
-      signatures: [],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
+    setIsUploading(true);
+    try {
+      let file_url = '/api/files/pending';
 
-    legalStore.createDocument(doc);
-    setDocs(legalStore.getDocuments());
-    setShowCreateModal(false);
-    setNewDoc({ title: '', case_id: '', category: 'Conclusions', content: '' });
-    
-    legalStore.logAction({
-      id: `LOG-${Date.now()}`,
-      timestamp: new Date().toISOString(),
-      user_id: user.id,
-      user_name: user.name,
-      action: 'Création document',
-      target_type: 'Document',
-      target_id: doc.id,
-      metadata: { title: doc.title, case_id: doc.case_id }
-    });
+      // Upload file if provided
+      if (newDoc.file) {
+        const validation = validateFile(newDoc.file);
+        if (!validation.valid) {
+          toast.error(validation.error || 'File validation failed');
+          setIsUploading(false);
+          return;
+        }
+
+        try {
+          const uploaded = await uploadFile(newDoc.file);
+          file_url = uploaded.file_url;
+        } catch (error) {
+          toast.error('File upload failed');
+          setIsUploading(false);
+          return;
+        }
+      }
+
+      const doc: LegalDocument = {
+        id: `HC-2024-${Math.floor(Math.random() * 9000) + 1000}`,
+        case_id: newDoc.case_id,
+        title: newDoc.title,
+        content: newDoc.content,
+        category: newDoc.category,
+        status: 'Brouillon',
+        current_version: 1,
+        versions: [{
+          version: 1,
+          file_url,
+          created_at: new Date().toISOString(),
+          created_by: user.id,
+          change_note: 'Version initiale'
+        }],
+        signatures: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      legalStore.createDocument(doc);
+      setDocs(legalStore.getDocuments());
+      setShowCreateModal(false);
+      setNewDoc({ title: '', case_id: '', category: 'Conclusions', content: '', file: null });
+
+      legalStore.logAction({
+        id: `LOG-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user_id: user.id,
+        user_name: user.name,
+        action: 'Création document',
+        target_type: 'Document',
+        target_id: doc.id,
+        metadata: { title: doc.title, case_id: doc.case_id }
+      });
+
+      toast.success('Document créé avec succès');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const linkify = (text: string) => {
@@ -324,22 +356,33 @@ const Documents = () => {
                   </Select>
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Joindre un Fichier (Optionnel)</Label>
+                <Input
+                  type="file"
+                  onChange={(e) => setNewDoc({...newDoc, file: e.target.files?.[0] || null})}
+                  className="bg-slate-50 border-none rounded-xl h-12 text-sm"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.png,.jpg,.jpeg,.gif,.webp"
+                />
+                {newDoc.file && <p className="text-[9px] font-bold text-slate-500">Fichier: {newDoc.file.name}</p>}
+              </div>
             </div>
 
             <DialogFooter>
-              <Button 
-                variant="ghost" 
-                onClick={() => { setShowCreateModal(false); setNewDoc({ title: '', case_id: '', category: 'Conclusions' }); }}
+              <Button
+                variant="ghost"
+                onClick={() => { setShowCreateModal(false); setNewDoc({ title: '', case_id: '', category: 'Conclusions', content: '', file: null }); }}
                 className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
               >
                 Annuler
               </Button>
-              <Button 
+              <Button
                 onClick={handleCreate}
-                disabled={!newDoc.title || !newDoc.case_id}
+                disabled={!newDoc.title || !newDoc.case_id || isUploading}
                 className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl shadow-xl shadow-black/10"
               >
-                Générer & Indexer
+                {isUploading ? 'Téléchargement...' : 'Générer & Indexer'}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -3,7 +3,22 @@
 export type LegalRole = 'Associé' | 'Avocat' | 'Juriste' | 'Secrétaire' | 'Comptable' | 'Stagiaire' | 'Auditeur';
 
 export type CaseType = 'Pénal' | 'Civil' | 'Affaires' | 'Admin';
-export type CaseStatus = 'Ouvert' | 'En cours' | 'En attente' | 'Clos' | 'Archivé' | 'Scellé';
+export type CaseStatus = 'En cours' | 'En attente' | 'Clos' | 'Archivé' | 'Scellé';
+
+// Case type mapping for display and workspace matching
+export const CASE_TYPE_DISPLAY: Record<CaseType, string> = {
+  'Pénal': 'Pénal',
+  'Civil': 'Civil',
+  'Affaires': 'Affaires',
+  'Admin': 'Administratif'
+};
+
+export const CASE_TYPE_TO_WORKSPACE_ID: Record<CaseType, string> = {
+  'Pénal': 'penal',
+  'Civil': 'civil',
+  'Affaires': 'affaires',
+  'Admin': 'admin'
+};
 export type ConfidentialityLevel = 'Normal' | 'Confidentiel' | 'Secret' | 'Scellé';
 
 export interface Client {

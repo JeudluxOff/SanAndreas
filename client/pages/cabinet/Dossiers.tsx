@@ -130,7 +130,7 @@ const Dossiers = () => {
       description: newCase.description,
       client_id: newCase.client_id,
       type: (newCase.type as CaseType) || 'Pénal',
-      status: 'Ouvert',
+      status: 'En cours',
       confidentiality: (newCase.confidentiality as ConfidentialityLevel) || 'Normal',
       lead_id: user.id,
       members: [{ user_id: user.id, name: user.name, role: user.role, avatar: user.id }],

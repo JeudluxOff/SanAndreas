@@ -24,39 +24,39 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { legalStore } from '@/lib/legal-store';
-import { CaseType } from '@shared/api';
+import { CaseType, CASE_TYPE_DISPLAY } from '@shared/api';
 import { Link } from 'react-router-dom';
 
-const WORKSPACES_CONFIG = [
-  { 
-    id: 'penal' as CaseType, 
-    name: 'Pôle Pénal', 
-    icon: <Gavel className="w-6 h-6" />, 
-    color: 'text-red-600', 
+const WORKSPACES_CONFIG: Array<{ id: CaseType; name: string; icon: JSX.Element; color: string; bg: string; procedures: string[] }> = [
+  {
+    id: 'Pénal',
+    name: 'Pôle Pénal',
+    icon: <Gavel className="w-6 h-6" />,
+    color: 'text-red-600',
     bg: 'bg-red-50',
     procedures: ["Audit de conflit", "Dépôt conclusions", "Scellement Vault"]
   },
-  { 
-    id: 'civil' as CaseType, 
-    name: 'Pôle Civil', 
-    icon: <Users className="w-6 h-6" />, 
-    color: 'text-[#c1a461]', 
+  {
+    id: 'Civil',
+    name: 'Pôle Civil',
+    icon: <Users className="w-6 h-6" />,
+    color: 'text-[#c1a461]',
     bg: 'bg-[#c1a461]/5',
     procedures: ["Convention Honoraires", "Assignation", "Signification"]
   },
-  { 
-    id: 'affaires' as CaseType, 
-    name: 'Pôle Affaires', 
-    icon: <Briefcase className="w-6 h-6" />, 
-    color: 'text-blue-600', 
+  {
+    id: 'Affaires',
+    name: 'Pôle Affaires',
+    icon: <Briefcase className="w-6 h-6" />,
+    color: 'text-blue-600',
     bg: 'bg-blue-50',
     procedures: ["Fusion-Acquisition", "Audit LCB-FT", "Contrat cadre"]
   },
-  { 
-    id: 'admin' as CaseType, 
-    name: 'Pôle Administratif', 
-    icon: <Landmark className="w-6 h-6" />, 
-    color: 'text-emerald-600', 
+  {
+    id: 'Admin',
+    name: 'Pôle Administratif',
+    icon: <Landmark className="w-6 h-6" />,
+    color: 'text-emerald-600',
     bg: 'bg-emerald-50',
     procedures: ["Recours pour excès de pouvoir", "Urbanisme", "Marchés publics"]
   }
@@ -65,8 +65,8 @@ const WORKSPACES_CONFIG = [
 const Workspaces = () => {
   const [selectedType, setSelectedType] = React.useState<CaseType>('Pénal');
   const cases = legalStore.getCases();
-  
-  const selectedConfig = WORKSPACES_CONFIG.find(w => w.name.includes(selectedType)) || WORKSPACES_CONFIG[0];
+
+  const selectedConfig = WORKSPACES_CONFIG.find(w => w.id === selectedType) || WORKSPACES_CONFIG[0];
   const activeCases = cases.filter(c => c.type === selectedType && c.status === 'En cours');
   const poleDocs = legalStore.getDocuments().filter(d => {
     const c = legalStore.getCase(d.case_id);
@@ -92,10 +92,10 @@ const Workspaces = () => {
         {/* Horizontal Workspace Selector */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {WORKSPACES_CONFIG.map((ws) => {
-            const type = ws.name.split(' ')[1] as CaseType;
+            const type = ws.id;
             const poleCases = cases.filter(c => c.type === type);
             return (
-              <Card 
+              <Card
                 key={ws.id}
                 onClick={() => setSelectedType(type)}
                 className={cn(

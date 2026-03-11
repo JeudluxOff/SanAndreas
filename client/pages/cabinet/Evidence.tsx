@@ -45,7 +45,9 @@ import { cn } from '@/lib/utils';
 import { legalStore } from '@/lib/legal-store';
 import { useAuth } from '@/contexts/AuthContext';
 import { Evidence, ConfidentialityLevel } from '@shared/api';
+import { uploadFile, validateFile } from '@/lib/file-upload';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const EvidenceVault = () => {
   const { user } = useAuth();
@@ -61,8 +63,10 @@ const EvidenceVault = () => {
     type: 'Document',
     content: '',
     images: [] as string[],
-    confidentiality: 'Normal' as ConfidentialityLevel
+    confidentiality: 'Normal' as ConfidentialityLevel,
+    file: null as File | null
   });
+  const [isUploading, setIsUploading] = React.useState(false);
   const [editingEvi, setEditingEvi] = React.useState({
     name: '',
     case_id: '',
@@ -85,38 +89,66 @@ const EvidenceVault = () => {
     });
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!user || !newEvidence.name || !newEvidence.case_id) return;
 
-    const evi: Evidence = {
-      id: `EVI-${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 90) + 10}`,
-      case_id: newEvidence.case_id,
-      name: newEvidence.name,
-      type: newEvidence.type,
-      content: newEvidence.content,
-      images: newEvidence.images,
-      file_url: '#',
-      confidentiality: newEvidence.confidentiality,
-      uploaded_by: user.name,
-      uploaded_at: new Date().toISOString(),
-      to_produce_at_hearing: false
-    };
+    setIsUploading(true);
+    try {
+      let file_url = '/api/files/pending';
 
-    legalStore.addEvidence(evi);
-    setEvidence(legalStore.getCases().flatMap(c => legalStore.getEvidence(c.id)));
-    setShowUploadModal(false);
-    setNewEvidence({ name: '', case_id: '', type: 'Document', content: '', images: [], confidentiality: 'Normal' });
+      // Upload file if provided
+      if (newEvidence.file) {
+        const validation = validateFile(newEvidence.file);
+        if (!validation.valid) {
+          toast.error(validation.error || 'File validation failed');
+          setIsUploading(false);
+          return;
+        }
 
-    legalStore.logAction({
-      id: `LOG-${Date.now()}`,
-      timestamp: new Date().toISOString(),
-      user_id: user.id,
-      user_name: user.name,
-      action: 'Dépôt preuve',
-      target_type: 'Evidence',
-      target_id: evi.id,
-      metadata: { name: evi.name, case_id: evi.case_id }
-    });
+        try {
+          const uploaded = await uploadFile(newEvidence.file);
+          file_url = uploaded.file_url;
+        } catch (error) {
+          toast.error('File upload failed');
+          setIsUploading(false);
+          return;
+        }
+      }
+
+      const evi: Evidence = {
+        id: `EVI-${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 90) + 10}`,
+        case_id: newEvidence.case_id,
+        name: newEvidence.name,
+        type: newEvidence.type,
+        content: newEvidence.content,
+        images: newEvidence.images,
+        file_url,
+        confidentiality: newEvidence.confidentiality,
+        uploaded_by: user.name,
+        uploaded_at: new Date().toISOString(),
+        to_produce_at_hearing: false
+      };
+
+      legalStore.addEvidence(evi);
+      setEvidence(legalStore.getCases().flatMap(c => legalStore.getEvidence(c.id)));
+      setShowUploadModal(false);
+      setNewEvidence({ name: '', case_id: '', type: 'Document', content: '', images: [], confidentiality: 'Normal', file: null });
+
+      legalStore.logAction({
+        id: `LOG-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user_id: user.id,
+        user_name: user.name,
+        action: 'Dépôt preuve',
+        target_type: 'Evidence',
+        target_id: evi.id,
+        metadata: { name: evi.name, case_id: evi.case_id }
+      });
+
+      toast.success('Preuve ajoutée avec succès');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleUpdate = () => {
@@ -316,22 +348,33 @@ const EvidenceVault = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Joindre un Fichier (Optionnel)</Label>
+                <Input
+                  type="file"
+                  onChange={(e) => setNewEvidence({...newEvidence, file: e.target.files?.[0] || null})}
+                  className="bg-slate-50 border-none rounded-xl h-12 text-sm"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.png,.jpg,.jpeg,.gif,.webp,.mp3,.mp4,.mov,.avi"
+                />
+                {newEvidence.file && <p className="text-[9px] font-bold text-slate-500">Fichier: {newEvidence.file.name}</p>}
+              </div>
             </div>
 
             <DialogFooter>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 onClick={() => setShowUploadModal(false)}
                 className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
               >
                 Annuler
               </Button>
-              <Button 
+              <Button
                 onClick={handleUpload}
-                disabled={!newEvidence.name || !newEvidence.case_id}
+                disabled={!newEvidence.name || !newEvidence.case_id || isUploading}
                 className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl"
               >
-                Chiffrer & Sceller
+                {isUploading ? 'Téléchargement...' : 'Chiffrer & Sceller'}
               </Button>
             </DialogFooter>
           </DialogContent>

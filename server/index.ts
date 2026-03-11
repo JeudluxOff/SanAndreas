@@ -101,6 +101,48 @@ export function createServer() {
     }
   });
 
+  // File upload endpoint
+  app.post("/api/files", (req, res) => {
+    try {
+      const { filename, content, type } = req.body;
+
+      if (!filename || !content) {
+        return res.status(400).json({ error: "Missing filename or content" });
+      }
+
+      // Generate a unique file ID
+      const fileId = `FILE-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      // In a production app, you'd save to disk or cloud storage
+      // For now, we'll generate a data URL or placeholder that includes the file info
+      const file_url = `/api/files/${fileId}`;
+
+      res.json({
+        file_id: fileId,
+        file_url,
+        filename,
+        uploaded_at: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ error: "File upload failed" });
+    }
+  });
+
+  // File retrieval endpoint (placeholder)
+  app.get("/api/files/:fileId", (req, res) => {
+    try {
+      const { fileId } = req.params;
+      // In production, retrieve file from storage
+      // For now, return a placeholder
+      res.json({
+        file_id: fileId,
+        message: "File retrieval endpoint"
+      });
+    } catch (error) {
+      res.status(500).json({ error: "File retrieval failed" });
+    }
+  });
+
   // Admin Routes
   app.post("/api/admin/publish", handlePublish);
   app.get("/api/admin/publish-history", handleGetPublishHistory);
