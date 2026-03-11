@@ -54,6 +54,7 @@ import {
 
 import { useAuth, ServiceID, Permission } from "@/contexts/AuthContext";
 import { useGovernmentStore } from "@/hooks/useGovernmentStore";
+import { PERMISSIONS } from "@/lib/permissions";
 
 const Workspace = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
@@ -106,6 +107,12 @@ const Workspace = () => {
   const handleCreateDocument = () => {
     if (!docTitle || !serviceId) return;
 
+    // Check permission before creating document
+    if (!hasPermission(PERMISSIONS.DOCUMENTS_CREATE)) {
+      console.warn('User does not have permission to create documents');
+      return;
+    }
+
     const newDoc = {
       id: `DOC-${upperServiceId}-${Math.floor(Math.random() * 999)}`,
       title: docTitle,
@@ -124,6 +131,12 @@ const Workspace = () => {
   const handleUpdateDocument = () => {
     if (!docTitle || !editingDoc || !serviceId) return;
 
+    // Check permission before updating document
+    if (!hasPermission(PERMISSIONS.DOCUMENTS_EDIT)) {
+      console.warn('User does not have permission to edit documents');
+      return;
+    }
+
     store.updateDocument(serviceId, { ...editingDoc, title: docTitle, type: docType });
 
     setDocTitle("");
@@ -134,12 +147,25 @@ const Workspace = () => {
 
   const handleDeleteDocument = (docId: string) => {
     if (!serviceId) return;
+
+    // Check permission before deleting document
+    if (!hasPermission(PERMISSIONS.DOCUMENTS_DELETE)) {
+      console.warn('User does not have permission to delete documents');
+      return;
+    }
+
     store.deleteDocument(serviceId, docId);
     logAction(`Suppression du document ID : ${docId}`);
   };
 
   const handleCreateDossier = () => {
     if (!dossierTitle || !serviceId) return;
+
+    // Check permission before creating dossier
+    if (!hasPermission(PERMISSIONS.DOSSIERS_CREATE)) {
+      console.warn('User does not have permission to create dossiers');
+      return;
+    }
 
     const newDossier = {
       id: `DOS-${upperServiceId}-${Math.floor(Math.random() * 9999)}`,
@@ -158,6 +184,12 @@ const Workspace = () => {
   const handleUpdateDossier = () => {
     if (!dossierTitle || !editingDossier || !serviceId) return;
 
+    // Check permission before updating dossier
+    if (!hasPermission(PERMISSIONS.DOSSIERS_EDIT)) {
+      console.warn('User does not have permission to edit dossiers');
+      return;
+    }
+
     store.updateDossier(serviceId, { ...editingDossier, title: dossierTitle });
 
     setDossierTitle("");
@@ -168,12 +200,25 @@ const Workspace = () => {
 
   const handleDeleteDossier = (dosId: string) => {
     if (!serviceId) return;
+
+    // Check permission before deleting dossier
+    if (!hasPermission(PERMISSIONS.DOSSIERS_DELETE)) {
+      console.warn('User does not have permission to delete dossiers');
+      return;
+    }
+
     store.deleteDossier(serviceId, dosId);
     logAction(`Suppression du dossier ID : ${dosId}`);
   };
 
   const handleCreateTask = () => {
     if (!taskTitle || !serviceId) return;
+
+    // Check permission before creating task
+    if (!hasPermission(PERMISSIONS.TASKS_CREATE)) {
+      console.warn('User does not have permission to create tasks');
+      return;
+    }
 
     const newTask = {
       id: Date.now(),
@@ -195,6 +240,12 @@ const Workspace = () => {
   const handleUpdateTask = () => {
     if (!taskTitle || !editingTask || !serviceId) return;
 
+    // Check permission before updating task
+    if (!hasPermission(PERMISSIONS.TASKS_EDIT)) {
+      console.warn('User does not have permission to edit tasks');
+      return;
+    }
+
     store.updateTask(serviceId, { ...editingTask, title: taskTitle, priority: taskPriority, due: taskDue || editingTask.due });
 
     setTaskTitle("");
@@ -206,6 +257,13 @@ const Workspace = () => {
 
   const handleDeleteTask = (taskId: number) => {
     if (!serviceId) return;
+
+    // Check permission before deleting task
+    if (!hasPermission(PERMISSIONS.TASKS_DELETE)) {
+      console.warn('User does not have permission to delete tasks');
+      return;
+    }
+
     store.deleteTask(serviceId, taskId);
     logAction(`Suppression de la tâche ID : ${taskId}`);
   };

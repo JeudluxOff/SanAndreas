@@ -15,6 +15,7 @@ import {
 } from '@shared/api';
 import { toast } from 'sonner';
 import { notifyDraftChange } from '@/contexts/AdminContext';
+import { compareNames, findSimilarMatches } from './fuzzy-match';
 
 const STORE_KEY = 'hc_legal_store';
 const SYNC_INTERVAL = 5000; // Poll every 5 seconds
@@ -119,8 +120,9 @@ class LegalStoreManager {
           newInvoices.forEach(inv => this.triggerNotification('invoices', 'Nouvelle Facture (Sync)', `Montant: ${inv.amount} ${inv.currency}`));
         }
 
-        // Simple merge: prefer server data for now to ensure all users see same thing
-        this.data = serverData;
+        // Improved merge: use timestamp-based conflict resolution per entity
+        // "Last-write-wins" strategy: keep the most recently updated version of each entity
+        this.data = this.mergeDataWithTimestamps(this.data, serverData);
         this.saveLocally();
         this.notify();
       } else {
@@ -138,6 +140,67 @@ class LegalStoreManager {
         this.isSyncing = false;
       }
     }
+  }
+
+  /**
+   * Merge local and server data using timestamp-based conflict resolution
+   * For each entity: keep the version with the latest updated_at timestamp
+   */
+  private mergeDataWithTimestamps(local: LegalStore, server: LegalStore): LegalStore {
+    // Helper to merge arrays of entities with timestamps
+    const mergeEntities = <T extends { id: string; updated_at?: string }>(
+      localItems: T[],
+      serverItems: T[]
+    ): T[] => {
+      const merged: Map<string, T> = new Map();
+
+      // Add local items
+      localItems.forEach(item => merged.set(item.id, item));
+
+      // Merge server items (server wins if timestamps are equal or newer)
+      serverItems.forEach(serverItem => {
+        const localItem = merged.get(serverItem.id);
+        if (!localItem) {
+          // New item from server
+          merged.set(serverItem.id, serverItem);
+        } else {
+          // Existing item: compare timestamps
+          const localTime = new Date(localItem.updated_at || 0).getTime();
+          const serverTime = new Date(serverItem.updated_at || 0).getTime();
+
+          if (serverTime >= localTime) {
+            // Server version is newer or equal (server wins on tie)
+            merged.set(serverItem.id, serverItem);
+          }
+          // Otherwise keep local version (local is newer)
+        }
+      });
+
+      return Array.from(merged.values());
+    };
+
+    return {
+      ...local,
+      clients: mergeEntities(local.clients, server.clients),
+      cases: mergeEntities(local.cases, server.cases),
+      documents: mergeEntities(local.documents, server.documents),
+      evidence: mergeEntities(local.evidence, server.evidence),
+      tasks: mergeEntities(local.tasks, server.tasks),
+      hearings: mergeEntities(local.hearings, server.hearings),
+      invoices: mergeEntities(local.invoices, server.invoices),
+      staff: mergeEntities(local.staff, server.staff),
+      // Audit logs and conflict checks: always append server versions (immutable)
+      auditLogs: [...new Map([
+        ...local.auditLogs.map(l => [l.id, l]),
+        ...server.auditLogs.map(l => [l.id, l])
+      ]).values()],
+      conflictChecks: [...new Map([
+        ...local.conflictChecks.map(c => [c.id, c]),
+        ...server.conflictChecks.map(c => [c.id, c])
+      ]).values()],
+      messages: mergeEntities(local.messages, server.messages),
+      settings: server.settings // Settings are global, server wins
+    };
   }
 
   private async saveToServer() {
@@ -462,19 +525,32 @@ class LegalStoreManager {
 
   // Conflict Check
   performConflictCheck(query: string, userId: string): ConflictCheck {
-    const matches = this.data.clients
-      .filter(c => c.name.toLowerCase().includes(query.toLowerCase()))
-      .map(c => c.name);
-    
+    const matches: string[] = [];
+
+    // Check client names with fuzzy matching (threshold: 0.6 = 60% similar)
+    const clientNames = this.data.clients.map(c => c.name);
+    const similarClients = findSimilarMatches(query, clientNames, 0.6);
+    matches.push(...similarClients.map(m => m.match));
+
+    // Check case parties/opponents (if available)
+    for (const caseItem of this.data.cases) {
+      if (compareNames(query, caseItem.title, 0.65)) {
+        matches.push(caseItem.title);
+      }
+    }
+
+    // Deduplicate matches
+    const uniqueMatches = Array.from(new Set(matches));
+
     const check: ConflictCheck = {
       id: `CC-${Date.now()}`,
       timestamp: new Date().toISOString(),
       query,
-      result: matches.length > 0 ? 'Fail' : 'Pass',
-      matched_entities: matches,
+      result: uniqueMatches.length > 0 ? 'Fail' : 'Pass',
+      matched_entities: uniqueMatches,
       performed_by: userId
     };
-    
+
     this.data.conflictChecks.unshift(check);
     this.save();
     return check;
