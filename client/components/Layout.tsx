@@ -16,7 +16,7 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAdmin } from "@/contexts/AdminContext";
+import { useAdminSafe } from "@/contexts/AdminContext";
 import { AlertCircle } from "lucide-react";
 
 const navItems = [
@@ -34,7 +34,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { emergencyMode } = useAuth();
-  const { pendingPublications, hasPendingChanges } = useAdmin();
+  const { pendingPublications, hasPendingChanges } = useAdminSafe();
 
   const publicNavItems = navItems.filter(item => !item.isEmployee);
   const employeeItem = navItems.find(item => item.isEmployee);

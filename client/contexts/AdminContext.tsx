@@ -115,3 +115,24 @@ export function useAdmin() {
   }
   return context;
 }
+
+// Safe version that returns default values if AdminProvider is not present
+export function useAdminSafe() {
+  const context = useContext(AdminContext);
+
+  // Return default values if context doesn't exist
+  if (context === undefined) {
+    return {
+      draftChanges: [],
+      pendingPublications: 0,
+      addDraftChange: () => {},
+      removeDraftChange: () => {},
+      clearDraftChanges: () => {},
+      getDraftChangesByType: () => [],
+      publishDrafts: async () => {},
+      hasPendingChanges: () => false
+    };
+  }
+
+  return context;
+}
