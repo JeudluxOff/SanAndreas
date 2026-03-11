@@ -237,14 +237,39 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
   const [isProfileDialogOpen, setIsProfileDialogOpen] = React.useState(false);
   const [newName, setNewName] = React.useState('');
   const [newAvatar, setNewAvatar] = React.useState('');
+  const [hasChanges, setHasChanges] = React.useState(false);
   const navigate = useNavigate();
 
   React.useEffect(() => {
     if (user) {
       setNewName(user.name);
       setNewAvatar(user.avatar || '');
+      setHasChanges(false);
     }
   }, [user]);
+
+  // Auto-save when dialog closes if there are changes
+  const handleDialogOpenChange = (open: boolean) => {
+    if (!open && hasChanges && newName.trim()) {
+      // Dialog is closing and there are changes
+      updateUser({
+        name: newName,
+        avatar: newAvatar.trim() || undefined
+      });
+      setHasChanges(false);
+    }
+    setIsProfileDialogOpen(open);
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewName(e.target.value);
+    setHasChanges(true);
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewAvatar(e.target.value);
+    setHasChanges(true);
+  };
 
   const handleUpdateProfile = () => {
     if (newName.trim()) {
@@ -252,6 +277,7 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
         name: newName,
         avatar: newAvatar.trim() || undefined
       });
+      setHasChanges(false);
       setIsProfileDialogOpen(false);
     }
   };
@@ -326,7 +352,7 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
         </div>
       </div>
 
-        <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
+        <Dialog open={isProfileDialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogContent className="sm:max-w-[425px] bg-[#0a0f18] text-white border-white/5">
             <DialogHeader>
               <DialogTitle className="uppercase font-black tracking-tight text-xl">Profil Officiel</DialogTitle>
@@ -347,7 +373,7 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
                   <Input
                     id="avatar"
                     value={newAvatar}
-                    onChange={(e) => setNewAvatar(e.target.value)}
+                    onChange={handleAvatarChange}
                     className="bg-white/5 border-white/10 text-white font-black placeholder:text-white/10"
                     placeholder="URL DE L'IMAGE (HTTPS://...)"
                   />
@@ -361,7 +387,7 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
                 <Input
                   id="name"
                   value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
+                  onChange={handleNameChange}
                   className="bg-white/5 border-white/10 text-white font-black uppercase placeholder:text-white/10"
                   placeholder="EX: JULIAN NOXWOOD"
                 />
@@ -390,8 +416,8 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
               )}
             </div>
             <DialogFooter>
-              <Button variant="ghost" onClick={() => setIsProfileDialogOpen(false)} className="text-white/40 font-black uppercase text-[10px]">Annuler</Button>
-              <Button onClick={handleUpdateProfile} className="bg-[#c1a461] hover:bg-[#d1b471] text-white font-black uppercase text-[10px] px-8">Enregistrer</Button>
+              <Button variant="ghost" onClick={() => setIsProfileDialogOpen(false)} className="text-white/40 font-black uppercase text-[10px]">Fermer</Button>
+              <Button onClick={handleUpdateProfile} className="bg-[#c1a461] hover:bg-[#d1b471] text-white font-black uppercase text-[10px] px-8">Enregistrer Maintenant</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
