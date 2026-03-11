@@ -18,6 +18,17 @@
   },
   "staff": [
     {
+      "id": "reed_noxwood",
+      "name": "Reed Noxwood",
+      "role": "Associé",
+      "email": "r.noxwood@np.sa",
+      "status": "Actif",
+      "joined_at": "2018-01-01",
+      "last_active": "2024-05-24T09:42:00Z",
+      "matricule": "RN-01",
+      "callsign": "A-1"
+    },
+    {
       "id": "admin_avocat",
       "name": "Mathieu Gerrin",
       "role": "Associé",
@@ -82,26 +93,50 @@
       "status": "Actif",
       "joined_at": "2023-06-01",
       "last_active": "2024-05-24T09:42:00Z"
-    },
-    {
-      "id": "reed_noxwood",
-      "name": "Reed Noxwood",
-      "role": "Associé",
-      "email": "r.noxwood@np.sa",
-      "status": "Actif",
-      "joined_at": "2018-01-01",
-      "last_active": "2024-05-24T09:42:00Z",
-      "matricule": "RN-01",
-      "callsign": "A-1"
     }
   ],
   "clients": [
     {
-      "id": "cli-1773249787523",
-      "name": "test",
-      "email": "",
+      "id": "cli-005",
+      "name": "Mairie de Los Santos",
+      "email": "mayor@ls.sa",
+      "type": "Entreprise",
+      "created_at": "2024-01-05"
+    },
+    {
+      "id": "cli-006",
+      "name": "Fleeca Bank",
+      "email": "support@fleeca.sa",
+      "type": "Entreprise",
+      "created_at": "2024-04-12"
+    },
+    {
+      "id": "cli-007",
+      "name": "Ammu-Nation",
+      "email": "sales@ammu-nation.sa",
+      "type": "Entreprise",
+      "created_at": "2024-03-25"
+    },
+    {
+      "id": "cli-008",
+      "name": "LS Customs",
+      "email": "hao@lscustoms.sa",
+      "type": "Entreprise",
+      "created_at": "2024-02-28"
+    },
+    {
+      "id": "cli-009",
+      "name": "Benny's Motorworks",
+      "email": "benny@bennys.sa",
+      "type": "Entreprise",
+      "created_at": "2024-04-05"
+    },
+    {
+      "id": "cli-test",
+      "name": "Test Client",
+      "email": "test@client.fr",
       "type": "Individu",
-      "created_at": "2026-03-11"
+      "created_at": "2024-01-01"
     },
     {
       "id": "cli-1772902196080",
@@ -139,52 +174,17 @@
       "created_at": "2024-01-01"
     },
     {
-      "id": "cli-005",
-      "name": "Mairie de Los Santos",
-      "email": "mayor@ls.sa",
-      "type": "Entreprise",
-      "created_at": "2024-01-05"
-    },
-    {
-      "id": "cli-006",
-      "name": "Fleeca Bank",
-      "email": "support@fleeca.sa",
-      "type": "Entreprise",
-      "created_at": "2024-04-12"
-    },
-    {
-      "id": "cli-007",
-      "name": "Ammu-Nation",
-      "email": "sales@ammu-nation.sa",
-      "type": "Entreprise",
-      "created_at": "2024-03-25"
-    },
-    {
-      "id": "cli-008",
-      "name": "LS Customs",
-      "email": "hao@lscustoms.sa",
-      "type": "Entreprise",
-      "created_at": "2024-02-28"
-    },
-    {
-      "id": "cli-009",
-      "name": "Benny's Motorworks",
-      "email": "benny@bennys.sa",
-      "type": "Entreprise",
-      "created_at": "2024-04-05"
-    },
-    {
       "id": "cli-010",
       "name": "Ballas Gang",
       "type": "Individu",
       "created_at": "2024-05-01"
     },
     {
-      "id": "cli-test",
-      "name": "Test Client",
-      "email": "test@client.fr",
+      "id": "cli-1773249787523",
+      "name": "test",
+      "email": "",
       "type": "Individu",
-      "created_at": "2024-01-01"
+      "created_at": "2026-03-11"
     }
   ],
   "cases": [],
@@ -195,15 +195,139 @@
   "invoices": [],
   "auditLogs": [
     {
-      "id": "LOG-1773249787524",
-      "timestamp": "2026-03-11T17:23:07.524Z",
+      "id": "LOG-1773250608866",
+      "timestamp": "2026-03-11T17:36:48.866Z",
       "user_id": "admin_avocat",
-      "user_name": "Mathieu Gerrin",
-      "action": "Création client",
+      "user_name": "Julian Noxwood",
+      "action": "Modification identifiants client",
       "target_type": "Client",
       "target_id": "cli-1773249787523",
       "metadata": {
-        "name": "test"
+        "name": "test",
+        "old_email": "test@client.fr",
+        "new_email": "test@client.fr"
+      }
+    },
+    {
+      "id": "LOG-1773244757909",
+      "timestamp": "2026-03-11T15:59:17.909Z",
+      "user_id": "admin_avocat",
+      "user_name": "System",
+      "action": "Suppression du dossier",
+      "target_type": "Case",
+      "target_id": "HC-2024-001",
+      "metadata": {
+        "title": "dfgdfg"
+      }
+    },
+    {
+      "id": "LOG-1773244744803",
+      "timestamp": "2026-03-11T15:59:04.803Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Noxwood",
+      "action": "Création dossier",
+      "target_type": "Case",
+      "target_id": "HC-2024-001",
+      "metadata": {
+        "title": "dfgdfg"
+      }
+    },
+    {
+      "id": "LOG-1773244737145",
+      "timestamp": "2026-03-11T15:58:57.145Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Noxwood",
+      "action": "Vérification conflit intérêts",
+      "target_type": "ConflictCheck",
+      "target_id": "CC-1773244737144",
+      "metadata": {
+        "query": "fdsgdf",
+        "result": "Pass"
+      }
+    },
+    {
+      "id": "LOG-1773166392791",
+      "timestamp": "2026-03-10T18:13:12.791Z",
+      "user_id": "admin_avocat",
+      "user_name": "Mathieu Gerrin",
+      "action": "Vérification conflit intérêts",
+      "target_type": "ConflictCheck",
+      "target_id": "CC-1773166392790",
+      "metadata": {
+        "query": "dfbcv",
+        "result": "Pass"
+      }
+    },
+    {
+      "id": "LOG-1773164852435",
+      "timestamp": "2026-03-10T17:47:32.435Z",
+      "user_id": "admin_avocat",
+      "user_name": "System",
+      "action": "Suppression client",
+      "target_type": "Client",
+      "target_id": "cli-004",
+      "metadata": {
+        "name": "Gouvernement SA"
+      }
+    },
+    {
+      "id": "LOG-1773162798373",
+      "timestamp": "2026-03-10T17:13:18.373Z",
+      "user_id": "admin_avocat",
+      "user_name": "System",
+      "action": "Suppression d'audience",
+      "target_type": "Hearing",
+      "target_id": "HR-1773162785691",
+      "metadata": {
+        "title": "Réunion Gouvernement"
+      }
+    },
+    {
+      "id": "LOG-1773162097035",
+      "timestamp": "2026-03-10T17:01:37.035Z",
+      "user_id": "reed_noxwood",
+      "user_name": "System",
+      "action": "Suppression client",
+      "target_type": "Client",
+      "target_id": "cli-010",
+      "metadata": {
+        "name": "Ballas Gang"
+      }
+    },
+    {
+      "id": "LOG-1773162086844",
+      "timestamp": "2026-03-10T17:01:26.844Z",
+      "user_id": "reed_noxwood",
+      "user_name": "System",
+      "action": "Suppression client",
+      "target_type": "Client",
+      "target_id": "cli-003",
+      "metadata": {
+        "name": "Thornton Duggan"
+      }
+    },
+    {
+      "id": "LOG-1773162084251",
+      "timestamp": "2026-03-10T17:01:24.251Z",
+      "user_id": "reed_noxwood",
+      "user_name": "System",
+      "action": "Suppression client",
+      "target_type": "Client",
+      "target_id": "cli-002",
+      "metadata": {
+        "name": "Union Depository"
+      }
+    },
+    {
+      "id": "LOG-1773162073587",
+      "timestamp": "2026-03-10T17:01:13.587Z",
+      "user_id": "reed_noxwood",
+      "user_name": "System",
+      "action": "Suppression client",
+      "target_type": "Client",
+      "target_id": "cli-1772902196080",
+      "metadata": {
+        "name": "xcxb"
       }
     },
     {
@@ -358,145 +482,19 @@
       }
     },
     {
-      "id": "LOG-1773244757909",
-      "timestamp": "2026-03-11T15:59:17.909Z",
-      "user_id": "admin_avocat",
-      "user_name": "System",
-      "action": "Suppression du dossier",
-      "target_type": "Case",
-      "target_id": "HC-2024-001",
-      "metadata": {
-        "title": "dfgdfg"
-      }
-    },
-    {
-      "id": "LOG-1773244744803",
-      "timestamp": "2026-03-11T15:59:04.803Z",
-      "user_id": "admin_avocat",
-      "user_name": "Julian Noxwood",
-      "action": "Création dossier",
-      "target_type": "Case",
-      "target_id": "HC-2024-001",
-      "metadata": {
-        "title": "dfgdfg"
-      }
-    },
-    {
-      "id": "LOG-1773244737145",
-      "timestamp": "2026-03-11T15:58:57.145Z",
-      "user_id": "admin_avocat",
-      "user_name": "Julian Noxwood",
-      "action": "Vérification conflit intérêts",
-      "target_type": "ConflictCheck",
-      "target_id": "CC-1773244737144",
-      "metadata": {
-        "query": "fdsgdf",
-        "result": "Pass"
-      }
-    },
-    {
-      "id": "LOG-1773166392791",
-      "timestamp": "2026-03-10T18:13:12.791Z",
+      "id": "LOG-1773249787524",
+      "timestamp": "2026-03-11T17:23:07.524Z",
       "user_id": "admin_avocat",
       "user_name": "Mathieu Gerrin",
-      "action": "Vérification conflit intérêts",
-      "target_type": "ConflictCheck",
-      "target_id": "CC-1773166392790",
-      "metadata": {
-        "query": "dfbcv",
-        "result": "Pass"
-      }
-    },
-    {
-      "id": "LOG-1773164852435",
-      "timestamp": "2026-03-10T17:47:32.435Z",
-      "user_id": "admin_avocat",
-      "user_name": "System",
-      "action": "Suppression client",
+      "action": "Création client",
       "target_type": "Client",
-      "target_id": "cli-004",
+      "target_id": "cli-1773249787523",
       "metadata": {
-        "name": "Gouvernement SA"
-      }
-    },
-    {
-      "id": "LOG-1773162798373",
-      "timestamp": "2026-03-10T17:13:18.373Z",
-      "user_id": "admin_avocat",
-      "user_name": "System",
-      "action": "Suppression d'audience",
-      "target_type": "Hearing",
-      "target_id": "HR-1773162785691",
-      "metadata": {
-        "title": "Réunion Gouvernement"
-      }
-    },
-    {
-      "id": "LOG-1773162097035",
-      "timestamp": "2026-03-10T17:01:37.035Z",
-      "user_id": "reed_noxwood",
-      "user_name": "System",
-      "action": "Suppression client",
-      "target_type": "Client",
-      "target_id": "cli-010",
-      "metadata": {
-        "name": "Ballas Gang"
-      }
-    },
-    {
-      "id": "LOG-1773162086844",
-      "timestamp": "2026-03-10T17:01:26.844Z",
-      "user_id": "reed_noxwood",
-      "user_name": "System",
-      "action": "Suppression client",
-      "target_type": "Client",
-      "target_id": "cli-003",
-      "metadata": {
-        "name": "Thornton Duggan"
-      }
-    },
-    {
-      "id": "LOG-1773162084251",
-      "timestamp": "2026-03-10T17:01:24.251Z",
-      "user_id": "reed_noxwood",
-      "user_name": "System",
-      "action": "Suppression client",
-      "target_type": "Client",
-      "target_id": "cli-002",
-      "metadata": {
-        "name": "Union Depository"
-      }
-    },
-    {
-      "id": "LOG-1773162073587",
-      "timestamp": "2026-03-10T17:01:13.587Z",
-      "user_id": "reed_noxwood",
-      "user_name": "System",
-      "action": "Suppression client",
-      "target_type": "Client",
-      "target_id": "cli-1772902196080",
-      "metadata": {
-        "name": "xcxb"
+        "name": "test"
       }
     }
   ],
   "conflictChecks": [
-    {
-      "id": "CC-1771775783702",
-      "timestamp": "2026-02-22T15:56:23.702Z",
-      "query": "vbn",
-      "result": "Pass",
-      "matched_entities": [],
-      "performed_by": "admin_avocat"
-    },
-    {
-      "id": "CC-1771775217852",
-      "timestamp": "2026-02-22T15:46:57.852Z",
-      "query": "yg",
-      "result": "Pass",
-      "matched_entities": [],
-      "performed_by": "admin_avocat"
-    },
     {
       "id": "CC-1773244737144",
       "timestamp": "2026-03-11T15:58:57.144Z",
@@ -509,6 +507,22 @@
       "id": "CC-1773166392790",
       "timestamp": "2026-03-10T18:13:12.790Z",
       "query": "dfbcv",
+      "result": "Pass",
+      "matched_entities": [],
+      "performed_by": "admin_avocat"
+    },
+    {
+      "id": "CC-1771775783702",
+      "timestamp": "2026-02-22T15:56:23.702Z",
+      "query": "vbn",
+      "result": "Pass",
+      "matched_entities": [],
+      "performed_by": "admin_avocat"
+    },
+    {
+      "id": "CC-1771775217852",
+      "timestamp": "2026-02-22T15:46:57.852Z",
+      "query": "yg",
       "result": "Pass",
       "matched_entities": [],
       "performed_by": "admin_avocat"
