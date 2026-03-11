@@ -52,7 +52,7 @@ export const Navigation = () => {
               <Lock className="w-3 h-3" /> Accès Avocats
             </Button>
           </Link>
-          <Link to="/cabinet/portal">
+          <Link to="/cabinet/client-login">
             <Button className="bg-[#c1a461] hover:bg-[#927843] text-white font-black uppercase text-[10px] tracking-[0.2em] px-8 h-10 shadow-xl shadow-[#c1a461]/10">
               Portail Client
             </Button>
