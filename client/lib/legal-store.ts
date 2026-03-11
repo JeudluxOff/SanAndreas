@@ -262,6 +262,10 @@ class LegalStoreManager {
   createClient(client: Client) {
     this.data.clients.unshift(client);
     this.save();
+
+    // Auto-create client user account
+    this.createClientUserAccount(client.id, client.name);
+
     notifyDraftChange({
       type: 'legal',
       action: 'create',
@@ -272,6 +276,26 @@ class LegalStoreManager {
       userId: 'system',
       userName: 'System'
     });
+  }
+
+  private createClientUserAccount(clientId: string, clientName: string) {
+    const registeredClientUsers = JSON.parse(localStorage.getItem('sa_client_users') || '{}');
+
+    const email = `${clientName.toLowerCase().replace(/\s+/g, '.')}@client.fr`;
+    const password = 'test123';
+
+    registeredClientUsers[email] = {
+      user: {
+        id: clientId,
+        username: email,
+        name: clientName,
+        client_id: clientId,
+        is_client: true
+      },
+      password: password
+    };
+
+    localStorage.setItem('sa_client_users', JSON.stringify(registeredClientUsers));
   }
 
   updateClient(updated: Client) {
@@ -298,6 +322,13 @@ class LegalStoreManager {
       const client = this.data.clients[idx];
       this.data.clients.splice(idx, 1);
       this.save();
+
+      // Remove associated user account
+      this.deleteClientUserAccount(id, client.name);
+
+      // Force logout if this client is currently logged in
+      this.notifyClientDeleted(id);
+
       notifyDraftChange({
         type: 'legal',
         action: 'delete',
@@ -319,6 +350,23 @@ class LegalStoreManager {
         metadata: { name: client.name }
       });
     }
+  }
+
+  private deleteClientUserAccount(clientId: string, clientName: string) {
+    const registeredClientUsers = JSON.parse(localStorage.getItem('sa_client_users') || '{}');
+
+    // Find and remove the user account matching this client
+    const email = `${clientName.toLowerCase().replace(/\s+/g, '.')}@client.fr`;
+    if (registeredClientUsers[email]) {
+      delete registeredClientUsers[email];
+      localStorage.setItem('sa_client_users', JSON.stringify(registeredClientUsers));
+    }
+  }
+
+  private notifyClientDeleted(clientId: string) {
+    // Dispatch event so AuthContext can check and logout
+    (window as any).__clientDeletedEvent = clientId;
+    window.dispatchEvent(new Event('clientDeleted'));
   }
 
   // Cases

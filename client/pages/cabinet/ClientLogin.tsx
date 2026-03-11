@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, LogIn, Key, Mail } from 'lucide-react';
+import { Eye, EyeOff, LogIn, Key, Mail, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -99,18 +99,30 @@ const ClientLogin = () => {
       </div>
 
       <Card className="w-full max-w-md bg-[#0a0f18] border-white/10 rounded-[32px] shadow-2xl relative z-10">
-        <CardHeader className="space-y-2 text-center pb-8">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 bg-[#c1a461]/10 rounded-2xl border border-[#c1a461]/20">
-              <LogIn className="w-8 h-8 text-[#c1a461]" />
-            </div>
+        <CardHeader className="pb-8">
+          <div className="flex items-center justify-between mb-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/cabinet')}
+              className="text-white/40 hover:text-white p-0 h-auto"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+            <div />
           </div>
-          <CardTitle className="text-2xl font-black text-white uppercase tracking-tighter">
-            Portail Client
-          </CardTitle>
-          <CardDescription className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-            Accédez à vos dossiers et documents
-          </CardDescription>
+          <div className="space-y-2 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="p-3 bg-[#c1a461]/10 rounded-2xl border border-[#c1a461]/20">
+                <LogIn className="w-8 h-8 text-[#c1a461]" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl font-black text-white uppercase tracking-tighter">
+              Portail Client
+            </CardTitle>
+            <CardDescription className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+              Accédez à vos dossiers et documents
+            </CardDescription>
+          </div>
         </CardHeader>
 
         <CardContent>

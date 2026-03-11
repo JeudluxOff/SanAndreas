@@ -43,6 +43,13 @@
   ],
   "clients": [
     {
+      "id": "cli-test",
+      "name": "Test Client",
+      "email": "test@client.fr",
+      "type": "Individu",
+      "created_at": "2024-01-01"
+    },
+    {
       "id": "cli-005",
       "name": "Mairie de Los Santos",
       "email": "mayor@ls.sa",

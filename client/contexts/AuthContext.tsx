@@ -105,6 +105,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    const handleClientDeleted = (event: Event) => {
+      const deletedClientId = (window as any).__clientDeletedEvent;
+      if (user?.client_id === deletedClientId && user?.is_client) {
+        logout();
+      }
+    };
+
+    window.addEventListener('clientDeleted', handleClientDeleted);
+    return () => window.removeEventListener('clientDeleted', handleClientDeleted);
+  }, [user]);
+
+  useEffect(() => {
     const savedUser = localStorage.getItem('sa_gov_user');
     const savedEmergency = localStorage.getItem('sa_gov_emergency_mode');
 
@@ -115,6 +127,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (savedRegUsers) {
       setRegisteredUsers(JSON.parse(savedRegUsers));
     }
+
+    // Initialize client users if not already done
+    const registeredClientUsers = localStorage.getItem('sa_client_users');
+    if (!registeredClientUsers) {
+      const clients = legalStore.getClients();
+      const clientUsers: Record<string, any> = {};
+
+      // Add test client
+      clientUsers['test@client.fr'] = {
+        user: {
+          id: 'cli-test',
+          username: 'test@client.fr',
+          name: 'Test Client',
+          client_id: 'cli-test',
+          is_client: true
+        },
+        password: 'test123'
+      };
+
+      // Add credentials for first 3 existing clients
+      clients.slice(0, 3).forEach(client => {
+        const email = `${client.name.toLowerCase().replace(/\s+/g, '.')}@client.fr`;
+        clientUsers[email] = {
+          user: {
+            id: client.id,
+            username: email,
+            name: client.name,
+            client_id: client.id,
+            is_client: true
+          },
+          password: 'test123'
+        };
+      });
+
+      localStorage.setItem('sa_client_users', JSON.stringify(clientUsers));
+    }
+
     if (savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser) as User;
