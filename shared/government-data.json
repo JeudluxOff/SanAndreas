@@ -582,6 +582,32 @@
   ],
   "auditLogs": [
     {
+      "id": "1773244862202",
+      "timestamp": "2026-03-11T16:01:02.202Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Noxwood",
+      "role": "admin",
+      "service_id": "JUSTICE",
+      "action": "Mise à jour profil",
+      "metadata": {
+        "name": "Mathieu Gerrin",
+        "avatar": "Mathieu Gerrin"
+      }
+    },
+    {
+      "id": "1773244850936",
+      "timestamp": "2026-03-11T16:00:50.936Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Noxwood",
+      "role": "admin",
+      "service_id": "JUSTICE",
+      "action": "Mise à jour profil",
+      "metadata": {
+        "name": "Julian Noxwood",
+        "avatar": "Mathieu Gerrin"
+      }
+    },
+    {
       "id": "1773244729793",
       "timestamp": "2026-03-11T15:58:49.793Z",
       "user_id": "admin_avocat",

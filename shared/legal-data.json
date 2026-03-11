@@ -30,14 +30,15 @@
     },
     {
       "id": "admin_avocat",
-      "name": "Julian Noxwood",
+      "name": "Mathieu Gerrin",
       "role": "Associé",
       "email": "j.noxwood@np.sa",
       "status": "Actif",
       "joined_at": "2020-01-01",
       "last_active": "2024-05-24T09:42:00Z",
       "matricule": "JN-01",
-      "callsign": "A-2"
+      "callsign": "A-2",
+      "avatar": "Mathieu Gerrin"
     }
   ],
   "clients": [
