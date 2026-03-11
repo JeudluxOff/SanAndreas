@@ -143,6 +143,12 @@ const Clients = () => {
   const handleSaveCredentials = () => {
     if (!selectedClientForAccess || !user) return;
 
+    // Validation
+    if (!clientEmail || !clientPassword) {
+      toast.error('L\'email et le mot de passe sont obligatoires');
+      return;
+    }
+
     const oldCredentials = legalStore.getClientCredentials(selectedClientForAccess.id);
     if (oldCredentials) {
       const success = legalStore.updateClientCredentials(
@@ -164,9 +170,20 @@ const Clients = () => {
           metadata: { name: selectedClientForAccess.name }
         });
 
+        toast.success('Identifiants sauvegardés avec succès', {
+          description: `${selectedClientForAccess.name} peut maintenant se connecter avec les nouveaux identifiants.`,
+          duration: 3000,
+        });
+
         setShowAccessModal(false);
         setSelectedClientForAccess(null);
+        setClientEmail('');
+        setClientPassword('');
+      } else {
+        toast.error('Erreur lors de la sauvegarde des identifiants');
       }
+    } else {
+      toast.error('Aucun identifiant trouvé pour ce client');
     }
   };
 
