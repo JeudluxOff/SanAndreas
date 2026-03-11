@@ -85,6 +85,43 @@
   "invoices": [],
   "auditLogs": [
     {
+      "id": "LOG-1773244757909",
+      "timestamp": "2026-03-11T15:59:17.909Z",
+      "user_id": "admin_avocat",
+      "user_name": "System",
+      "action": "Suppression du dossier",
+      "target_type": "Case",
+      "target_id": "HC-2024-001",
+      "metadata": {
+        "title": "dfgdfg"
+      }
+    },
+    {
+      "id": "LOG-1773244744803",
+      "timestamp": "2026-03-11T15:59:04.803Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Noxwood",
+      "action": "Création dossier",
+      "target_type": "Case",
+      "target_id": "HC-2024-001",
+      "metadata": {
+        "title": "dfgdfg"
+      }
+    },
+    {
+      "id": "LOG-1773244737145",
+      "timestamp": "2026-03-11T15:58:57.145Z",
+      "user_id": "admin_avocat",
+      "user_name": "Julian Noxwood",
+      "action": "Vérification conflit intérêts",
+      "target_type": "ConflictCheck",
+      "target_id": "CC-1773244737144",
+      "metadata": {
+        "query": "fdsgdf",
+        "result": "Pass"
+      }
+    },
+    {
       "id": "LOG-1773166392791",
       "timestamp": "2026-03-10T18:13:12.791Z",
       "user_id": "admin_avocat",
@@ -322,6 +359,14 @@
     }
   ],
   "conflictChecks": [
+    {
+      "id": "CC-1773244737144",
+      "timestamp": "2026-03-11T15:58:57.144Z",
+      "query": "fdsgdf",
+      "result": "Pass",
+      "matched_entities": [],
+      "performed_by": "admin_avocat"
+    },
     {
       "id": "CC-1773166392790",
       "timestamp": "2026-03-10T18:13:12.790Z",
