@@ -11,6 +11,7 @@ import {
   GovAuditLog
 } from '@shared/gov-api';
 import { legalStore } from '@/lib/legal-store';
+import { notifyDraftChange } from '@/contexts/AdminContext';
 
 const STORE_KEY = 'gov_intranet_store';
 const SYNC_INTERVAL = 5000; // Poll every 5 seconds
@@ -203,6 +204,16 @@ class GovernmentStoreManager {
   createMessage(msg: GovMessage) {
     this.data.messages.push(msg);
     this.save();
+    notifyDraftChange({
+      type: 'government',
+      action: 'create',
+      entityType: 'Message',
+      entityId: msg.id,
+      entityName: `Message in ${msg.channel_id}`,
+      changes: msg,
+      userId: msg.sender_id,
+      userName: msg.sender_name || 'System'
+    });
   }
 
   // Audit
@@ -228,6 +239,16 @@ class GovernmentStoreManager {
   logAction(log: GovAuditLog) {
     this.data.auditLogs.unshift(log);
     this.save();
+    notifyDraftChange({
+      type: 'government',
+      action: 'create',
+      entityType: 'AuditLog',
+      entityId: log.id,
+      entityName: log.action,
+      changes: log,
+      userId: log.user_id,
+      userName: log.user_name
+    });
   }
   clearAuditLogs() {
     this.data.auditLogs = [];
@@ -311,6 +332,16 @@ class GovernmentStoreManager {
     if (ws) {
       ws.documents = [doc, ...(ws.documents || [])];
       this.save();
+      notifyDraftChange({
+        type: 'government',
+        action: 'create',
+        entityType: 'Document',
+        entityId: doc.id,
+        entityName: doc.title,
+        changes: doc,
+        userId: 'system',
+        userName: 'System'
+      });
     }
   }
 
@@ -319,14 +350,37 @@ class GovernmentStoreManager {
     if (ws) {
       ws.documents = ws.documents.map(d => d.id === updatedDoc.id ? updatedDoc : d);
       this.save();
+      notifyDraftChange({
+        type: 'government',
+        action: 'update',
+        entityType: 'Document',
+        entityId: updatedDoc.id,
+        entityName: updatedDoc.title,
+        changes: updatedDoc,
+        userId: 'system',
+        userName: 'System'
+      });
     }
   }
 
   deleteDocument(serviceId: string, docId: string) {
     const ws = this.getWorkspace(serviceId);
     if (ws) {
+      const doc = ws.documents.find(d => d.id === docId);
       ws.documents = ws.documents.filter(d => d.id !== docId);
       this.save();
+      if (doc) {
+        notifyDraftChange({
+          type: 'government',
+          action: 'delete',
+          entityType: 'Document',
+          entityId: docId,
+          entityName: doc.title,
+          changes: { id: docId },
+          userId: 'system',
+          userName: 'System'
+        });
+      }
     }
   }
 

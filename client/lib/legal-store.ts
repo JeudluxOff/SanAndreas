@@ -14,6 +14,7 @@ import {
   NotificationSettings
 } from '@shared/api';
 import { toast } from 'sonner';
+import { notifyDraftChange } from '@/contexts/AdminContext';
 
 const STORE_KEY = 'hc_legal_store';
 const SYNC_INTERVAL = 5000; // Poll every 5 seconds
@@ -193,6 +194,16 @@ class LegalStoreManager {
   createClient(client: Client) {
     this.data.clients.unshift(client);
     this.save();
+    notifyDraftChange({
+      type: 'legal',
+      action: 'create',
+      entityType: 'Client',
+      entityId: client.id,
+      entityName: client.name,
+      changes: client,
+      userId: 'system',
+      userName: 'System'
+    });
   }
 
   updateClient(updated: Client) {
@@ -200,6 +211,16 @@ class LegalStoreManager {
     if (idx !== -1) {
       this.data.clients[idx] = updated;
       this.save();
+      notifyDraftChange({
+        type: 'legal',
+        action: 'update',
+        entityType: 'Client',
+        entityId: updated.id,
+        entityName: updated.name,
+        changes: updated,
+        userId: 'system',
+        userName: 'System'
+      });
     }
   }
 
@@ -209,6 +230,16 @@ class LegalStoreManager {
       const client = this.data.clients[idx];
       this.data.clients.splice(idx, 1);
       this.save();
+      notifyDraftChange({
+        type: 'legal',
+        action: 'delete',
+        entityType: 'Client',
+        entityId: id,
+        entityName: client.name,
+        changes: { id },
+        userId,
+        userName: 'System'
+      });
       this.logAction({
         id: `LOG-${Date.now()}`,
         timestamp: new Date().toISOString(),
@@ -229,12 +260,32 @@ class LegalStoreManager {
     this.data.cases.unshift(newCase);
     this.save();
     this.triggerNotification('dossiers', 'Nouveau Dossier', `Le dossier "${newCase.title}" a été créé.`);
+    notifyDraftChange({
+      type: 'legal',
+      action: 'create',
+      entityType: 'Case',
+      entityId: newCase.id,
+      entityName: newCase.title,
+      changes: newCase,
+      userId: 'system',
+      userName: 'System'
+    });
   }
   updateCase(updated: Case) {
     const idx = this.data.cases.findIndex(c => c.id === updated.id);
     if (idx !== -1) {
       this.data.cases[idx] = updated;
       this.save();
+      notifyDraftChange({
+        type: 'legal',
+        action: 'update',
+        entityType: 'Case',
+        entityId: updated.id,
+        entityName: updated.title,
+        changes: updated,
+        userId: 'system',
+        userName: 'System'
+      });
     }
   }
 
@@ -247,12 +298,32 @@ class LegalStoreManager {
     this.data.documents.unshift(doc);
     this.save();
     this.triggerNotification('documents', 'Nouveau Document', `Un nouveau document "${doc.title}" a été ajouté.`);
+    notifyDraftChange({
+      type: 'legal',
+      action: 'create',
+      entityType: 'Document',
+      entityId: doc.id,
+      entityName: doc.title,
+      changes: doc,
+      userId: 'system',
+      userName: 'System'
+    });
   }
   updateDocument(updated: LegalDocument) {
     const idx = this.data.documents.findIndex(d => d.id === updated.id);
     if (idx !== -1) {
       this.data.documents[idx] = updated;
       this.save();
+      notifyDraftChange({
+        type: 'legal',
+        action: 'update',
+        entityType: 'Document',
+        entityId: updated.id,
+        entityName: updated.title,
+        changes: updated,
+        userId: 'system',
+        userName: 'System'
+      });
     }
   }
 
@@ -277,12 +348,32 @@ class LegalStoreManager {
     this.data.tasks.unshift(task);
     this.save();
     this.triggerNotification('tasks', 'Nouvelle Tâche', `La tâche "${task.title}" a été assignée.`);
+    notifyDraftChange({
+      type: 'legal',
+      action: 'create',
+      entityType: 'Task',
+      entityId: task.id,
+      entityName: task.title,
+      changes: task,
+      userId: 'system',
+      userName: 'System'
+    });
   }
   updateTask(updated: Task) {
     const idx = this.data.tasks.findIndex(t => t.id === updated.id);
     if (idx !== -1) {
       this.data.tasks[idx] = updated;
       this.save();
+      notifyDraftChange({
+        type: 'legal',
+        action: 'update',
+        entityType: 'Task',
+        entityId: updated.id,
+        entityName: updated.title,
+        changes: updated,
+        userId: 'system',
+        userName: 'System'
+      });
     }
   }
 

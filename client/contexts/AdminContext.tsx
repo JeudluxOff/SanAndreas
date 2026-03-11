@@ -1,4 +1,13 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+
+// Global notifier function that stores will use
+let globalDraftNotifier: ((change: Omit<DraftChange, 'id' | 'timestamp'>) => void) | null = null;
+
+export function notifyDraftChange(change: Omit<DraftChange, 'id' | 'timestamp'>) {
+  if (globalDraftNotifier) {
+    globalDraftNotifier(change);
+  }
+}
 
 export interface DraftChange {
   id: string;
@@ -35,8 +44,16 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       id: `DRAFT-${Date.now()}`,
       timestamp: new Date().toISOString()
     };
-    setDraftChanges([newChange, ...draftChanges]);
+    setDraftChanges(prev => [newChange, ...prev]);
   };
+
+  // Register the global notifier on mount
+  useEffect(() => {
+    globalDraftNotifier = addDraftChange;
+    return () => {
+      globalDraftNotifier = null;
+    };
+  }, []);
 
   const removeDraftChange = (id: string) => {
     setDraftChanges(draftChanges.filter(c => c.id !== id));
