@@ -129,14 +129,32 @@ const Clients = () => {
 
   const handleOpenAccessModal = (client: Client) => {
     setSelectedClientForAccess(client);
-    const credentials = legalStore.getClientCredentials(client.id);
-    if (credentials) {
-      setClientEmail(credentials.email);
-      setClientPassword(credentials.password);
-    } else {
-      setClientEmail('');
-      setClientPassword('');
+    let credentials = legalStore.getClientCredentials(client.id);
+
+    // If credentials don't exist, create them with default values
+    if (!credentials) {
+      const email = `${client.name.toLowerCase().replace(/\s+/g, '.')}@client.fr`;
+      const password = 'test123';
+
+      // Create the credentials
+      const registeredClientUsers = JSON.parse(localStorage.getItem('sa_client_users') || '{}');
+      registeredClientUsers[email] = {
+        user: {
+          id: client.id,
+          username: email,
+          name: client.name,
+          client_id: client.id,
+          is_client: true
+        },
+        password: password
+      };
+      localStorage.setItem('sa_client_users', JSON.stringify(registeredClientUsers));
+
+      credentials = { email, password };
     }
+
+    setClientEmail(credentials.email);
+    setClientPassword(credentials.password);
     setShowAccessModal(true);
   };
 
@@ -149,13 +167,21 @@ const Clients = () => {
       return;
     }
 
-    const oldCredentials = legalStore.getClientCredentials(selectedClientForAccess.id);
-    if (oldCredentials) {
+    try {
+      // Get the current credentials to know the old email
+      const currentCredentials = legalStore.getClientCredentials(selectedClientForAccess.id);
+
+      if (!currentCredentials) {
+        toast.error('Aucun identifiant trouvé pour ce client');
+        return;
+      }
+
+      // Update the credentials
       const success = legalStore.updateClientCredentials(
         selectedClientForAccess.id,
-        oldCredentials.email,
-        clientEmail,
-        clientPassword
+        currentCredentials.email,  // old email
+        clientEmail,                // new email
+        clientPassword              // new password
       );
 
       if (success) {
@@ -167,7 +193,11 @@ const Clients = () => {
           action: 'Modification identifiants client',
           target_type: 'Client',
           target_id: selectedClientForAccess.id,
-          metadata: { name: selectedClientForAccess.name }
+          metadata: {
+            name: selectedClientForAccess.name,
+            old_email: currentCredentials.email,
+            new_email: clientEmail
+          }
         });
 
         toast.success('Identifiants sauvegardés avec succès', {
@@ -182,8 +212,9 @@ const Clients = () => {
       } else {
         toast.error('Erreur lors de la sauvegarde des identifiants');
       }
-    } else {
-      toast.error('Aucun identifiant trouvé pour ce client');
+    } catch (error) {
+      toast.error('Une erreur est survenue');
+      console.error(error);
     }
   };
 
