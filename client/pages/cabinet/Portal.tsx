@@ -19,7 +19,10 @@ import {
   FileCheck,
   TrendingUp,
   Landmark,
-  UserCheck
+  UserCheck,
+  Loader,
+  AlertCircle,
+  RotateCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -29,10 +32,12 @@ import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { legalStore } from '@/lib/legal-store';
+import { useClientSync, useSyncStatusText } from '@/hooks/useClientSync';
 
 const Portal = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = React.useState('dossier');
+  const { syncStatus, sync, getLastSyncText } = useClientSync(user?.client_id, 15000); // Sync every 15 seconds
 
   // Get all cases and documents for this client
   const allCases = legalStore.getCases();
@@ -59,8 +64,36 @@ const Portal = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0f18] flex flex-col font-sans">
+      {/* Sync Status Bar */}
+      <div className={cn(
+        "h-10 px-4 md:px-10 flex items-center justify-end gap-3 text-[9px] font-bold uppercase tracking-widest transition-all",
+        syncStatus.isSyncing ? "bg-blue-600/20 text-blue-300 border-b border-blue-500/20" :
+        syncStatus.error ? "bg-red-600/20 text-red-300 border-b border-red-500/20" :
+        syncStatus.lastSyncAt ? "bg-emerald-600/20 text-emerald-300 border-b border-emerald-500/20" :
+        "bg-white/5 text-white/40 border-b border-white/5"
+      )}>
+        <div className="flex items-center gap-2">
+          {syncStatus.isSyncing && <Loader className="w-3 h-3 animate-spin" />}
+          {syncStatus.error && <AlertCircle className="w-3 h-3" />}
+          {!syncStatus.isSyncing && !syncStatus.error && syncStatus.lastSyncAt && <CheckCircle2 className="w-3 h-3" />}
+          <span>
+            {syncStatus.isSyncing ? 'Syncing...' :
+             syncStatus.error ? `Error: ${syncStatus.error}` :
+             syncStatus.lastSyncAt ? getLastSyncText() : 'Never synced'}
+          </span>
+        </div>
+        <button
+          onClick={() => sync()}
+          disabled={syncStatus.isSyncing}
+          className="ml-4 p-1 hover:bg-white/10 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Refresh data"
+        >
+          <RotateCw className={cn("w-3 h-3", syncStatus.isSyncing && "animate-spin")} />
+        </button>
+      </div>
+
       {/* Client Portal Header - Mobile Responsive */}
-      <header className="border-b border-white/5 bg-[#0a0f18]/80 backdrop-blur-xl sticky top-0 z-50 px-4 md:px-10 py-4 md:py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-8">
+      <header className="border-b border-white/5 bg-[#0a0f18]/80 backdrop-blur-xl sticky top-10 z-50 px-4 md:px-10 py-4 md:py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-8">
         <div className="flex items-center gap-3 md:gap-8 w-full md:w-auto">
           <Link to="/cabinet">
             <Button variant="ghost" className="text-[9px] md:text-[10px] font-black text-white/40 uppercase tracking-[0.2em] md:tracking-[0.3em] hover:text-[#c1a461] hover:bg-white/5 gap-2 px-2 md:px-0 group shrink-0">

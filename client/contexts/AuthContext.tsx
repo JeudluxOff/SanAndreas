@@ -271,6 +271,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return false;
   };
 
+  const clientLogin = (email: string, password: string, clientId?: string): boolean => {
+    // Load registered client users
+    const registeredClientUsers = JSON.parse(localStorage.getItem('sa_client_users') || '{}');
+    const clientUser = registeredClientUsers[email];
+
+    if (clientUser && clientUser.password === password) {
+      const user = {
+        ...clientUser.user,
+        client_id: clientUser.user.client_id || clientId,
+        is_client: true,
+        access_method: 'email_password' as const
+      };
+      setUser(user as User);
+      localStorage.setItem('sa_gov_user', JSON.stringify(user));
+      logAction('Connexion Client', { email });
+      return true;
+    }
+
+    return false;
+  };
+
   const hasPermission = (permission: Permission): boolean => {
     if (!user || !user.permissions) return false;
     return user.permissions.includes(permission);
@@ -473,7 +494,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={{
-      user, login, logout, isLoading, hasPermission, canAccessService,
+      user, login, clientLogin, logout, isLoading, hasPermission, canAccessService,
       logAction, updateStatus, updateUser, registerUser, updateOtherUser, deleteUser, emergencyMode, toggleEmergencyMode
     }}>
       {children}

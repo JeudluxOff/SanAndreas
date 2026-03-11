@@ -115,6 +115,73 @@ authRouter.get('/me', authMiddleware, (req: AuthRequest, res: Response) => {
 });
 
 /**
+ * POST /api/v2/auth/login-token
+ * Authenticate using an access token (for clients accessing specific cases)
+ * Token format: TOKEN-{CASE_ID}-{RANDOM_STRING}
+ */
+authRouter.post('/login-token', (req: Request, res: Response) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ error: 'Access token is required' });
+    }
+
+    // Validate token format
+    const tokenParts = token.split('-');
+    if (tokenParts.length !== 3 || tokenParts[0] !== 'TOKEN') {
+      return res.status(400).json({ error: 'Invalid token format' });
+    }
+
+    const caseId = tokenParts[1];
+    const tokenHash = tokenParts[2];
+
+    // Mock token validation - in production, check against database
+    // Verify that the token exists and hasn't expired
+    const validTokens: Record<string, { case_id: string; expires_at: number; client_id?: string }> = {
+      'TOKEN-HC-2024-001-ABC123DEF456': {
+        case_id: 'HC-2024-001',
+        expires_at: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days
+        client_id: 'cli-005'
+      },
+      'TOKEN-HC-2024-002-XYZ789GHI012': {
+        case_id: 'HC-2024-002',
+        expires_at: Date.now() + 30 * 24 * 60 * 60 * 1000,
+        client_id: 'cli-006'
+      }
+    };
+
+    const validToken = validTokens[token];
+    if (!validToken || validToken.expires_at < Date.now()) {
+      return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+
+    // Generate JWT for this client with limited scope
+    const clientTokens = jwtAuth.generateToken({
+      user_id: `client-${caseId}`,
+      name: 'Client',
+      role: 'client',
+      client_id: validToken.client_id || caseId
+    });
+
+    res.json({
+      ...clientTokens,
+      user: {
+        id: `client-${caseId}`,
+        name: 'Accès Client',
+        role: 'client',
+        client_id: validToken.client_id || caseId,
+        is_client: true,
+        access_method: 'token',
+        token_expires_at: new Date(validToken.expires_at).toISOString()
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Token validation failed' });
+  }
+});
+
+/**
  * POST /api/v2/auth/logout
  * Logout user (invalidate token on client side)
  */

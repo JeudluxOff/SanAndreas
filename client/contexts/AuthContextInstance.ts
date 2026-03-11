@@ -4,6 +4,7 @@ import { User, Role, Permission, ServiceID, UserStatus } from './AuthContextType
 export interface AuthContextType {
   user: User | null;
   login: (username: string, password: string) => Promise<boolean>;
+  clientLogin: (email: string, password: string, clientId?: string) => boolean;
   logout: () => void;
   isLoading: boolean;
   hasPermission: (permission: Permission) => boolean;

@@ -48,4 +48,9 @@ export interface User {
   matricule?: string;
   callsign?: string;
   avatar?: string;
+  // Client portal fields
+  client_id?: string;
+  is_client?: boolean;
+  access_method?: 'email_password' | 'token';
+  token_expires_at?: string;
 }

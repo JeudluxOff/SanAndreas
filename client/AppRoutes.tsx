@@ -18,6 +18,7 @@ import LegalClients from "@/pages/cabinet/Clients";
 import LegalAdmin from "@/pages/cabinet/Admin";
 import LegalWorkspaces from "@/pages/cabinet/Workspaces";
 import CabinetLogin from "@/pages/cabinet/Login";
+import ClientLogin from "@/pages/cabinet/ClientLogin";
 import CriminalLaw from "@/pages/cabinet/public/CriminalLaw";
 import CivilLaw from "@/pages/cabinet/public/CivilLaw";
 import BusinessLaw from "@/pages/cabinet/public/BusinessLaw";
@@ -59,6 +60,7 @@ export const AppRoutes = () => (
     <Route path="/cabinet/methodology" element={<Methodology />} />
     <Route path="/cabinet/fees" element={<Fees />} />
     <Route path="/cabinet/login" element={<CabinetLogin />} />
+    <Route path="/cabinet/client-login" element={<ClientLogin />} />
     <Route path="/cabinet/portal" element={
       <ProtectedRoute>
         <LegalPortal />

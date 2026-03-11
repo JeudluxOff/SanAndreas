@@ -50,10 +50,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Case, CaseType, ConfidentialityLevel, Client } from '@shared/api';
 
 const Dossiers = () => {
+  // Call all hooks at the top level, unconditionally, in same order every render
   const store = useLegalStore();
-  const { isAssocié } = useLegalRBAC();
   const { user } = useAuth();
+  const { isAssocié } = useLegalRBAC();
   const location = useLocation();
+
+  // All state declarations in order
   const [showCreateModal, setShowCreateModal] = React.useState(false);
   const [showQuickClientModal, setShowQuickClientModal] = React.useState(false);
   const [showConflictModal, setShowConflictModal] = React.useState(false);
@@ -65,8 +68,15 @@ const Dossiers = () => {
     name: '',
     type: 'Individu'
   });
+  const [newCase, setNewCase] = React.useState<Partial<Case>>({
+    title: '',
+    description: '',
+    client_id: '',
+    type: 'Pénal',
+    confidentiality: 'Normal',
+  });
 
-  // Handle "action=new" from Header
+  // Effects after all state hooks
   React.useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('action') === 'new') {
@@ -75,15 +85,6 @@ const Dossiers = () => {
       setShowConflictModal(true);
     }
   }, [location]);
-
-  // Create Case Form State
-  const [newCase, setNewCase] = React.useState<Partial<Case>>({
-    title: '',
-    description: '',
-    client_id: '',
-    type: 'Pénal',
-    confidentiality: 'Normal',
-  });
 
   const cases = store.getCases().filter(c => c.status !== 'Archivé');
   const clients = store.getClients();

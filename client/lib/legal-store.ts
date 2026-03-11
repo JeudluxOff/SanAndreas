@@ -91,8 +91,8 @@ class LegalStoreManager {
     }, 1000);
   }
 
-  private async fetchFromServer(retries = 1) {
-    if (this.isSyncing && retries === 1) return;
+  private async fetchFromServer(retries = 0) {
+    if (this.isSyncing && retries === 0) return;
     this.isSyncing = true;
     try {
       const controller = new AbortController();
@@ -101,49 +101,49 @@ class LegalStoreManager {
       const res = await fetch('/api/legal', { signal: controller.signal });
       clearTimeout(timeoutId);
 
-      if (res.ok) {
-        const serverData = await res.json() as LegalStore;
-
-        // Detect new items for notifications if this is not the first load
-        if (this.data.cases.length > 0) {
-          const newCases = serverData.cases.filter(sc => !this.data.cases.some(c => c.id === sc.id));
-          newCases.forEach(c => this.triggerNotification('dossiers', 'Nouveau Dossier (Sync)', `Dossier: ${c.title}`));
-
-          const newDocs = serverData.documents.filter(sd => !this.data.documents.some(d => d.id === sd.id));
-          newDocs.forEach(d => this.triggerNotification('documents', 'Nouveau Document (Sync)', `Doc: ${d.title}`));
-
-          const newEvidence = serverData.evidence.filter(se => !this.data.evidence.some(e => e.id === se.id));
-          newEvidence.forEach(e => this.triggerNotification('evidence', 'Nouvelle Preuve (Sync)', `Preuve: ${e.name}`));
-
-          const newHearings = serverData.hearings.filter(sh => !this.data.hearings.some(h => h.id === sh.id));
-          newHearings.forEach(h => this.triggerNotification('hearings', 'Nouvelle Audience (Sync)', `Audience: ${h.title}`));
-
-          const newTasks = serverData.tasks.filter(st => !this.data.tasks.some(t => t.id === st.id));
-          newTasks.forEach(t => this.triggerNotification('tasks', 'Nouvelle Tâche (Sync)', `Tâche: ${t.title}`));
-
-          const newInvoices = serverData.invoices.filter(si => !this.data.invoices.some(i => i.id === si.id));
-          newInvoices.forEach(inv => this.triggerNotification('invoices', 'Nouvelle Facture (Sync)', `Montant: ${inv.amount} ${inv.currency}`));
-        }
-
-        // Improved merge: use timestamp-based conflict resolution per entity
-        // "Last-write-wins" strategy: keep the most recently updated version of each entity
-        this.data = this.mergeDataWithTimestamps(this.data, serverData);
-        this.saveLocally();
-        this.notify();
+      if (!res.ok) {
+        throw new Error(`Server returned ${res.status}`);
       }
+
+      const serverData = await res.json() as LegalStore;
+
+      // Detect new items for notifications if this is not the first load
+      if (this.data.cases.length > 0) {
+        const newCases = serverData.cases.filter(sc => !this.data.cases.some(c => c.id === sc.id));
+        newCases.forEach(c => this.triggerNotification('dossiers', 'Nouveau Dossier (Sync)', `Dossier: ${c.title}`));
+
+        const newDocs = serverData.documents.filter(sd => !this.data.documents.some(d => d.id === sd.id));
+        newDocs.forEach(d => this.triggerNotification('documents', 'Nouveau Document (Sync)', `Doc: ${d.title}`));
+
+        const newEvidence = serverData.evidence.filter(se => !this.data.evidence.some(e => e.id === se.id));
+        newEvidence.forEach(e => this.triggerNotification('evidence', 'Nouvelle Preuve (Sync)', `Preuve: ${e.name}`));
+
+        const newHearings = serverData.hearings.filter(sh => !this.data.hearings.some(h => h.id === sh.id));
+        newHearings.forEach(h => this.triggerNotification('hearings', 'Nouvelle Audience (Sync)', `Audience: ${h.title}`));
+
+        const newTasks = serverData.tasks.filter(st => !this.data.tasks.some(t => t.id === st.id));
+        newTasks.forEach(t => this.triggerNotification('tasks', 'Nouvelle Tâche (Sync)', `Tâche: ${t.title}`));
+
+        const newInvoices = serverData.invoices.filter(si => !this.data.invoices.some(i => i.id === si.id));
+        newInvoices.forEach(inv => this.triggerNotification('invoices', 'Nouvelle Facture (Sync)', `Montant: ${inv.amount} ${inv.currency}`));
+      }
+
+      // Improved merge: use timestamp-based conflict resolution per entity
+      // "Last-write-wins" strategy: keep the most recently updated version of each entity
+      this.data = this.mergeDataWithTimestamps(this.data, serverData);
+      this.saveLocally();
+      this.notify();
       this.isSyncing = false;
     } catch (e: any) {
+      this.isSyncing = false;
       // Silently handle network errors - app will work with local data
-      // Only retry once to avoid spamming logs
-      if (retries > 0 && e.name !== 'AbortError') {
+      // Retry once with exponential backoff if not an abort
+      if (retries === 0 && e.name !== 'AbortError') {
         setTimeout(() => {
-          this.isSyncing = false;
-          this.fetchFromServer(retries - 1);
-        }, 2000);
-      } else {
-        this.isSyncing = false;
-        // App will continue working with cached localStorage data
+          this.fetchFromServer(1);
+        }, 3000);
       }
+      // Otherwise fail silently - app continues with cached localStorage data
     }
   }
 

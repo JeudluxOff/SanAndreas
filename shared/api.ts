@@ -29,6 +29,13 @@ export interface Client {
   address?: string;
   type: 'Individu' | 'Entreprise';
   created_at: string;
+  // Client portal fields
+  owner_user_id?: string;
+  notification_preferences?: {
+    email_documents: boolean;
+    email_invoices: boolean;
+    email_announcements: boolean;
+  };
 }
 
 export interface CaseMember {
@@ -92,6 +99,9 @@ export interface LegalDocument {
   }[];
   created_at: string;
   updated_at: string;
+  // Client portal fields
+  visibility_level?: 'private' | 'shared';
+  shared_at?: string;
 }
 
 export interface Evidence {

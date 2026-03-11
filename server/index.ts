@@ -8,6 +8,7 @@ import { handlePublish, handleGetPublishHistory } from "./routes/admin";
 import { cloudStorage } from "./lib/s3-storage";
 import { authRouter } from "./routes/api-v2-auth";
 import { casesRouter } from "./routes/api-v2-cases";
+import { clientsRouter } from "./routes/api-v2-clients";
 import { auditRouter } from "./routes/api-v2-audit";
 import { errorHandler } from "./middleware/auth";
 
@@ -208,6 +209,7 @@ export function createServer() {
   // API v2 Routes with Authentication
   app.use("/api/v2/auth", authRouter);
   app.use("/api/v2/cases", casesRouter);
+  app.use("/api/v2/clients", clientsRouter);
   app.use("/api/v2/audit", auditRouter);
 
   // Error handling middleware (must be last)

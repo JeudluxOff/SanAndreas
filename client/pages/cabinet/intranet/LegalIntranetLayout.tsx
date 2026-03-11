@@ -239,6 +239,7 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
   const [newAvatar, setNewAvatar] = React.useState('');
   const [hasChanges, setHasChanges] = React.useState(false);
   const navigate = useNavigate();
+  const autoSaveTimeoutRef = React.useRef<NodeJS.Timeout>();
 
   React.useEffect(() => {
     if (user) {
@@ -248,10 +249,35 @@ export default function LegalIntranetLayout({ children }: { children: React.Reac
     }
   }, [user]);
 
+  // Auto-save with debounce while typing
+  React.useEffect(() => {
+    if (hasChanges && newName.trim()) {
+      // Clear previous timeout
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+
+      // Set new timeout to auto-save after 2 seconds of inactivity
+      autoSaveTimeoutRef.current = setTimeout(() => {
+        updateUser({
+          name: newName,
+          avatar: newAvatar.trim() || undefined
+        });
+        setHasChanges(false);
+      }, 2000);
+    }
+
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [newName, newAvatar, hasChanges, updateUser]);
+
   // Auto-save when dialog closes if there are changes
   const handleDialogOpenChange = (open: boolean) => {
     if (!open && hasChanges && newName.trim()) {
-      // Dialog is closing and there are changes
+      // Dialog is closing - save immediately
       updateUser({
         name: newName,
         avatar: newAvatar.trim() || undefined
