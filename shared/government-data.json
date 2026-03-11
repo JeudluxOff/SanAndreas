@@ -582,6 +582,18 @@
   ],
   "auditLogs": [
     {
+      "id": "1773250210904",
+      "timestamp": "2026-03-11T17:30:10.904Z",
+      "user_id": "cli-test",
+      "user_name": "Test Client",
+      "role": "none",
+      "service_id": "none",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin_avocat"
+      }
+    },
+    {
       "id": "1773249760057",
       "timestamp": "2026-03-11T17:22:40.057Z",
       "user_id": "admin_avocat",

@@ -32,8 +32,6 @@ import { cn } from "@/lib/utils";
 
 import { useAuth, Permission, ServiceID } from "@/contexts/AuthContext";
 import { useGovernmentStore } from "@/hooks/useGovernmentStore";
-import { legalStore } from "@/lib/legal-store";
-import { Evidence } from "@shared/api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 const DossierDetail = () => {
@@ -47,8 +45,6 @@ const DossierDetail = () => {
 
   if (!dossierData) return null;
 
-  const legalEvidence = id ? legalStore.getEvidence(id) : [];
-
   // Adapt store data to local UI structure if needed, or use directly
   const dossier = {
     ...dossierData,
@@ -61,7 +57,7 @@ const DossierDetail = () => {
     progress: dossierData.progress || 0,
     participants: dossierData.participants || [],
     documents: store.getGlobalDocuments().filter(d => d.id.startsWith('DOC')), // Simplified link
-    evidence: legalEvidence,
+    evidence: [], // Evidence is only available in the legal cabinet intranet
     timeline: [
       { date: "22 Mai, 14:30", user: dossierData.owner, action: "Synchronisation effectuée", type: "system" }
     ]

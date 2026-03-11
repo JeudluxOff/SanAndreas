@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { governmentStore } from '@/lib/government-store';
-import { legalStore } from '@/lib/legal-store';
 import { User, Role, Permission, ServiceID, UserStatus } from './AuthContextTypes';
 import { AuthContext, AuthContextType } from './AuthContextInstance';
 
@@ -390,23 +389,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       updatedUser.permissions = ROLE_PERMISSIONS[updates.role] || [];
     }
 
-    // Sync with stores if name, role or avatar changed
+    // Sync with government store if name, role or avatar changed
     if (updates.name || updates.role || updates.avatar) {
       const govUpdate: any = {};
       if (updates.name) govUpdate.name = updates.name;
       if (updates.role) govUpdate.role = updates.role;
       if (updates.avatar) govUpdate.image = updates.avatar;
       governmentStore.updateEmployee(user.name, govUpdate);
-
-      // Also sync with legalStore
-      const staffMember = legalStore.getStaff().find(s => s.id === user.id);
-      if (staffMember) {
-        legalStore.updateStaff({
-          ...staffMember,
-          name: updates.name || staffMember.name,
-          avatar: updates.avatar || staffMember.avatar
-        });
-      }
     }
 
     setUser(updatedUser);
@@ -439,29 +428,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     setRegisteredUsers(updatedRegUsers);
     localStorage.setItem('sa_gov_registered_users', JSON.stringify(updatedRegUsers));
-
-    // Also sync with legalStore
-    const staffMember = legalStore.getStaff().find(s => s.id === userId);
-    if (staffMember) {
-      const legalRoleMap: Record<string, string> = {
-        'admin': 'Associé',
-        'avocat': 'Avocat',
-        'gouverneur': 'Associé',
-        'vice_gouverneur': 'Associé',
-        'secretaire_justice': 'Avocat',
-        'secretaire_etat_general': 'Auditeur',
-        'secretaire_tresor_commerce': 'Comptable'
-      };
-
-      legalStore.updateStaff({
-        ...staffMember,
-        name: updates.name || staffMember.name,
-        role: updates.role ? (legalRoleMap[updates.role] || staffMember.role) as any : staffMember.role,
-        avatar: updates.avatar !== undefined ? updates.avatar : staffMember.avatar,
-        matricule: updates.matricule !== undefined ? updates.matricule : staffMember.matricule,
-        callsign: updates.callsign !== undefined ? updates.callsign : staffMember.callsign
-      });
-    }
 
     // Sync with governmentStore
     if (updates.name || updates.role || updates.avatar) {
@@ -497,30 +463,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setRegisteredUsers(updatedRegUsers);
     localStorage.setItem('sa_gov_registered_users', JSON.stringify(updatedRegUsers));
 
-    // Also sync with legalStore
-    const legalRoleMap: Record<string, string> = {
-      'admin': 'Associé',
-      'avocat': 'Avocat',
-      'gouverneur': 'Associé',
-      'vice_gouverneur': 'Associé',
-      'secretaire_justice': 'Avocat',
-      'secretaire_etat_general': 'Auditeur',
-      'secretaire_tresor_commerce': 'Comptable'
-    };
-
-    legalStore.addStaff({
-      id: newUser.id,
-      name: newUser.name,
-      role: (legalRoleMap[newUser.role] || 'Avocat') as any,
-      email: `${newUser.username}@np.sa`,
-      status: 'Actif',
-      joined_at: new Date().toISOString(),
-      last_active: new Date().toISOString(),
-      matricule: newUser.matricule,
-      callsign: newUser.callsign,
-      avatar: newUser.avatar
-    });
-
     logAction('Création nouvel utilisateur', { username: newUser.username, role: newUser.role });
   };
 
@@ -529,9 +471,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     delete updatedRegUsers[userId];
     setRegisteredUsers(updatedRegUsers);
     localStorage.setItem('sa_gov_registered_users', JSON.stringify(updatedRegUsers));
-
-    // Also remove from legalStore staff list
-    legalStore.removeStaff(userId);
 
     logAction('Suppression utilisateur', { userId });
 

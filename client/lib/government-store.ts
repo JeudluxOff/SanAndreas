@@ -10,7 +10,6 @@ import {
   GovMessage,
   GovAuditLog
 } from '@shared/gov-api';
-import { legalStore } from '@/lib/legal-store';
 import { notifyDraftChange } from '@/contexts/AdminContext';
 
 const STORE_KEY = 'gov_intranet_store';
@@ -43,11 +42,6 @@ class GovernmentStoreManager {
     const saved = localStorage.getItem(STORE_KEY);
     this.data = saved ? JSON.parse(saved) : INITIAL_DATA;
     this.initSync();
-
-    // Subscribe to legalStore to refresh views when legal data changes
-    legalStore.subscribe(() => {
-      this.notify();
-    });
   }
 
   public stopSync() {
@@ -150,22 +144,7 @@ class GovernmentStoreManager {
 
   // Employees
   getEmployees() {
-    const govEmployees = this.data.employees;
-
-    // Include Legal Staff from legalStore
-    const legalStaff = legalStore.getStaff().map(s => ({
-      name: s.name,
-      role: s.role,
-      service: 'Cabinet Juridique (JUSTICE)',
-      grade: s.role === 'Associé' ? 'Associé Principal' : 'Auxiliaire de Justice',
-      status: s.status === 'Actif' ? 'En service' : 'Indisponible',
-      email: s.email,
-      joinDate: new Date(s.joined_at).toLocaleDateString(),
-      image: s.avatar ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${s.avatar}` : undefined,
-      description: `Membre du Cabinet Noxwood & Partner. Dernière activité: ${new Date(s.last_active).toLocaleString()}`
-    }));
-
-    return [...govEmployees, ...legalStaff];
+    return this.data.employees;
   }
   updateEmployees(employees: GovEmployee[]) {
     this.data.employees = employees;
@@ -190,21 +169,7 @@ class GovernmentStoreManager {
 
   // Calendar
   getCalendarEvents() {
-    const govEvents = this.data.calendarEvents;
-
-    // Include Legal Hearings from legalStore
-    const legalEvents = legalStore.getHearings().map((h, i) => ({
-      id: 9000 + i, // Fake IDs for merged calendar
-      time: new Date(h.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      title: `[AUDIENCE] ${h.title}`,
-      type: h.type === 'Pénal' ? 'Justice' : 'Administratif',
-      date: new Date(h.date).toLocaleDateString(),
-      participants: 2,
-      location: h.location,
-      service: 'JUSTICE'
-    }));
-
-    return [...govEvents, ...legalEvents];
+    return this.data.calendarEvents;
   }
 
   // Messages
@@ -228,21 +193,7 @@ class GovernmentStoreManager {
 
   // Audit
   getAuditLogs() {
-    const govLogs = this.data.auditLogs;
-
-    // Include Legal Audit Logs
-    const legalLogs = legalStore.getAuditLogs().map(log => ({
-      id: log.id,
-      timestamp: log.timestamp,
-      user_id: log.user_id,
-      user_name: log.user_name,
-      role: 'Avocat',
-      service_id: 'JUSTICE',
-      action: `[CABINET] ${log.action}`,
-      metadata: log.metadata
-    }));
-
-    return [...govLogs, ...legalLogs].sort((a, b) =>
+    return this.data.auditLogs.sort((a, b) =>
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
   }
@@ -299,42 +250,11 @@ class GovernmentStoreManager {
 
   // Documents
   getGlobalDocuments() {
-    const govDocs = Object.values(this.data.workspaces).flatMap(ws => (ws.documents || []).map(d => ({
+    return Object.values(this.data.workspaces).flatMap(ws => (ws.documents || []).map(d => ({
       ...d,
       service_name: ws.name,
       service_id: Object.keys(this.data.workspaces).find(key => this.data.workspaces[key] === ws)?.toUpperCase()
     })));
-
-    // Include Legal Documents and Evidence from legalStore
-    const legalDocs = legalStore.getDocuments().map(d => ({
-      id: d.id,
-      title: d.title,
-      content: d.content,
-      type: d.category,
-      date: new Date(d.created_at).toLocaleDateString(),
-      status: d.status,
-      author: 'Cabinet N&P',
-      archived: d.status === 'Archivé',
-      acl: [],
-      service_name: 'Cabinet Juridique',
-      service_id: 'JUSTICE'
-    }));
-
-    const legalEvidence = legalStore.getCases().flatMap(c => legalStore.getEvidence(c.id)).map(e => ({
-      id: e.id,
-      title: `[PREUVE] ${e.name}`,
-      content: e.content,
-      type: 'Pièce à Conviction',
-      date: new Date(e.uploaded_at).toLocaleDateString(),
-      status: e.confidentiality === 'Scellé' ? 'Scellée' : 'Déposée',
-      author: e.uploaded_by,
-      archived: false,
-      acl: e.confidentiality === 'Scellé' ? ['ADMIN_ONLY'] : [],
-      service_name: 'Cabinet Juridique',
-      service_id: 'JUSTICE'
-    }));
-
-    return [...govDocs, ...legalDocs, ...legalEvidence];
   }
 
   createDocument(serviceId: string, doc: GovDocument) {
@@ -396,28 +316,11 @@ class GovernmentStoreManager {
 
   // Dossiers
   getGlobalDossiers() {
-    const govDossiers = Object.values(this.data.workspaces).flatMap(ws => (ws.dossiers || []).map(d => ({
+    return Object.values(this.data.workspaces).flatMap(ws => (ws.dossiers || []).map(d => ({
       ...d,
       service_name: ws.name,
       service_id: Object.keys(this.data.workspaces).find(key => this.data.workspaces[key] === ws)?.toUpperCase()
     })));
-
-    // Include Legal Dossiers from legalStore
-    const legalDossiers = legalStore.getCases().map(c => ({
-      id: c.id,
-      title: c.title,
-      status: c.status,
-      archived: c.status === 'Archivé',
-      acl: [],
-      priority: 'Normale',
-      creationDate: new Date(c.created_at).toLocaleDateString(),
-      description: c.description,
-      progress: c.progression || 0,
-      service_name: 'Cabinet Juridique',
-      service_id: 'JUSTICE'
-    }));
-
-    return [...govDossiers, ...legalDossiers];
   }
 
   getDossier(id: string) {
@@ -430,26 +333,6 @@ class GovernmentStoreManager {
         owner: ws.staff?.[0]?.name || "Responsable Service"
       };
     }
-
-    // Check Legal Store
-    const legalCase = legalStore.getCase(id);
-    if (legalCase) {
-      return {
-        id: legalCase.id,
-        title: legalCase.title,
-        status: legalCase.status,
-        archived: legalCase.status === 'Archivé',
-        acl: [],
-        priority: 'Normale',
-        creationDate: new Date(legalCase.created_at).toLocaleDateString(),
-        description: legalCase.description,
-        progress: legalCase.progression || 0,
-        service_name: 'Cabinet Juridique',
-        service_id: 'JUSTICE',
-        owner: 'Victoria Partner'
-      };
-    }
-
     return null;
   }
 
