@@ -481,6 +481,77 @@ class LegalStoreManager {
     }
   }
 
+  // Document Sharing
+  shareDocumentWithClient(docId: string, clientIds: string[], lawyerId: string) {
+    const doc = this.data.documents.find(d => d.id === docId);
+    if (doc) {
+      // Initialize shared_with array if it doesn't exist
+      if (!doc.shared_with) {
+        doc.shared_with = [];
+      }
+
+      // Add new client IDs that aren't already there
+      clientIds.forEach(clientId => {
+        if (!doc.shared_with!.includes(clientId)) {
+          doc.shared_with!.push(clientId);
+        }
+      });
+
+      doc.shared_at = new Date().toISOString();
+      doc.shared_by = lawyerId;
+
+      this.updateDocument(doc);
+
+      // Log the action
+      this.logAction({
+        id: `LOG-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user_id: lawyerId,
+        user_name: 'System',
+        action: 'Partage document avec client(s)',
+        target_type: 'Document',
+        target_id: docId,
+        metadata: {
+          doc_title: doc.title,
+          client_ids: clientIds,
+          client_count: clientIds.length
+        }
+      });
+
+      return true;
+    }
+    return false;
+  }
+
+  unshareDocumentFromClient(docId: string, clientId: string, lawyerId: string) {
+    const doc = this.data.documents.find(d => d.id === docId);
+    if (doc && doc.shared_with) {
+      const idx = doc.shared_with.indexOf(clientId);
+      if (idx !== -1) {
+        doc.shared_with.splice(idx, 1);
+        this.updateDocument(doc);
+
+        // Log the action
+        this.logAction({
+          id: `LOG-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          user_id: lawyerId,
+          user_name: 'System',
+          action: 'Retrait partage document client',
+          target_type: 'Document',
+          target_id: docId,
+          metadata: {
+            doc_title: doc.title,
+            client_id: clientId
+          }
+        });
+
+        return true;
+      }
+    }
+    return false;
+  }
+
   // Evidence
   getEvidence(caseId: string) {
     return this.data.evidence.filter(e => e.case_id === caseId);
@@ -605,6 +676,54 @@ class LegalStoreManager {
   createMessage(msg: Message) {
     this.data.messages.push(msg);
     this.save();
+  }
+
+  // Client Messaging (private messages between lawyer and client)
+  createClientMessage(message: Message) {
+    // Ensure message has required client messaging fields
+    const clientMsg: Message = {
+      ...message,
+      type: 'client',
+      is_read: false,
+      id: message.id || `MSG-${Date.now()}`,
+      timestamp: message.timestamp || new Date().toISOString()
+    };
+
+    this.data.messages.push(clientMsg);
+    this.save();
+
+    // Log the action if it's from a lawyer
+    if (message.sender_id !== message.client_id) {
+      this.logAction({
+        id: `LOG-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user_id: message.sender_id,
+        user_name: message.sender_name || 'System',
+        action: 'Message client envoyé',
+        target_type: 'Message',
+        target_id: clientMsg.id,
+        metadata: {
+          client_id: message.client_id,
+          content_preview: message.content.substring(0, 100)
+        }
+      });
+    }
+  }
+
+  getClientMessages(clientId: string) {
+    return this.data.messages
+      .filter(m => m.type === 'client' && m.client_id === clientId)
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }
+
+  markClientMessageAsRead(messageId: string) {
+    const msg = this.data.messages.find(m => m.id === messageId);
+    if (msg) {
+      msg.is_read = true;
+      this.save();
+      return true;
+    }
+    return false;
   }
 
   // Audit

@@ -49,6 +49,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { legalStore } from '@/lib/legal-store';
 import { useAuth } from '@/contexts/AuthContext';
@@ -64,7 +65,9 @@ const Documents = () => {
   const [showEditModal, setShowEditModal] = React.useState(false);
   const [showViewModal, setShowViewModal] = React.useState(false);
   const [showSignModal, setShowSignModal] = React.useState(false);
+  const [showShareModal, setShowShareModal] = React.useState(false);
   const [selectedDocId, setSelectedDocId] = React.useState<string | null>(null);
+  const [selectedClientsToShare, setSelectedClientsToShare] = React.useState<string[]>([]);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [newDoc, setNewDoc] = React.useState({
     title: '',
@@ -82,6 +85,7 @@ const Documents = () => {
   });
 
   const cases = legalStore.getCases();
+  const clients = legalStore.getClients();
 
   const handleCreate = async () => {
     if (!user || !newDoc.title || !newDoc.case_id) return;
@@ -260,6 +264,32 @@ const Documents = () => {
       legalStore.deleteDocument(id, user.id);
       setDocs(legalStore.getDocuments().filter(d => d.status !== 'Archivé'));
     }
+  };
+
+  const handleShareDoc = () => {
+    if (!user || !selectedDocId || selectedClientsToShare.length === 0) {
+      toast.error('Veuillez sélectionner au moins un client');
+      return;
+    }
+
+    legalStore.shareDocumentWithClient(selectedDocId, selectedClientsToShare, user.id);
+
+    legalStore.logAction({
+      id: `LOG-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      user_id: user.id,
+      user_name: user.name,
+      action: `Partage document avec ${selectedClientsToShare.length} client(s)`,
+      target_type: 'Document',
+      target_id: selectedDocId,
+      metadata: { shared_with_count: selectedClientsToShare.length }
+    });
+
+    toast.success(`Document partagé avec ${selectedClientsToShare.length} client(s)`);
+    setShowShareModal(false);
+    setSelectedDocId(null);
+    setSelectedClientsToShare([]);
+    setDocs(legalStore.getDocuments().filter(d => d.status !== 'Archivé'));
   };
 
   const filteredDocs = docs.filter(d => 
@@ -589,6 +619,67 @@ const Documents = () => {
           </DialogContent>
         </Dialog>
 
+        {/* Share Document Modal */}
+        <Dialog open={showShareModal} onOpenChange={setShowShareModal}>
+          <DialogContent className="max-w-xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Partager le Document</DialogTitle>
+              <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                Sélectionnez les clients avec qui partager ce document.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 my-6 max-h-[400px] overflow-y-auto">
+              {clients.length > 0 ? (
+                clients.map((client) => (
+                  <div key={client.id} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg border border-slate-100">
+                    <Checkbox
+                      id={client.id}
+                      checked={selectedClientsToShare.includes(client.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedClientsToShare([...selectedClientsToShare, client.id]);
+                        } else {
+                          setSelectedClientsToShare(selectedClientsToShare.filter(id => id !== client.id));
+                        }
+                      }}
+                    />
+                    <Label htmlFor={client.id} className="flex-1 cursor-pointer text-sm font-bold text-slate-900 uppercase">
+                      {client.name}
+                    </Label>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{client.email}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center py-8">
+                  Aucun client disponible
+                </p>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowShareModal(false);
+                  setSelectedDocId(null);
+                  setSelectedClientsToShare([]);
+                }}
+                className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleShareDoc}
+                disabled={selectedClientsToShare.length === 0}
+                className="bg-[#c1a461] hover:bg-[#c1a461]/90 text-white text-[10px] font-black uppercase tracking-widest h-12 px-10 rounded-xl shadow-xl shadow-[#c1a461]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Partager avec {selectedClientsToShare.length} client{selectedClientsToShare.length !== 1 ? 's' : ''}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {[
             { label: "En Brouillon", value: docs.filter(d => d.status === 'Brouillon').length, icon: <Zap className="w-5 h-5" />, color: "text-amber-600", bg: "bg-amber-50" },
@@ -648,8 +739,19 @@ const Documents = () => {
                           <div className="p-3 bg-slate-50 rounded-xl text-slate-400 group-hover:text-[#c1a461] transition-colors">
                             <FileText className="w-5 h-5" />
                           </div>
-                          <div>
-                            <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{item.title}</p>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">{item.title}</p>
+                              {item.shared_with && item.shared_with.length > 0 ? (
+                                <Badge className="bg-emerald-50 text-emerald-700 text-[7px] font-black px-2 py-0.5 uppercase tracking-widest">
+                                  👥 Partagé ({item.shared_with.length})
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-slate-400 text-[7px] font-black px-2 py-0.5 uppercase tracking-widest border-slate-200">
+                                  🔒 Privé
+                                </Badge>
+                              )}
+                            </div>
                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.id}</p>
                           </div>
                         </div>
@@ -727,6 +829,16 @@ const Documents = () => {
                                 className="text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-[#c1a461] p-3 rounded-lg cursor-pointer flex gap-3"
                               >
                                 <FileEdit className="w-4 h-4" /> Modifier
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedDocId(item.id);
+                                  setSelectedClientsToShare([]);
+                                  setShowShareModal(true);
+                                }}
+                                className="text-[10px] font-black uppercase tracking-widest text-[#c1a461] hover:text-[#c1a461]/80 p-3 rounded-lg cursor-pointer flex gap-3"
+                              >
+                                <Share2 className="w-4 h-4" /> Partager Avec Client
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => handleArchiveDoc(item.id)}

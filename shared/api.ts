@@ -102,6 +102,8 @@ export interface LegalDocument {
   // Client portal fields
   visibility_level?: 'private' | 'shared';
   shared_at?: string;
+  shared_with?: string[]; // Array of client IDs who have access
+  shared_by?: string; // Lawyer ID who shared it
 }
 
 export interface Evidence {
@@ -184,6 +186,11 @@ export interface Message {
   content: string;
   timestamp: string;
   attachments?: string[];
+  // Client messaging fields
+  type?: 'internal' | 'client'; // internal = lawyer-only, client = shared with client
+  client_id?: string; // Which client this message is for
+  is_read?: boolean; // Whether client has read it
+  sender_name?: string; // Name of sender for display
 }
 
 export interface StaffMember {

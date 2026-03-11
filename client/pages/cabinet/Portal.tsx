@@ -44,17 +44,39 @@ const Portal = () => {
   const clientCases = allCases.filter(c => c.client_id === user?.client_id);
   const activeCases = clientCases.filter(c => c.status !== 'Clos' && c.status !== 'Archivé');
 
-  // Get documents for active cases
+  // Get documents for active cases that are shared with this client
   const allDocuments = legalStore.getDocuments();
-  const caseDocuments = allDocuments.filter(d =>
-    activeCases.some(c => c.id === d.case_id) && d.status !== 'Archivé'
-  );
+  const caseDocuments = allDocuments.filter(d => {
+    // Must be for an active case
+    if (!activeCases.some(c => c.id === d.case_id)) return false;
+    // Must not be archived
+    if (d.status === 'Archivé') return false;
+    // Check sharing: if shared_with is defined, client must be in it
+    // If shared_with is undefined (old docs), treat as shared with everyone
+    if (d.shared_with && d.shared_with.length > 0) {
+      return d.shared_with.includes(user?.client_id || '');
+    }
+    // Backwards compatibility: undefined or empty shared_with = not shared
+    return !d.shared_with || d.shared_with.length === 0 ? false : true;
+  });
 
   // Get invoices for this client
   const allInvoices = legalStore.getInvoices();
   const clientInvoices = allInvoices.filter(inv => inv.client_id === user?.client_id);
   const totalAmount = clientInvoices.reduce((sum, inv) => sum + inv.amount, 0);
   const paidAmount = clientInvoices.filter(inv => inv.status === 'Payé').reduce((sum, inv) => sum + inv.amount, 0);
+
+  // Get messages for this client
+  const clientMessages = user?.client_id ? legalStore.getClientMessages(user.client_id) : [];
+
+  // Get audit logs for the current case
+  const allAuditLogs = legalStore.getAuditLogs();
+  const caseAuditLogs = activeCases.length > 0
+    ? allAuditLogs
+        .filter(log => log.target_id === activeCases[0].id)
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, 5)
+    : [];
 
   // Get staff for contact info
   const staff = legalStore.getStaff();
@@ -117,7 +139,7 @@ const Portal = () => {
 
         <div className="flex items-center gap-4 md:gap-8 w-full md:w-auto justify-between md:justify-end">
           <nav className="hidden sm:flex items-center gap-4 md:gap-8">
-            {['Dossier', 'Documents', 'Facturation'].map((tab) => (
+            {['Dossier', 'Documents', 'Messages', 'Facturation'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab.toLowerCase())}
@@ -180,6 +202,8 @@ const Portal = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
           {/* Main Content Area */}
           <div className="lg:col-span-8 space-y-8 md:space-y-12">
+            {activeTab === 'dossier' && (
+              <>
             {/* Timeline Section */}
             <section className="space-y-6 md:space-y-8">
               <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center gap-3">
@@ -191,41 +215,50 @@ const Portal = () => {
 
               <div className="space-y-4 md:space-y-6 relative">
                 <div className="absolute left-6 md:left-10 top-0 bottom-0 w-px bg-white/10 hidden md:block" />
-                {[
-                  { date: "Hier, 14:30", action: "Conclusions pénales déposées par Maître Partner", status: "completed" },
-                  { date: "22 Mai, 10:00", action: "Revue stratégique au cabinet", status: "completed" },
-                  { date: "26 Mai, 09:00", action: "Audience Préliminaire — Cour Supérieure", status: "pending" }
-                ].map((item, idx) => (
-                  <div key={idx} className="flex gap-4 md:gap-8 items-start relative group">
-                    <div className={cn(
-                      "text-[8px] md:text-[10px] font-black uppercase tracking-widest hidden md:block md:w-20 md:pt-1 md:text-right shrink-0",
-                      item.status === 'completed' ? 'text-[#c1a461]' : 'text-white/20'
-                    )}>
-                      {item.date}
+                {caseAuditLogs.length > 0 ? (
+                  caseAuditLogs.map((log, idx) => (
+                    <div key={log.id} className="flex gap-4 md:gap-8 items-start relative group">
+                      <div className={cn(
+                        "text-[8px] md:text-[10px] font-black uppercase tracking-widest hidden md:block md:w-20 md:pt-1 md:text-right shrink-0",
+                        'text-[#c1a461]'
+                      )}>
+                        {new Date(log.timestamp).toLocaleDateString('fr-FR')} <br className="hidden md:block" /> {new Date(log.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                      <div className={cn(
+                        "w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-[#0a0f18] mt-1 relative z-10 transition-all shrink-0",
+                        'bg-[#c1a461]'
+                      )} />
+                      <Card className="flex-grow bg-white/5 border-white/5 shadow-none rounded-xl md:rounded-[32px] p-4 md:p-8">
+                        <p className={cn(
+                          "text-sm md:text-lg font-black uppercase tracking-tighter leading-tight",
+                          'text-white'
+                        )}>
+                          {log.description}
+                        </p>
+                        <p className={cn(
+                          "text-[8px] md:hidden font-bold uppercase tracking-widest mt-2",
+                          'text-[#c1a461]'
+                        )}>
+                          {new Date(log.timestamp).toLocaleDateString('fr-FR')} à {new Date(log.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </Card>
                     </div>
-                    <div className={cn(
-                      "w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-[#0a0f18] mt-1 relative z-10 transition-all shrink-0",
-                      item.status === 'completed' ? 'bg-[#c1a461]' : 'bg-white/5 border-white/20 group-hover:bg-white/10'
-                    )} />
-                    <Card className="flex-grow bg-white/5 border-white/5 shadow-none rounded-xl md:rounded-[32px] p-4 md:p-8">
-                      <p className={cn(
-                        "text-sm md:text-lg font-black uppercase tracking-tighter leading-tight",
-                        item.status === 'completed' ? 'text-white' : 'text-white/40'
-                      )}>
-                        {item.action}
-                      </p>
-                      <p className={cn(
-                        "text-[8px] md:hidden font-bold uppercase tracking-widest mt-2",
-                        item.status === 'completed' ? 'text-[#c1a461]' : 'text-white/20'
-                      )}>
-                        {item.date}
-                      </p>
-                    </Card>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <Card className="flex-grow bg-white/5 border-white/5 shadow-none rounded-xl md:rounded-[32px] p-4 md:p-8">
+                    <p className="text-sm md:text-lg font-black uppercase tracking-tighter leading-tight text-white/40">
+                      Aucun événement enregistré
+                    </p>
+                  </Card>
+                )}
               </div>
             </section>
 
+              </>
+            )}
+
+            {activeTab === 'documents' && (
+              <>
             {/* Recent Documents */}
             <section className="space-y-6 md:space-y-8">
               <h3 className="text-lg md:text-xl font-black text-white uppercase tracking-tight flex items-center gap-2 md:gap-3">
@@ -233,7 +266,7 @@ const Portal = () => {
               </h3>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
                 {caseDocuments.length > 0 ? (
-                  caseDocuments.slice(0, 4).map((doc) => (
+                  caseDocuments.map((doc) => (
                     <Card key={doc.id} className="bg-white/5 border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-6 group hover:bg-white/10 transition-all cursor-pointer">
                       <div className="flex items-center gap-4 md:gap-6">
                         <div className="p-3 md:p-4 bg-white/5 rounded-lg md:rounded-2xl text-[#c1a461] shrink-0">
@@ -258,6 +291,130 @@ const Portal = () => {
                 )}
               </div>
             </section>
+              </>
+            )}
+
+            {activeTab === 'messages' && (
+              <section className="space-y-6 md:space-y-8">
+                <h3 className="text-lg md:text-xl font-black text-white uppercase tracking-tight flex items-center gap-2 md:gap-3">
+                  <MessageSquare className="w-4 h-4 md:w-5 md:h-5 text-[#c1a461] shrink-0" /> Messages Privés
+                </h3>
+                <div className="space-y-4 md:space-y-6">
+                  {clientMessages.length > 0 ? (
+                    clientMessages.map((msg) => (
+                      <Card key={msg.id} className="bg-white/5 border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-6 hover:bg-white/10 transition-all">
+                        <div className="space-y-3 md:space-y-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                              <Avatar className="h-8 w-8 md:h-10 md:w-10 ring-2 ring-[#c1a461]/20 shrink-0">
+                                <AvatarFallback>{msg.sender_name?.[0] || 'A'}</AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0">
+                                <p className="text-[10px] md:text-[11px] font-black text-white uppercase tracking-tight">
+                                  {msg.sender_name || 'Avocat'}
+                                </p>
+                                <p className="text-[8px] md:text-[9px] font-bold text-white/30 uppercase tracking-widest mt-0.5">
+                                  {new Date(msg.created_at).toLocaleDateString('fr-FR')} à {new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                              </div>
+                            </div>
+                            {msg.is_read && (
+                              <Badge className="bg-emerald-500/20 text-emerald-300 text-[7px] md:text-[8px] font-black tracking-widest uppercase shrink-0">Lu</Badge>
+                            )}
+                          </div>
+                          <p className="text-sm md:text-base text-white/80 leading-relaxed">{msg.content}</p>
+                        </div>
+                      </Card>
+                    ))
+                  ) : (
+                    <Card className="bg-white/5 border-white/5 rounded-2xl md:rounded-3xl p-6 md:p-8">
+                      <p className="text-[10px] md:text-[11px] font-black uppercase text-white/40 tracking-tight text-center py-4">
+                        Aucun message
+                      </p>
+                    </Card>
+                  )}
+                </div>
+              </section>
+            )}
+
+            {activeTab === 'facturation' && (
+              <section className="space-y-6 md:space-y-8">
+                <h3 className="text-lg md:text-xl font-black text-white uppercase tracking-tight flex items-center gap-2 md:gap-3">
+                  <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-[#c1a461] shrink-0" /> Facturation
+                </h3>
+
+                {/* Billing Summary */}
+                <Card className="border-none shadow-2xl rounded-2xl md:rounded-[40px] bg-white p-6 md:p-10 space-y-6 md:space-y-10">
+                  <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center gap-3">
+                    <h4 className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] md:tracking-[0.4em]">Résumé</h4>
+                    <Badge className={cn(
+                      "font-black tracking-widest uppercase text-[7px] md:text-[8px] py-0.5 shrink-0",
+                      totalAmount === 0 ? 'bg-slate-50 text-slate-600' :
+                      paidAmount === totalAmount ? 'bg-emerald-50 text-emerald-600' :
+                      'bg-amber-50 text-amber-600'
+                    )}>
+                      {totalAmount === 0 ? 'AUCUNE' : paidAmount === totalAmount ? 'À JOUR' : 'EN ATTENTE'}
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">Montant Total</p>
+                    <p className="text-3xl md:text-4xl font-black text-[#0a0f18] tracking-tighter">{totalAmount.toLocaleString()} SA$</p>
+                  </div>
+                  {totalAmount > 0 && (
+                    <div className="space-y-4">
+                      <div className="flex justify-between text-[10px] md:text-[11px] font-black uppercase">
+                        <span className="text-slate-400">Réglé</span>
+                        <span className="text-emerald-600">{paidAmount.toLocaleString()} SA$</span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${totalAmount > 0 ? (paidAmount / totalAmount) * 100 : 0}%` }} />
+                      </div>
+                    </div>
+                  )}
+                </Card>
+
+                {/* Invoices List */}
+                <div className="space-y-4 md:space-y-6">
+                  <h4 className="text-[10px] md:text-[11px] font-black text-white uppercase tracking-tight">Factures ({clientInvoices.length})</h4>
+                  {clientInvoices.length > 0 ? (
+                    clientInvoices.map((invoice) => (
+                      <Card key={invoice.id} className="bg-white/5 border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-6 hover:bg-white/10 transition-all">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="p-2 md:p-3 bg-white/5 rounded-lg text-[#c1a461] shrink-0">
+                              <CreditCard className="w-4 h-4 md:w-5 md:h-5" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[10px] md:text-[11px] font-black text-white uppercase tracking-tight truncate">{invoice.number}</p>
+                              <p className="text-[8px] md:text-[9px] font-bold text-white/30 uppercase tracking-widest mt-0.5">
+                                {new Date(invoice.date).toLocaleDateString('fr-FR')}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-[10px] md:text-[11px] font-black text-white uppercase tracking-tight">{invoice.amount.toLocaleString()} SA$</p>
+                            <Badge className={cn(
+                              "text-[7px] md:text-[8px] font-black tracking-widest uppercase mt-1",
+                              invoice.status === 'Payé' ? 'bg-emerald-500/20 text-emerald-300' :
+                              invoice.status === 'En attente' ? 'bg-amber-500/20 text-amber-300' :
+                              'bg-slate-500/20 text-slate-300'
+                            )}>
+                              {invoice.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      </Card>
+                    ))
+                  ) : (
+                    <Card className="bg-white/5 border-white/5 rounded-2xl md:rounded-3xl p-6 md:p-8">
+                      <p className="text-[10px] md:text-[11px] font-black uppercase text-white/40 tracking-tight text-center py-4">
+                        Aucune facture
+                      </p>
+                    </Card>
+                  )}
+                </div>
+              </section>
+            )}
           </div>
 
           {/* Sidebar Area */}

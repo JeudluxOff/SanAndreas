@@ -187,8 +187,152 @@
       "created_at": "2026-03-11"
     }
   ],
-  "cases": [],
-  "documents": [],
+  "cases": [
+    {
+      "id": "HC-2024-MA001",
+      "title": "État de SA vs. Martin Madrazo",
+      "type": "Pénal",
+      "status": "Actif",
+      "client_id": "cli-001",
+      "lead_id": "reed_noxwood",
+      "created_at": "2024-01-15",
+      "updated_at": "2026-03-11",
+      "description": "Affaire de fraude fiscale et blanchiment d'argent"
+    },
+    {
+      "id": "HC-2024-LS001",
+      "title": "LS Customs vs. Department of Revenue",
+      "type": "Fiscal",
+      "status": "Actif",
+      "client_id": "cli-008",
+      "lead_id": "avocat_marcus",
+      "created_at": "2024-02-28",
+      "updated_at": "2026-03-11",
+      "description": "Contestation des impositions fiscales"
+    },
+    {
+      "id": "HC-2024-BEN001",
+      "title": "Benny's Motorworks - Litiges Contractuels",
+      "type": "Commercial",
+      "status": "Actif",
+      "client_id": "cli-009",
+      "lead_id": "avocat_victoria",
+      "created_at": "2024-04-05",
+      "updated_at": "2026-03-11",
+      "description": "Différends commerciaux avec fournisseurs"
+    }
+  ],
+  "documents": [
+    {
+      "id": "HC-2024-0001",
+      "case_id": "HC-2024-MA001",
+      "title": "Conclusions Préliminaires - État vs. Madrazo",
+      "content": "CONCLUSIONS PRÉLIMINAIRES\n\nM. Martin Madrazo est poursuivi pour les faits suivants:\n- Fraude fiscale aggravée\n- Blanchiment de capitaux\n- Réception de biens volés\n\nPièces justificatives annexées au présent dossier.",
+      "category": "Conclusions",
+      "status": "Signé",
+      "current_version": 1,
+      "versions": [
+        {
+          "version": 1,
+          "file_url": "/api/files/HC-2024-0001",
+          "created_at": "2024-01-20",
+          "created_by": "reed_noxwood",
+          "change_note": "Version initiale"
+        }
+      ],
+      "signatures": [
+        {
+          "user_id": "reed_noxwood",
+          "signed_at": "2024-02-15T10:30:00Z",
+          "role": "Associé"
+        }
+      ],
+      "created_at": "2024-01-20",
+      "updated_at": "2024-02-15",
+      "shared_with": ["cli-001"],
+      "shared_by": "reed_noxwood",
+      "shared_at": "2024-02-15"
+    },
+    {
+      "id": "HC-2024-0002",
+      "case_id": "HC-2024-MA001",
+      "title": "Preuves Financières et Documents Comptables",
+      "content": "PIÈCES JUSTIFICATIVES FINANCIÈRES\n\nLes documents suivants constituent des preuves de l'activité frauduleuse:\n1. Relevés bancaires pour période 2023-2024\n2. Déclarations fiscales falsifiées\n3. Transferts internationaux suspects\n\nTous les documents originaux sont conservés en archivage.",
+      "category": "Conclusions",
+      "status": "Validé",
+      "current_version": 2,
+      "versions": [
+        {
+          "version": 2,
+          "file_url": "/api/files/HC-2024-0002",
+          "created_at": "2024-02-20",
+          "created_by": "reed_noxwood",
+          "change_note": "Ajout de pièces supplémentaires"
+        },
+        {
+          "version": 1,
+          "file_url": "/api/files/HC-2024-0002-v1",
+          "created_at": "2024-02-01",
+          "created_by": "avocat_elena",
+          "change_note": "Version initiale"
+        }
+      ],
+      "signatures": [],
+      "created_at": "2024-02-01",
+      "updated_at": "2024-02-20",
+      "shared_with": ["cli-001"],
+      "shared_by": "reed_noxwood",
+      "shared_at": "2024-02-20"
+    },
+    {
+      "id": "HC-2024-0003",
+      "case_id": "HC-2024-LS001",
+      "title": "Mémoire d'Appel - LS Customs",
+      "content": "MÉMOIRE D'APPEL\n\nLS Customs conteste les décisions du département des revenus relatives aux impositions exercice 2024.\n\nArguments:\n1. Calcul erroné des bases imposables\n2. Application incorrecte des réductions d'impôt\n3. Intérêts de retard injustifiés\n\nDemande d'annulation et restitution des sommes versées.",
+      "category": "Requête",
+      "status": "Brouillon",
+      "current_version": 1,
+      "versions": [
+        {
+          "version": 1,
+          "file_url": "/api/files/HC-2024-0003",
+          "created_at": "2026-03-10",
+          "created_by": "avocat_marcus",
+          "change_note": "Version initiale"
+        }
+      ],
+      "signatures": [],
+      "created_at": "2026-03-10",
+      "updated_at": "2026-03-10",
+      "shared_with": ["cli-008"],
+      "shared_by": "avocat_marcus",
+      "shared_at": "2026-03-10"
+    },
+    {
+      "id": "HC-2024-0004",
+      "case_id": "HC-2024-BEN001",
+      "title": "Convention de Résolution - Benny's",
+      "content": "CONVENTION DE RÉSOLUTION DES LITIGES\n\nEntre Benny's Motorworks et ses fournisseurs:\n\n1. Reconnaissance des dettes de part et d'autre\n2. Calendrier de paiement révisé\n3. Renonciation aux intérêts de retard\n4. Engagement de bonne foi pour futures relations commerciales",
+      "category": "Convention",
+      "status": "Validé",
+      "current_version": 1,
+      "versions": [
+        {
+          "version": 1,
+          "file_url": "/api/files/HC-2024-0004",
+          "created_at": "2026-03-05",
+          "created_by": "avocat_victoria",
+          "change_note": "Version initiale"
+        }
+      ],
+      "signatures": [],
+      "created_at": "2026-03-05",
+      "updated_at": "2026-03-05",
+      "shared_with": ["cli-009"],
+      "shared_by": "avocat_victoria",
+      "shared_at": "2026-03-05"
+    }
+  ],
   "evidence": [],
   "tasks": [],
   "hearings": [],
@@ -492,6 +636,58 @@
       "metadata": {
         "name": "test"
       }
+    },
+    {
+      "id": "LOG-2024-021501",
+      "timestamp": "2024-02-15T10:30:00Z",
+      "user_id": "reed_noxwood",
+      "user_name": "Reed Noxwood",
+      "action": "Partage document avec 1 client(s)",
+      "target_type": "Document",
+      "target_id": "HC-2024-0001",
+      "metadata": {
+        "shared_with_count": 1,
+        "title": "Conclusions Préliminaires - État vs. Madrazo"
+      }
+    },
+    {
+      "id": "LOG-2024-021502",
+      "timestamp": "2024-02-20T14:00:00Z",
+      "user_id": "reed_noxwood",
+      "user_name": "Reed Noxwood",
+      "action": "Partage document avec 1 client(s)",
+      "target_type": "Document",
+      "target_id": "HC-2024-0002",
+      "metadata": {
+        "shared_with_count": 1,
+        "title": "Preuves Financières et Documents Comptables"
+      }
+    },
+    {
+      "id": "LOG-2026-030501",
+      "timestamp": "2026-03-05T16:00:00Z",
+      "user_id": "avocat_victoria",
+      "user_name": "Victoria Cole",
+      "action": "Partage document avec 1 client(s)",
+      "target_type": "Document",
+      "target_id": "HC-2024-0004",
+      "metadata": {
+        "shared_with_count": 1,
+        "title": "Convention de Résolution - Benny's"
+      }
+    },
+    {
+      "id": "LOG-2026-031001",
+      "timestamp": "2026-03-10T15:30:00Z",
+      "user_id": "avocat_marcus",
+      "user_name": "Marcus Vane",
+      "action": "Partage document avec 1 client(s)",
+      "target_type": "Document",
+      "target_id": "HC-2024-0003",
+      "metadata": {
+        "shared_with_count": 1,
+        "title": "Mémoire d'Appel - LS Customs"
+      }
     }
   ],
   "conflictChecks": [
@@ -535,6 +731,76 @@
       "sender_id": "admin_avocat",
       "content": "jdueb",
       "timestamp": "2026-03-10T17:46:20.786Z"
+    },
+    {
+      "id": "MSG-CLI-001-001",
+      "type": "client",
+      "client_id": "cli-001",
+      "sender_id": "reed_noxwood",
+      "sender_name": "Reed Noxwood",
+      "content": "Bienvenue sur votre portail sécurisé. Vous retrouverez ici vos dossiers actifs et les documents partagés par nos équipes.",
+      "is_read": true,
+      "created_at": "2024-01-15T09:00:00Z"
+    },
+    {
+      "id": "MSG-CLI-001-002",
+      "type": "client",
+      "client_id": "cli-001",
+      "sender_id": "reed_noxwood",
+      "sender_name": "Reed Noxwood",
+      "content": "Nous avons finalisé les conclusions préliminaires pour votre dossier. Vous pouvez les consulter dans l'onglet Documents.",
+      "is_read": true,
+      "created_at": "2024-02-15T14:30:00Z"
+    },
+    {
+      "id": "MSG-CLI-001-003",
+      "type": "client",
+      "client_id": "cli-001",
+      "sender_id": "reed_noxwood",
+      "sender_name": "Reed Noxwood",
+      "content": "Une audience est prévue pour le 26 mai à 9h00. Merci de confirmer votre présence.",
+      "is_read": false,
+      "created_at": "2026-03-11T10:00:00Z"
+    },
+    {
+      "id": "MSG-CLI-008-001",
+      "type": "client",
+      "client_id": "cli-008",
+      "sender_id": "avocat_marcus",
+      "sender_name": "Marcus Vane",
+      "content": "Bienvenue sur votre portail client. Vous pouvez consulter l'avancée de votre dossier à tout moment.",
+      "is_read": true,
+      "created_at": "2024-02-28T08:00:00Z"
+    },
+    {
+      "id": "MSG-CLI-008-002",
+      "type": "client",
+      "client_id": "cli-008",
+      "sender_id": "avocat_marcus",
+      "sender_name": "Marcus Vane",
+      "content": "Le mémoire d'appel a été rédigé et est actuellement en relecture. Nous vous le partagerons dès sa validation.",
+      "is_read": true,
+      "created_at": "2026-03-10T15:45:00Z"
+    },
+    {
+      "id": "MSG-CLI-009-001",
+      "type": "client",
+      "client_id": "cli-009",
+      "sender_id": "avocat_victoria",
+      "sender_name": "Victoria Cole",
+      "content": "Bienvenue Benny's Motorworks! Vous avez accès à votre portail sécurisé de suivi des dossiers.",
+      "is_read": true,
+      "created_at": "2024-04-05T10:00:00Z"
+    },
+    {
+      "id": "MSG-CLI-009-002",
+      "type": "client",
+      "client_id": "cli-009",
+      "sender_id": "avocat_victoria",
+      "sender_name": "Victoria Cole",
+      "content": "Bonne nouvelle! La convention de résolution a été validée et signée par tous les tiers.",
+      "is_read": false,
+      "created_at": "2026-03-05T16:20:00Z"
     }
   ]
 }
