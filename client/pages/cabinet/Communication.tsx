@@ -29,6 +29,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import { legalStore } from '@/lib/legal-store';
 import { useLegalStore } from '@/hooks/useLegalStore';
 import { Message } from '@shared/api';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 const Communication = () => {
   const store = useLegalStore();
@@ -37,9 +50,48 @@ const Communication = () => {
   const [activeChannelName, setActiveChannelName] = React.useState("Pôle Pénal");
   const [isDM, setIsDM] = React.useState(false);
   const [message, setMessage] = React.useState("");
+  const [showAnnouncementModal, setShowAnnouncementModal] = React.useState(false);
+  const [announcements, setAnnouncements] = React.useState<any[]>([]);
+  const [newAnnouncement, setNewAnnouncement] = React.useState({
+    title: '',
+    content: '',
+    priority: 'normal' as 'high' | 'normal' | 'low'
+  });
 
   const chatMessages = store.getMessages(activeChannelId);
   const staff = store.getStaff();
+
+  const handleCreateAnnouncement = () => {
+    if (!newAnnouncement.title || !newAnnouncement.content || !user) return;
+
+    const announcement = {
+      id: `ANN-${Date.now()}`,
+      title: newAnnouncement.title,
+      content: newAnnouncement.content,
+      priority: newAnnouncement.priority,
+      author_id: user.id,
+      author_name: user.name,
+      created_at: new Date().toISOString(),
+      read_by: [user.id]
+    };
+
+    setAnnouncements([announcement, ...announcements]);
+
+    store.logAction({
+      id: `LOG-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      user_id: user.id,
+      user_name: user.name,
+      action: 'Création annonce interne',
+      target_type: 'Announcement',
+      target_id: announcement.id,
+      metadata: { title: announcement.title }
+    });
+
+    toast.success('Annonce créée et envoyée à tous les collaborateurs');
+    setShowAnnouncementModal(false);
+    setNewAnnouncement({ title: '', content: '', priority: 'normal' });
+  };
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,7 +237,13 @@ const Communication = () => {
                  </div>
                )}
                <div className="h-6 w-px bg-slate-100 mx-2" />
-               <Button variant="ghost" size="icon" className="text-slate-400 hover:text-[#c1a461]">
+               <Button
+                 onClick={() => setShowAnnouncementModal(true)}
+                 variant="ghost"
+                 size="icon"
+                 className="text-slate-400 hover:text-[#c1a461]"
+                 title="Créer une annonce"
+               >
                  <Bell className="w-5 h-5" />
                </Button>
             </div>
@@ -244,6 +302,74 @@ const Communication = () => {
             </div>
           </form>
         </div>
+
+        {/* Announcement Creation Modal */}
+        <Dialog open={showAnnouncementModal} onOpenChange={setShowAnnouncementModal}>
+          <DialogContent className="max-w-2xl bg-white rounded-[32px] p-10 border-none shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Créer une Annonce Interne</DialogTitle>
+              <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                Tous les collaborateurs recevront cette annonce instantanément
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 my-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Titre</Label>
+                <Input
+                  value={newAnnouncement.title}
+                  onChange={(e) => setNewAnnouncement({...newAnnouncement, title: e.target.value})}
+                  placeholder="EX: RÉUNION D'ÉQUIPE - IMPORTANT..."
+                  className="bg-slate-50 border-none rounded-xl h-12 text-sm font-bold uppercase"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Message</Label>
+                <Textarea
+                  value={newAnnouncement.content}
+                  onChange={(e) => setNewAnnouncement({...newAnnouncement, content: e.target.value})}
+                  placeholder="RÉDIGEZ LE CONTENU DE VOTRE ANNONCE..."
+                  className="bg-slate-50 border-none rounded-xl min-h-[200px] text-sm font-medium"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Niveau de Priorité</Label>
+                <Select
+                  value={newAnnouncement.priority}
+                  onValueChange={(val) => setNewAnnouncement({...newAnnouncement, priority: val as any})}
+                >
+                  <SelectTrigger className="bg-slate-50 border-none rounded-xl h-12">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Basse priorité</SelectItem>
+                    <SelectItem value="normal">Priorité normale</SelectItem>
+                    <SelectItem value="high">Haute priorité (Urgent)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="ghost"
+                onClick={() => setShowAnnouncementModal(false)}
+                className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleCreateAnnouncement}
+                disabled={!newAnnouncement.title || !newAnnouncement.content}
+                className="bg-[#0a0f18] text-white text-[10px] font-black uppercase tracking-widest h-12 px-8 rounded-xl shadow-xl"
+              >
+                Publier l'Annonce
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
   );
 };
