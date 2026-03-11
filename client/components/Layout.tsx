@@ -83,7 +83,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 emergencyMode ? "bg-red-600 border-red-500 animate-pulse" : "bg-primary border-primary"
               )}>
                 <img
-                  src="/placeholder.svg"
+                  src="https://cdn.builder.io/api/v1/image/assets%2F4e331a0ce80644199f9cae8c33fdc854%2F600291090c3f4dfba93193e69d252af7?format=webp&width=800&height=1200"
                   alt="San Andreas Seal"
                   className="w-10 h-10 md:w-14 md:h-14 opacity-90 group-hover:opacity-100"
                 />
