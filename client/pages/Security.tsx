@@ -47,23 +47,32 @@ export default function Security() {
           <ShieldAlert className="w-full h-full" />
         </div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl space-y-6">
-            <h1 className={cn(
-              "text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none border-l-8 pl-8 transition-colors",
-              emergencyMode ? "border-red-600" : "border-secondary"
-            )}>
-              {emergencyMode ? "ÉTAT D'URGENCE" : "Sécurité"} <br /> <span className={cn("transition-colors", emergencyMode ? "text-red-500" : "text-secondary")}>
-                {emergencyMode ? "NATIONAL" : "& Ordre Public"}
-              </span>
-            </h1>
-            <p className={cn(
-              "text-xl md:text-2xl font-medium leading-relaxed max-w-2xl uppercase tracking-tight transition-colors",
-              emergencyMode ? "text-red-300" : "text-slate-300"
-            )}>
-              {emergencyMode
-                ? "DÉPLOIEMENT IMMÉDIAT DES FORCES DE SÉCURITÉ. TOUS LES SERVICES SONT SOUS COMMANDEMENT DIRECT DU CABINET."
-                : "Protéger, Servir et Maintenir la Paix Civile à travers l'État de San Andreas."}
-            </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="max-w-3xl space-y-6">
+              <h1 className={cn(
+                "text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none border-l-8 pl-8 transition-colors",
+                emergencyMode ? "border-red-600" : "border-secondary"
+              )}>
+                {emergencyMode ? "ÉTAT D'URGENCE" : "Sécurité"} <br /> <span className={cn("transition-colors", emergencyMode ? "text-red-500" : "text-secondary")}>
+                  {emergencyMode ? "NATIONAL" : "& Ordre Public"}
+                </span>
+              </h1>
+              <p className={cn(
+                "text-xl md:text-2xl font-medium leading-relaxed max-w-2xl uppercase tracking-tight transition-colors",
+                emergencyMode ? "text-red-300" : "text-slate-300"
+              )}>
+                {emergencyMode
+                  ? "DÉPLOIEMENT IMMÉDIAT DES FORCES DE SÉCURITÉ. TOUS LES SERVICES SONT SOUS COMMANDEMENT DIRECT DU CABINET."
+                  : "Protéger, Servir et Maintenir la Paix Civile à travers l'État de San Andreas."}
+              </p>
+            </div>
+            <div className="hidden lg:block">
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2F4e331a0ce80644199f9cae8c33fdc854%2Fb35afc6ca05d4598bd3f540c9b832fe2?format=webp&width=800&height=1200"
+                alt="Officier de Sécurité Los Santos"
+                className="w-full h-auto object-contain drop-shadow-2xl"
+              />
+            </div>
           </div>
         </div>
       </div>
