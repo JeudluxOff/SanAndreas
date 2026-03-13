@@ -45,13 +45,13 @@ export default function Security() {
       )}>
         {/* Background Image */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60"
           style={{
             backgroundImage: "url('https://cdn.builder.io/api/v1/image/assets%2F4e331a0ce80644199f9cae8c33fdc854%2Fb35afc6ca05d4598bd3f540c9b832fe2?format=webp&width=800&height=1200')"
           }}
         />
-        {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1B365D] via-[#1B365D]/70 to-transparent" />
+        {/* Subtle overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#1B365D]/40 via-transparent to-transparent" />
 
         <div className="absolute inset-0 bg-white/5 opacity-10 pointer-events-none transform rotate-45 scale-150">
           <ShieldAlert className="w-full h-full" />
