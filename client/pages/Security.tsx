@@ -51,7 +51,7 @@ export default function Security() {
           }}
         />
         {/* Subtle overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1B365D]/40 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#1B365D]/0 via-transparent to-transparent" />
 
         <div className="absolute inset-0 bg-white/5 opacity-10 pointer-events-none transform rotate-45 scale-150">
           <ShieldAlert className="w-full h-full" />
