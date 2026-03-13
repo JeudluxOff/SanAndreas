@@ -199,9 +199,9 @@ export default function Security() {
             </div>
             
             <div className="relative aspect-square md:aspect-video bg-slate-900 rounded-[2rem] shadow-2xl overflow-hidden border-8 border-white group">
-              <img 
-                src="/placeholder.svg" 
-                alt="Map" 
+              <img
+                src="https://images.pexels.com/photos/16124523/pexels-photo-16124523.jpeg"
+                alt="Map"
                 className="w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-1000"
               />
               <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center space-y-6">

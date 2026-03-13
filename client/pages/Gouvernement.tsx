@@ -27,7 +27,7 @@ export default function Gouvernement() {
   ).map(e => ({
     role: e.role,
     name: e.name,
-    image: e.image || "/placeholder.svg",
+    image: e.image || "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg",
     description: e.description || `Membre officiel du Gouvernement de San Andreas au sein du service ${e.service}.`,
     icon: roleToIcon[e.role] || <UserCheck className="w-5 h-5" />
   }));
@@ -37,7 +37,7 @@ export default function Gouvernement() {
       <div className="bg-[#0a0f18] py-32 text-white relative overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
-            src="https://cdn.builder.io/api/v1/image/assets%2F4e331a0ce80644199f9cae8c33fdc854%2F5dcbd39c6c4842bdb3d0af4c134475de?format=webp&width=800&height=1200"
+            src="https://images.pexels.com/photos/35720257/pexels-photo-35720257.jpeg"
             alt="San Andreas Skyline"
             className="w-full h-full object-cover opacity-30"
           />

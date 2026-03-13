@@ -398,7 +398,7 @@
       "status": "En service",
       "email": "r.noxwood@np.sa",
       "joinDate": "Jan 2018",
-      "image": "/placeholder.svg",
+      "image": "https://images.pexels.com/photos/35720257/pexels-photo-35720257.jpeg",
       "description": "Fondateur historique du cabinet Noxwood & Partner."
     },
     {
@@ -420,7 +420,7 @@
       "status": "En service",
       "email": "e.rodriguez@sa.gov",
       "joinDate": "Fév 2024",
-      "image": "/placeholder.svg",
+      "image": "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg",
       "description": "Porte-parole officielle du Gouvernement, assurant une communication transparente avec le public."
     },
     {
@@ -431,7 +431,7 @@
       "status": "Hors service",
       "email": "j.teller@sa.gov",
       "joinDate": "Mar 2024",
-      "image": "/placeholder.svg",
+      "image": "https://images.pexels.com/photos/16124523/pexels-photo-16124523.jpeg",
       "description": "Coordonne les forces de l'ordre pour garantir un environnement sûr à tous les citoyens."
     },
     {
@@ -442,7 +442,7 @@
       "status": "En service",
       "email": "t.vercetti@sa.gov",
       "joinDate": "Mar 2024",
-      "image": "/placeholder.svg",
+      "image": "https://images.pexels.com/photos/15084326/pexels-photo-15084326.jpeg",
       "description": "Veille à l'équité du système judiciaire et au respect rigoureux des lois de l'État."
     },
     {
@@ -453,7 +453,7 @@
       "status": "En service",
       "email": "f.clinton@sa.gov",
       "joinDate": "Avr 2024",
-      "image": "/placeholder.svg",
+      "image": "https://images.pexels.com/photos/35720257/pexels-photo-35720257.jpeg",
       "description": "Gère les finances publiques avec rigueur pour assurer la stabilité économique à long terme."
     },
     {
@@ -464,7 +464,7 @@
       "status": "En service",
       "email": "l.davis@sa.gov",
       "joinDate": "Mai 2024",
-      "image": "/placeholder.svg",
+      "image": "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg",
       "description": "Soutient le développement du commerce et protège les droits des travailleurs de l'État."
     },
     {
@@ -475,7 +475,7 @@
       "status": "En service",
       "email": "j.frost@sa.gov",
       "joinDate": "Jan 2024",
-      "image": "/placeholder.svg",
+      "image": "https://images.pexels.com/photos/16124523/pexels-photo-16124523.jpeg",
       "description": "Dévoué à l'amélioration de la santé publique et au soutien des services sociaux."
     }
   ],
@@ -1322,19 +1322,19 @@
       "date": "15 Mai 2024",
       "category": "Sécurité",
       "title": "Inauguration du nouveau centre de formation du LSPD à Mission Row.",
-      "image": "/placeholder.svg"
+      "image": "https://images.pexels.com/photos/16124523/pexels-photo-16124523.jpeg"
     },
     {
       "date": "12 Mai 2024",
       "category": "Économie",
       "title": "Publication du rapport trimestriel sur la croissance économique de Los Santos.",
-      "image": "/placeholder.svg"
+      "image": "https://images.pexels.com/photos/35720257/pexels-photo-35720257.jpeg"
     },
     {
       "date": "10 Mai 2024",
       "category": "Justice",
       "title": "Nomination de trois nouveaux juges à la Cour Supérieure de San Andreas.",
-      "image": "/placeholder.svg"
+      "image": "https://images.pexels.com/photos/15084326/pexels-photo-15084326.jpeg"
     }
   ],
   "priorities": [

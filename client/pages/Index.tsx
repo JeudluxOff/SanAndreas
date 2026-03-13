@@ -41,7 +41,7 @@ export default function Index() {
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000"
           style={{
-            backgroundImage: "url('/placeholder.svg')",
+            backgroundImage: "url('https://images.pexels.com/photos/35720257/pexels-photo-35720257.jpeg')",
             transform: emergencyMode ? 'scale(1.1)' : 'scale(1)'
           }}
         />
@@ -116,9 +116,9 @@ export default function Index() {
           <div className="flex flex-col lg:flex-row items-center gap-16">
             <div className="w-full lg:w-1/2 relative group">
               <div className="absolute -inset-4 bg-secondary/10 rounded-lg transform rotate-2 group-hover:rotate-1 transition-transform" />
-              <img 
-                src="/placeholder.svg" 
-                alt="Governor of San Andreas" 
+              <img
+                src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg"
+                alt="Governor of San Andreas"
                 className="relative rounded-lg shadow-2xl border-8 border-white object-cover aspect-[4/5] w-full"
               />
               <div className="absolute -bottom-8 -right-8 bg-primary p-8 rounded-lg shadow-xl hidden md:block border-t-4 border-secondary">
