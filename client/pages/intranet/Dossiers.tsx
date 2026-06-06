@@ -113,21 +113,16 @@ const Dossiers = () => {
                     <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter border-slate-200">
                       {dossier.service_name}
                     </Badge>
-                    {dossier.confidential && (
-                      <Badge className="bg-red-600 text-white text-[9px] font-black uppercase flex items-center gap-1">
-                        <Lock className="w-2.5 h-2.5" /> Confidentiel
-                      </Badge>
-                    )}
                   </div>
                   <h3 className="text-lg font-extrabold text-slate-900 uppercase tracking-tight leading-none group-hover:text-primary transition-colors">
                     {dossier.title}
                   </h3>
                   <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> Mis à jour: {dossier.date}
+                      <Clock className="w-3 h-3" /> Créé: {dossier.creationDate ? new Date(dossier.creationDate).toLocaleDateString('fr-FR') : 'N/A'}
                     </span>
                     <span className="flex items-center gap-1">
-                      <Users className="w-3 h-3" /> Membres: 3
+                      <Users className="w-3 h-3" /> Membres: {dossier.participants?.length || 0}
                     </span>
                   </div>
                 </div>

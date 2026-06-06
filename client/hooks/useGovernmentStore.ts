@@ -1,10 +1,10 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import { governmentStore } from '@/lib/government-store';
 
 export const useGovernmentStore = () => {
-  const [, setTick] = React.useState(0);
+  const [, setTick] = useState(0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     return governmentStore.subscribe(() => {
       setTick(t => t + 1);
     });
