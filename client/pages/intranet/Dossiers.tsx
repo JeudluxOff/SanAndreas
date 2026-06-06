@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { 
-  FolderOpen, 
-  Search, 
-  Filter, 
-  Plus, 
+import {
+  FolderOpen,
+  Search,
+  Filter,
+  Plus,
   ChevronRight,
   ChevronLeft,
   Clock,
@@ -11,8 +11,7 @@ import {
   AlertTriangle,
   Users,
   Eye,
-  ArrowUpDown,
-  Lock
+  ArrowUpDown
 } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
 import { Link } from "react-router-dom";
@@ -32,14 +31,18 @@ const Dossiers = () => {
   const mockDossiers = store.getGlobalDossiers();
 
   const filteredDossiers = mockDossiers.filter(dossier => {
-    const matchesSearch = (dossier.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          dossier.id.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+    const title = dossier.title ?? "";
+    const id = dossier.id ?? "";
+    const acl = dossier.acl ?? [];
+
+    const matchesSearch = (title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          id.toLowerCase().includes(searchTerm.toLowerCase()));
+
     // RBAC Visibility Rules
     const isGovernor = user?.role === 'gouverneur';
     const isOwner = dossier.service_id === user?.service_id;
-    const inACL = user?.id && dossier.acl.includes(user.id);
-    
+    const inACL = user?.id ? acl.includes(user.id) : false;
+
     return matchesSearch && (isGovernor || isOwner || inACL);
   });
 

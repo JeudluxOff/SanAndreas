@@ -40,7 +40,14 @@ class GovernmentStoreManager {
 
   constructor() {
     const saved = localStorage.getItem(STORE_KEY);
-    this.data = saved ? JSON.parse(saved) : INITIAL_DATA;
+    try {
+      const parsed = saved ? JSON.parse(saved) : null;
+      // Validate that parsed data has workspaces structure
+      this.data = (parsed && parsed.workspaces) ? parsed : INITIAL_DATA;
+    } catch (error) {
+      console.warn('Failed to parse stored government data, using defaults:', error);
+      this.data = INITIAL_DATA;
+    }
     this.initSync();
   }
 
