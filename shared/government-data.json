@@ -582,6 +582,18 @@
   ],
   "auditLogs": [
     {
+      "id": "1782642668118",
+      "timestamp": "2026-06-28T10:31:08.118Z",
+      "user_id": "system",
+      "user_name": "Système",
+      "role": "none",
+      "service_id": "none",
+      "action": "Connexion réussie",
+      "metadata": {
+        "username": "admin"
+      }
+    },
+    {
       "id": "1782641840751",
       "timestamp": "2026-06-28T10:17:20.751Z",
       "user_id": "admin",
