@@ -582,6 +582,18 @@
   ],
   "auditLogs": [
     {
+      "id": "1782641637823",
+      "timestamp": "2026-06-28T10:13:57.823Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Tentative accès dossier non autorisé",
+      "metadata": {
+        "dossier_id": "DOS-SEC-1056"
+      }
+    },
+    {
       "id": "1782641633152",
       "timestamp": "2026-06-28T10:13:53.152Z",
       "user_id": "admin",
