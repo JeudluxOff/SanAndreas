@@ -1,11 +1,11 @@
 import React from 'react';
-import { 
-  FileText, 
-  Search, 
-  Plus, 
-  Filter, 
-  MoreVertical, 
-  ChevronRight, 
+import {
+  FileText,
+  Search,
+  Plus,
+  Filter,
+  MoreVertical,
+  ChevronRight,
   Lock,
   Download,
   FileCheck,
@@ -19,7 +19,8 @@ import {
   FileEdit,
   History,
   Archive,
-  Trash2
+  Trash2,
+  Share2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
