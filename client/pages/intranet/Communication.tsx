@@ -1,28 +1,5 @@
 import { useState } from "react";
-import { 
-  MessageSquare, 
-  Send, 
-  Users, 
-  Hash, 
-  Search, 
-  MoreVertical, 
-  Plus, 
-  AtSign, 
-  Paperclip, 
-  Smile, 
-  Bell, 
-  ShieldAlert, 
-  CheckCircle2,
-  Clock,
-  ArrowRight,
-  Settings,
-  User as UserIcon,
-  Filter,
-  FileText,
-  Volume2,
-  ChevronLeft,
-  ChevronRight
-} from "lucide-react";
+import { MessageSquare, Send, Users, Hash, Search, MoveVertical as MoreVertical, Plus, AtSign, Paperclip, Smile, Bell, ShieldAlert, CircleCheck as CheckCircle2, Clock, ArrowRight, Settings, User as UserIcon, ListFilter as Filter, FileText, Volume2, ChevronLeft, ChevronRight } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -44,6 +21,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useAuth, ServiceID } from "@/contexts/AuthContext";
 import { useGovernmentStore } from "@/hooks/useGovernmentStore";
+import { GovUserAccess, isGovernmentAdmin, isGovernmentGovernor, canAccessGovernmentChannel } from '@/lib/government-access';
+import { GovDivisionId, GOV_CHANNELS } from '@/lib/government-rbac';
 
 const allChannels = [
   { id: 'general', name: 'annonces-officielles', type: 'announcement', icon: <Volume2 className="w-4 h-4" />, service_id: 'CABINET' as ServiceID },
@@ -66,6 +45,15 @@ const Communication = () => {
   const { user, canAccessService, hasPermission, logAction, updateStatus } = useAuth();
   const store = useGovernmentStore();
 
+  const govAccess: GovUserAccess | null = user ? {
+    id: user.id,
+    roleTechnique: (user.govRoleTechnique || 'employee') as any,
+    primaryDivision: (user.govPrimaryDivision || 'administration_generale') as GovDivisionId,
+    secondaryDivisions: (user.govSecondaryDivisions || []) as GovDivisionId[],
+    permissions: (user.govPermissions || []) as any[],
+    status: user.govStatus || 'actif',
+  } : null;
+
   const statusColors = {
     available: 'bg-emerald-500',
     busy: 'bg-red-500',
@@ -80,9 +68,17 @@ const Communication = () => {
     offline: 'Hors service'
   };
 
-  const visibleChannels = allChannels.filter(channel =>
-    channel.id === 'general' || canAccessService(channel.service_id)
-  );
+  const visibleChannels = allChannels.filter(channel => {
+    if (isGovernmentAdmin(govAccess) || isGovernmentGovernor(govAccess)) return true;
+    if (channel.id === 'general') return true;
+    // Use division-based check via the gov RBAC system
+    const matchingGovChannel = GOV_CHANNELS.find(gc => gc.id === channel.id || gc.name.toLowerCase().includes(channel.name.replace(/-/g, ' ').toLowerCase()));
+    if (matchingGovChannel) {
+      return canAccessGovernmentChannel(govAccess, matchingGovChannel);
+    }
+    // Fallback to old service-based check
+    return canAccessService(channel.service_id);
+  });
 
   const [activeChannel, setActiveChannel] = useState(visibleChannels[0]);
   const [message, setMessage] = useState("");

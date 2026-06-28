@@ -5,12 +5,10 @@ import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Shield, Scale, HeartPulse, Building2, Landmark, 
-  MessageSquare, Users, Briefcase, ArrowRight,
-  ShieldAlert, UserCheck, Search, Filter, Lock
-} from "lucide-react";
+import { Shield, Scale, HeartPulse, Building2, Landmark, MessageSquare, Users, Briefcase, ArrowRight, ShieldAlert, UserCheck, Search, ListFilter as Filter, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GovUserAccess, isGovernmentAdmin, isGovernmentGovernor, getGovernmentAccessibleDivisions } from '@/lib/government-access';
+import { GovDivisionId, DIVISION_TO_WORKSPACE_MAP } from '@/lib/government-rbac';
 
 const workspaces = [
   {
@@ -100,6 +98,28 @@ export default function Workspaces() {
   const store = useGovernmentStore();
   const workspacesData = store.getWorkspaces();
 
+  const govAccess: GovUserAccess | null = user ? {
+    id: user.id,
+    roleTechnique: (user.govRoleTechnique || 'employee') as any,
+    primaryDivision: (user.govPrimaryDivision || 'administration_generale') as GovDivisionId,
+    secondaryDivisions: (user.govSecondaryDivisions || []) as GovDivisionId[],
+    permissions: (user.govPermissions || []) as any[],
+    status: user.govStatus || 'actif',
+  } : null;
+
+  const accessibleWorkspaceIds = new Set<string>();
+  if (isGovernmentAdmin(govAccess) || isGovernmentGovernor(govAccess)) {
+    workspaces.forEach(ws => accessibleWorkspaceIds.add(ws.id));
+  } else {
+    const divisions = getGovernmentAccessibleDivisions(govAccess);
+    divisions.forEach(div => {
+      const wsId = DIVISION_TO_WORKSPACE_MAP[div];
+      if (wsId) accessibleWorkspaceIds.add(wsId);
+    });
+  }
+
+  const visibleWorkspaces = workspaces.filter(ws => accessibleWorkspaceIds.has(ws.id));
+
   return (
     <IntranetLayout>
       <div className="space-y-8">
@@ -128,7 +148,7 @@ export default function Workspaces() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {workspaces.map((workspace) => {
+          {visibleWorkspaces.map((workspace) => {
             const hasAccess = canAccessService(workspace.id);
             const dynamicData = workspacesData[workspace.id.toLowerCase()];
             const membersCount = dynamicData?.members || workspace.members;
@@ -194,7 +214,7 @@ export default function Workspaces() {
               <div className="space-y-4 text-center md:text-left">
                  <h2 className="text-3xl font-black uppercase tracking-tighter">Coordination Inter-Départementale</h2>
                  <p className="text-slate-400 font-medium max-w-xl text-sm leading-relaxed">
-                    Le portail intranet centralise les ressources pour les {workspaces.length} services de l'État de San Andreas, assurant une collaboration efficace et sécurisée.
+                    Le portail intranet centralise les ressources pour les {visibleWorkspaces.length} services de l'État de San Andreas, assurant une collaboration efficace et sécurisée.
                  </p>
               </div>
               <div className="flex flex-wrap justify-center gap-8">

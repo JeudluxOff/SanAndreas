@@ -42,11 +42,12 @@ import Workspace from "@/pages/intranet/Workspace";
 import Workspaces from "@/pages/intranet/Workspaces";
 import Calendar from "@/pages/intranet/Calendar";
 import HR from "@/pages/intranet/HR";
+import EmployeeDetail from "@/pages/intranet/EmployeeDetail";
 import AuditLogs from "@/pages/intranet/AuditLogs";
 import Communication from "@/pages/intranet/Communication";
 import LegalIntranetLayout from "@/pages/cabinet/intranet/LegalIntranetLayout";
 import AdminPublish from "@/pages/AdminPublish";
-import { ProtectedRoute, PermissionRoute } from "@/components/RouteGuards";
+import { ProtectedRoute, PermissionRoute, GovernmentIntranetRoute } from "@/components/RouteGuards";
 
 export const AppRoutes = () => (
   <Routes>
@@ -103,25 +104,28 @@ export const AppRoutes = () => (
     } />
 
     {/* Intranet Protected Routes */}
-    <Route 
-      path="/intranet/*" 
+    <Route
+      path="/intranet/*"
       element={
         <ProtectedRoute>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/documents" element={<Documents />} />
-            <Route path="/dossiers" element={<Dossiers />} />
-            <Route path="/dossiers/:id" element={<DossierDetail />} />
-            <Route path="/workspace/:serviceId" element={<Workspace />} />
-            <Route path="/workspaces" element={<Workspaces />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/logs" element={<AuditLogs />} />
-            <Route path="/hr" element={<HR />} />
-            <Route path="/communication" element={<Communication />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <GovernmentIntranetRoute>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/documents" element={<Documents />} />
+              <Route path="/dossiers" element={<Dossiers />} />
+              <Route path="/dossiers/:id" element={<DossierDetail />} />
+              <Route path="/workspace/:serviceId" element={<Workspace />} />
+              <Route path="/workspaces" element={<Workspaces />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/logs" element={<AuditLogs />} />
+              <Route path="/hr" element={<HR />} />
+              <Route path="/hr/:employeeId" element={<EmployeeDetail />} />
+              <Route path="/communication" element={<Communication />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </GovernmentIntranetRoute>
         </ProtectedRoute>
-      } 
+      }
     />
 
     {/* Fallback */}

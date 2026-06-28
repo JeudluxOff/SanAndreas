@@ -1,29 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Shield, 
-  LayoutDashboard, 
-  FileText, 
-  FolderOpen, 
-  Users, 
-  MessageSquare, 
-  Calendar, 
-  Settings, 
-  LogOut, 
-  Menu,
-  X,
-  ArrowLeft,
-  Home,
-  Bell,
-  Search,
-  ChevronRight,
-  User,
-  Activity,
-  Briefcase,
-  ShieldAlert,
-  Edit2
-} from 'lucide-react';
+import { Shield, LayoutDashboard, FileText, FolderOpen, Users, MessageSquare, Calendar, Settings, LogOut, Menu, X, ArrowLeft, Chrome as Home, Bell, Search, ChevronRight, User, Activity, Briefcase, ShieldAlert, CreditCard as Edit2 } from 'lucide-react';
 import { useAuth, Role, Permission, ServiceID, UserStatus } from '@/contexts/AuthContext';
+import { GovUserAccess, canAccessHRPage, canAccessLogsPage, getGovernmentAccessibleDivisions, isGovernmentAdmin, isGovernmentGovernor } from '@/lib/government-access';
+import { GOV_DIVISION_LABELS, GOV_DIVISION_COLORS, GovDivisionId, GOV_DIVISIONS } from '@/lib/government-rbac';
 import { useGovernmentStore } from '@/hooks/useGovernmentStore';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
@@ -83,6 +63,14 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { user, logout, hasPermission, canAccessService, updateStatus, updateUser, emergencyMode, toggleEmergencyMode } = useAuth();
   const store = useGovernmentStore();
+  const govAccess: GovUserAccess | null = user ? {
+    id: user.id,
+    roleTechnique: (user.govRoleTechnique || 'employee') as any,
+    primaryDivision: (user.govPrimaryDivision || 'administration_generale') as GovDivisionId,
+    secondaryDivisions: (user.govSecondaryDivisions || []) as GovDivisionId[],
+    permissions: (user.govPermissions || []) as any[],
+    status: user.govStatus || 'actif',
+  } : null;
   const [isSyncing, setIsSyncing] = React.useState(false);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const [newName, setNewName] = useState('');
@@ -130,13 +118,19 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
     offline: 'Hors service'
   };
 
-  const filteredSidebarItems = sidebarItems.filter(item =>
-    !item.permission || hasPermission(item.permission)
-  );
+  const filteredSidebarItems = sidebarItems.filter(item => {
+    if (!item.permission) return true;
+    if (isGovernmentAdmin(govAccess) || isGovernmentGovernor(govAccess)) return true;
+    if (item.path === '/intranet/hr') return canAccessHRPage(govAccess);
+    if (item.path === '/intranet/logs') return canAccessLogsPage(govAccess);
+    return hasPermission(item.permission);
+  });
 
-  const visibleWorkspaces = workspaceServices.filter(ws =>
-    canAccessService(ws.id)
-  );
+  const accessibleDivisions = getGovernmentAccessibleDivisions(govAccess);
+  const visibleWorkspaces = workspaceServices.filter(ws => {
+    if (isGovernmentAdmin(govAccess) || isGovernmentGovernor(govAccess)) return true;
+    return canAccessService(ws.id);
+  });
 
   const handleLogout = () => {
     logout();

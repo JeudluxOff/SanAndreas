@@ -2,6 +2,8 @@ import {
   GovernmentStore,
   GovWorkspace,
   GovEmployee,
+  GovEmployeeV2,
+  GovHRHistoryEntry,
   GovTask,
   GovAnnouncement,
   GovDocument,
@@ -16,9 +18,215 @@ import { notifyDraftChange } from '@/contexts/AdminContext';
 const STORE_KEY = 'gov_intranet_store';
 const SYNC_INTERVAL = 5000; // Poll every 5 seconds
 
+const SEED_EMPLOYEES_V2: GovEmployeeV2[] = [
+  {
+    id: 'emp-admin',
+    username: 'admin',
+    firstName: 'Systeme',
+    lastName: 'Administrateur',
+    matricule: 'ADM-001',
+    grade: 'Administrateur',
+    functionTitle: 'Administrateur Global',
+    roleTechnique: 'admin',
+    primaryDivision: 'cabinet_gouverneur',
+    secondaryDivisions: [],
+    permissions: ['create_documents','edit_documents','validate_documents','publish_announcements','create_cases','edit_cases','archive_cases','manage_employees','edit_divisions','view_logs','manage_settings','activate_emergency_mode'],
+    status: 'actif',
+    email: 'admin@gov.sa',
+    phone: '555-0001',
+    joinedAt: '2023-01-01',
+    lastLogin: '2026-06-28',
+    notes: 'Compte administrateur principal',
+    gradeHistory: [],
+    hrHistory: []
+  },
+  {
+    id: 'emp-governor',
+    username: 'governor',
+    firstName: 'Ethan',
+    lastName: 'Hunt',
+    matricule: 'GOV-001',
+    avatar: 'https://cdn.builder.io/api/v1/image/assets%2F4e331a0ce80644199f9cae8c33fdc854%2F825f5b55d529428f974a0a1f35c96f2c?format=webp&width=800&height=1200',
+    grade: 'Gouverneur',
+    functionTitle: 'Gouverneur de San Andreas',
+    roleTechnique: 'governor',
+    primaryDivision: 'cabinet_gouverneur',
+    secondaryDivisions: [],
+    permissions: ['create_documents','edit_documents','validate_documents','publish_announcements','create_cases','edit_cases','archive_cases','manage_employees','edit_divisions','view_logs','manage_settings','activate_emergency_mode'],
+    status: 'actif',
+    email: 'governor@gov.sa',
+    phone: '555-0010',
+    joinedAt: '2023-03-15',
+    lastLogin: '2026-06-28',
+    gradeHistory: [],
+    hrHistory: []
+  },
+  {
+    id: 'emp-rh',
+    username: 'rh',
+    firstName: 'Marie',
+    lastName: 'Dupont',
+    matricule: 'RH-001',
+    grade: 'Responsable',
+    functionTitle: 'Directrice des Ressources Humaines',
+    roleTechnique: 'hr',
+    primaryDivision: 'ressources_humaines',
+    secondaryDivisions: ['administration_generale'],
+    permissions: ['manage_employees','edit_divisions','view_logs','create_documents','edit_documents'],
+    status: 'actif',
+    email: 'rh@gov.sa',
+    phone: '555-0020',
+    joinedAt: '2023-06-01',
+    lastLogin: '2026-06-27',
+    gradeHistory: [],
+    hrHistory: []
+  },
+  {
+    id: 'emp-sec-securite',
+    username: 'sec_securite',
+    firstName: 'Jackson',
+    lastName: 'Teller',
+    matricule: 'SEC-001',
+    grade: 'Directeur',
+    functionTitle: 'Secretaire a la Securite',
+    roleTechnique: 'manager',
+    primaryDivision: 'securite_publique',
+    secondaryDivisions: ['lspd', 'lssd'],
+    permissions: ['create_documents','edit_documents','validate_documents','create_cases','edit_cases','archive_cases','view_logs'],
+    status: 'actif',
+    email: 'securite@gov.sa',
+    phone: '555-0030',
+    joinedAt: '2023-04-10',
+    lastLogin: '2026-06-28',
+    gradeHistory: [],
+    hrHistory: []
+  },
+  {
+    id: 'emp-press',
+    username: 'press',
+    firstName: 'Lamar',
+    lastName: 'Davis',
+    matricule: 'PR-001',
+    grade: 'Responsable',
+    functionTitle: 'Attache de Presse',
+    roleTechnique: 'employee',
+    primaryDivision: 'presse',
+    secondaryDivisions: [],
+    permissions: ['publish_announcements','create_documents','edit_documents'],
+    status: 'actif',
+    email: 'presse@gov.sa',
+    phone: '555-0040',
+    joinedAt: '2023-09-01',
+    lastLogin: '2026-06-27',
+    gradeHistory: [],
+    hrHistory: []
+  },
+  {
+    id: 'emp-sec-sante',
+    username: 'sec_sante',
+    firstName: 'Julian',
+    lastName: 'Frost',
+    matricule: 'SAN-001',
+    grade: 'Directeur',
+    functionTitle: 'Secretaire a la Sante',
+    roleTechnique: 'manager',
+    primaryDivision: 'sante',
+    secondaryDivisions: ['sams'],
+    permissions: ['create_documents','edit_documents','validate_documents','create_cases','edit_cases','view_logs'],
+    status: 'actif',
+    email: 'sante@gov.sa',
+    phone: '555-0050',
+    joinedAt: '2023-05-20',
+    lastLogin: '2026-06-26',
+    gradeHistory: [],
+    hrHistory: []
+  },
+  {
+    id: 'emp-sec-tresor',
+    username: 'sec_tresor',
+    firstName: 'Franklin',
+    lastName: 'Clinton',
+    matricule: 'TRE-001',
+    grade: 'Directeur',
+    functionTitle: 'Secretaire au Tresor',
+    roleTechnique: 'manager',
+    primaryDivision: 'tresor_economie',
+    secondaryDivisions: [],
+    permissions: ['create_documents','edit_documents','validate_documents','create_cases','edit_cases','view_logs'],
+    status: 'actif',
+    email: 'tresor@gov.sa',
+    phone: '555-0060',
+    joinedAt: '2023-07-01',
+    lastLogin: '2026-06-28',
+    gradeHistory: [],
+    hrHistory: []
+  },
+  {
+    id: 'emp-agent-lspd',
+    username: 'agent_lspd',
+    firstName: 'Mike',
+    lastName: 'Torres',
+    matricule: 'LSPD-042',
+    grade: 'Agent',
+    functionTitle: 'Agent de terrain LSPD',
+    roleTechnique: 'employee',
+    primaryDivision: 'lspd',
+    secondaryDivisions: [],
+    permissions: ['create_documents','create_cases'],
+    status: 'actif',
+    email: 'torres@lspd.sa',
+    phone: '555-0070',
+    joinedAt: '2024-01-15',
+    lastLogin: '2026-06-28',
+    gradeHistory: [],
+    hrHistory: []
+  },
+  {
+    id: 'emp-agent-fib',
+    username: 'agent_fib',
+    firstName: 'Sarah',
+    lastName: 'Connor',
+    matricule: 'FIB-007',
+    grade: 'Superviseur',
+    functionTitle: 'Agent Special FIB',
+    roleTechnique: 'manager',
+    primaryDivision: 'fib',
+    secondaryDivisions: ['interieur'],
+    permissions: ['create_documents','edit_documents','create_cases','edit_cases','archive_cases','view_logs'],
+    status: 'actif',
+    email: 'connor@fib.sa',
+    phone: '555-0080',
+    joinedAt: '2023-11-01',
+    lastLogin: '2026-06-27',
+    gradeHistory: [],
+    hrHistory: []
+  },
+  {
+    id: 'emp-suspendu',
+    username: 'suspendu_test',
+    firstName: 'Jean',
+    lastName: 'Probleme',
+    matricule: 'SUS-001',
+    grade: 'Employe',
+    functionTitle: 'Agent suspendu',
+    roleTechnique: 'employee',
+    primaryDivision: 'administration_generale',
+    secondaryDivisions: [],
+    permissions: [],
+    status: 'suspendu',
+    email: 'suspendu@gov.sa',
+    joinedAt: '2024-03-01',
+    lastLogin: '2026-05-01',
+    notes: 'Suspendu pour faute professionnelle',
+    gradeHistory: [],
+    hrHistory: [{ id: 'hr-1', date: '2026-05-01', author: 'Marie Dupont', action: 'Suspension', oldValue: 'actif', newValue: 'suspendu' }]
+  }
+];
+
 const INITIAL_DATA: GovernmentStore = {
   workspaces: {},
   employees: [],
+  employeesV2: SEED_EMPLOYEES_V2,
   globalAnnouncements: [],
   calendarEvents: [],
   notifications: [],
@@ -44,7 +252,15 @@ class GovernmentStoreManager {
     try {
       const parsed = saved ? JSON.parse(saved) : null;
       // Validate that parsed data has workspaces structure
-      this.data = (parsed && parsed.workspaces) ? parsed : INITIAL_DATA;
+      if (parsed && parsed.workspaces) {
+        this.data = parsed;
+        // Ensure employeesV2 exists (migration from old data)
+        if (!this.data.employeesV2 || this.data.employeesV2.length === 0) {
+          this.data.employeesV2 = SEED_EMPLOYEES_V2;
+        }
+      } else {
+        this.data = INITIAL_DATA;
+      }
     } catch (error) {
       console.warn('Failed to parse stored government data, using defaults:', error);
       this.data = INITIAL_DATA;
@@ -433,6 +649,113 @@ class GovernmentStoreManager {
 
   getPendingValidationsCount() {
     return this.getGlobalDocuments().filter(d => d.status === 'À valider' || d.status === 'En relecture').length;
+  }
+
+  // ===== Employees V2 =====
+  getEmployeesV2(): GovEmployeeV2[] {
+    return this.data.employeesV2 || SEED_EMPLOYEES_V2;
+  }
+
+  getEmployeeById(id: string): GovEmployeeV2 | undefined {
+    return this.getEmployeesV2().find(e => e.id === id);
+  }
+
+  getEmployeeByUsername(username: string): GovEmployeeV2 | undefined {
+    return this.getEmployeesV2().find(e => e.username === username);
+  }
+
+  createEmployeeV2(employee: GovEmployeeV2): boolean {
+    const existing = this.getEmployeesV2();
+    if (existing.find(e => e.username === employee.username)) return false;
+    if (existing.find(e => e.matricule === employee.matricule)) return false;
+    this.data.employeesV2 = [employee, ...existing];
+    this.save();
+    return true;
+  }
+
+  updateEmployeeV2(id: string, updates: Partial<GovEmployeeV2>, author?: string): boolean {
+    const employees = this.getEmployeesV2();
+    const index = employees.findIndex(e => e.id === id);
+    if (index === -1) return false;
+
+    const old = employees[index];
+    const updated = { ...old, ...updates };
+
+    // Security: cannot remove last active admin
+    if (old.roleTechnique === 'admin' && updates.roleTechnique && updates.roleTechnique !== 'admin') {
+      const activeAdmins = employees.filter(e => e.roleTechnique === 'admin' && e.status === 'actif');
+      if (activeAdmins.length <= 1) return false;
+    }
+
+    if (old.roleTechnique === 'admin' && updates.status && (updates.status === 'suspendu' || updates.status === 'archive')) {
+      const activeAdmins = employees.filter(e => e.roleTechnique === 'admin' && e.status === 'actif');
+      if (activeAdmins.length <= 1) return false;
+    }
+
+    employees[index] = updated;
+    this.data.employeesV2 = employees;
+    this.save();
+    return true;
+  }
+
+  addHRHistoryEntry(employeeId: string, entry: GovHRHistoryEntry): void {
+    const employees = this.getEmployeesV2();
+    const index = employees.findIndex(e => e.id === employeeId);
+    if (index === -1) return;
+    if (!employees[index].hrHistory) employees[index].hrHistory = [];
+    employees[index].hrHistory!.unshift(entry);
+    this.data.employeesV2 = employees;
+    this.save();
+  }
+
+  suspendEmployee(id: string, author: string): boolean {
+    const emp = this.getEmployeeById(id);
+    if (!emp) return false;
+    if (emp.roleTechnique === 'admin') {
+      const activeAdmins = this.getEmployeesV2().filter(e => e.roleTechnique === 'admin' && e.status === 'actif');
+      if (activeAdmins.length <= 1) return false;
+    }
+    const success = this.updateEmployeeV2(id, { status: 'suspendu' });
+    if (success) {
+      this.addHRHistoryEntry(id, {
+        id: `hr-${Date.now()}`,
+        date: new Date().toISOString(),
+        author,
+        action: 'Suspension',
+        oldValue: emp.status,
+        newValue: 'suspendu'
+      });
+    }
+    return success;
+  }
+
+  archiveEmployeeV2(id: string, author: string): boolean {
+    const emp = this.getEmployeeById(id);
+    if (!emp) return false;
+    if (emp.roleTechnique === 'admin') {
+      const activeAdmins = this.getEmployeesV2().filter(e => e.roleTechnique === 'admin' && e.status === 'actif');
+      if (activeAdmins.length <= 1) return false;
+    }
+    const success = this.updateEmployeeV2(id, { status: 'archive' });
+    if (success) {
+      this.addHRHistoryEntry(id, {
+        id: `hr-${Date.now()}`,
+        date: new Date().toISOString(),
+        author,
+        action: 'Archivage',
+        oldValue: emp.status,
+        newValue: 'archive'
+      });
+    }
+    return success;
+  }
+
+  isUsernameAvailable(username: string): boolean {
+    return !this.getEmployeesV2().find(e => e.username === username);
+  }
+
+  isMatriculeAvailable(matricule: string): boolean {
+    return !this.getEmployeesV2().find(e => e.matricule === matricule);
   }
 }
 

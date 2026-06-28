@@ -48,6 +48,7 @@ export interface GovDocument {
   author: string;
   archived: boolean;
   acl: string[];
+  division_id?: string;
 }
 
 export interface GovDossier {
@@ -62,6 +63,7 @@ export interface GovDossier {
   description?: string;
   progress?: number;
   participants?: { id: string, name: string, role: string }[];
+  division_id?: string;
 }
 
 export interface GovEmployee {
@@ -172,6 +174,7 @@ export interface GovPriority {
 export interface GovernmentStore {
   workspaces: Record<string, GovWorkspace>;
   employees: GovEmployee[];
+  employeesV2: GovEmployeeV2[];
   globalAnnouncements: GovAnnouncement[];
   calendarEvents: GovCalendarEvent[];
   notifications: GovNotification[];
@@ -185,4 +188,43 @@ export interface GovernmentStore {
   news: GovNews[];
   priorities: GovPriority[];
   emergencyMode: boolean;
+}
+
+export interface GovEmployeeV2 {
+  id: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  matricule: string;
+  avatar?: string;
+  grade: string;
+  functionTitle: string;
+  roleTechnique: string;
+  primaryDivision: string;
+  secondaryDivisions: string[];
+  permissions: string[];
+  status: string;
+  phone?: string;
+  email?: string;
+  joinedAt?: string;
+  lastLogin?: string;
+  notes?: string;
+  gradeHistory?: GovGradeHistoryEntry[];
+  hrHistory?: GovHRHistoryEntry[];
+}
+
+export interface GovGradeHistoryEntry {
+  date: string;
+  oldGrade: string;
+  newGrade: string;
+  author: string;
+}
+
+export interface GovHRHistoryEntry {
+  id: string;
+  date: string;
+  author: string;
+  action: string;
+  oldValue: string;
+  newValue: string;
 }

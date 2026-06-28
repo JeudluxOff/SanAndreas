@@ -1,27 +1,5 @@
 import { useState } from "react";
-import { 
-  FileText, 
-  Search, 
-  Filter, 
-  Plus, 
-  Download, 
-  Printer, 
-  Share2, 
-  MoreVertical,
-  ChevronRight,
-  ChevronLeft,
-  FileCheck,
-  FileClock,
-  FileLock2,
-  FileWarning,
-  FolderOpen,
-  Users,
-  Eye,
-  Edit3,
-  Trash2,
-  ArrowUpDown,
-  ShieldCheck
-} from "lucide-react";
+import { FileText, Search, ListFilter as Filter, Plus, Download, Printer, Share2, MoveVertical as MoreVertical, ChevronRight, ChevronLeft, FileCheck, FileClock, FileLock2, FileWarning, FolderOpen, Users, Eye, CreditCard as Edit3, Trash2, ArrowUpDown, ShieldCheck } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -55,6 +33,8 @@ import { cn } from "@/lib/utils";
 
 import { useAuth, Permission, ServiceID } from "@/contexts/AuthContext";
 import { useGovernmentStore } from "@/hooks/useGovernmentStore";
+import { GovUserAccess, isGovernmentAdmin, isGovernmentGovernor, canAccessGovernmentDocument } from '@/lib/government-access';
+import { GovDivisionId } from '@/lib/government-rbac';
 
 const Documents = () => {
   const { user, hasPermission, logAction } = useAuth();
@@ -63,6 +43,15 @@ const Documents = () => {
   const [filterType, setFilterType] = useState("all");
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
+
+  const govAccess: GovUserAccess | null = user ? {
+    id: user.id,
+    roleTechnique: (user.govRoleTechnique || 'employee') as any,
+    primaryDivision: (user.govPrimaryDivision || 'administration_generale') as GovDivisionId,
+    secondaryDivisions: (user.govSecondaryDivisions || []) as GovDivisionId[],
+    permissions: (user.govPermissions || []) as any[],
+    status: user.govStatus || 'actif',
+  } : null;
 
   const documents = store.getGlobalDocuments();
 
@@ -82,12 +71,15 @@ const Documents = () => {
                           doc.id.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesType = (filterType === "all" || doc.type === filterType);
 
-    // RBAC Visibility Rules
-    const isGovernor = user?.role === 'gouverneur';
+    // Division-based RBAC
+    if (isGovernmentAdmin(govAccess) || isGovernmentGovernor(govAccess)) {
+      return matchesSearch && matchesType;
+    }
+    const canAccess = canAccessGovernmentDocument(govAccess, { division_id: doc.division_id });
     const isOwner = doc.service_id === user?.service_id;
     const inACL = user?.id && doc.acl.includes(user.id);
 
-    return matchesSearch && matchesType && (isGovernor || isOwner || inACL);
+    return matchesSearch && matchesType && (canAccess || isOwner || inACL);
   });
 
   const handleAction = (action: string, docTitle: string) => {

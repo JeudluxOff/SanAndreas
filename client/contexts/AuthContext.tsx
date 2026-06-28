@@ -7,6 +7,20 @@ import { AuthContext, AuthContextType } from './AuthContextInstance';
 export * from './AuthContextTypes';
 export { AuthContext };
 
+function getGovFieldsForUser(username: string) {
+  const emp = governmentStore.getEmployeeByUsername(username);
+  if (!emp) return {};
+  return {
+    govRoleTechnique: emp.roleTechnique,
+    govGrade: emp.grade,
+    govPrimaryDivision: emp.primaryDivision,
+    govSecondaryDivisions: emp.secondaryDivisions,
+    govPermissions: emp.permissions,
+    govStatus: emp.status,
+    govEmployeeId: emp.id,
+  };
+}
+
 const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   'gouverneur': [
     'intranet:view', 'dashboard:view', 'documents:view', 'documents:create', 'documents:edit', 'documents:delete', 'documents:submit_review', 'documents:approve_service', 'documents:approve_state', 'documents:sign', 'documents:publish', 'documents:archive',
@@ -188,8 +202,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check registered users first
     const regUser = registeredUsers[username];
     if (regUser && regUser.password === password) {
-      setUser(regUser.user);
-      localStorage.setItem('sa_gov_user', JSON.stringify(regUser.user));
+      // Check gov status for blockage
+      const govFields = getGovFieldsForUser(username);
+      if (govFields.govStatus === 'suspendu' || govFields.govStatus === 'archive') {
+        return false;
+      }
+      const userWithGov = { ...regUser.user, ...govFields };
+      setUser(userWithGov);
+      localStorage.setItem('sa_gov_user', JSON.stringify(userWithGov));
       logAction('Connexion réussie (Dynamic)', { username });
       return true;
     }
@@ -261,6 +281,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           service_name: 'Trésor & Commerce',
           grade: 'Secrétaire au Trésor'
         },
+        'rh': {
+          role: 'secretaire_etat_general',
+          service_id: 'ADMINISTRATION_GENERALE',
+          name: 'Marie Dupont',
+          service_name: 'Ressources Humaines',
+          grade: 'Directrice RH'
+        },
         'avocat': {
           role: 'avocat',
           service_id: 'JUSTICE',
@@ -297,6 +324,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const baseUser = mockUsers[username];
       if (baseUser) {
+        // Check if the government employee is suspended/archived
+        const govFields = getGovFieldsForUser(username);
+        if (govFields.govStatus === 'suspendu' || govFields.govStatus === 'archive') {
+          return false;
+        }
+
         const fullUser: User = {
           id: username,
           username,
@@ -308,7 +341,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           permissions: ROLE_PERMISSIONS[baseUser.role!],
           status: 'available',
           matricule: baseUser.matricule,
-          callsign: baseUser.callsign
+          callsign: baseUser.callsign,
+          avatar: baseUser.avatar,
+          ...govFields,
         };
 
         setUser(fullUser);

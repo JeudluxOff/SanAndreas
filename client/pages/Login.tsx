@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Shield, Lock, User as UserIcon, AlertCircle, Info, ArrowLeft } from "lucide-react";
+import { Shield, Lock, User as UserIcon, CircleAlert as AlertCircle, Info, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -161,6 +161,7 @@ const Login = () => {
                       <p><code className={cn("px-1 py-0.5 rounded", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200")}>sec_justice</code> (Just.)</p>
                       <p><code className={cn("px-1 py-0.5 rounded", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200")}>sec_sante</code> (Santé)</p>
                       <p><code className={cn("px-1 py-0.5 rounded", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200")}>sec_tresor</code> (Éco.)</p>
+                      <p><code className={cn("px-1 py-0.5 rounded", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200")}>rh</code> (RH)</p>
                     </div>
                   </div>
                 </div>

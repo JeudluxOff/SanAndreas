@@ -1,18 +1,5 @@
 import { useState } from "react";
-import {
-  FolderOpen,
-  Search,
-  Filter,
-  Plus,
-  ChevronRight,
-  ChevronLeft,
-  Clock,
-  CheckCircle2,
-  AlertTriangle,
-  Users,
-  Eye,
-  ArrowUpDown
-} from "lucide-react";
+import { FolderOpen, Search, ListFilter as Filter, Plus, ChevronRight, ChevronLeft, Clock, CircleCheck as CheckCircle2, TriangleAlert as AlertTriangle, Users, Eye, ArrowUpDown } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -22,11 +9,22 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useAuth, ServiceID } from "@/contexts/AuthContext";
 import { useGovernmentStore } from "@/hooks/useGovernmentStore";
+import { GovUserAccess, isGovernmentAdmin, isGovernmentGovernor, canAccessGovernmentCase } from '@/lib/government-access';
+import { GovDivisionId } from '@/lib/government-rbac';
 
 const Dossiers = () => {
   const { user, hasPermission, logAction } = useAuth();
   const store = useGovernmentStore();
   const [searchTerm, setSearchTerm] = useState("");
+
+  const govAccess: GovUserAccess | null = user ? {
+    id: user.id,
+    roleTechnique: (user.govRoleTechnique || 'employee') as any,
+    primaryDivision: (user.govPrimaryDivision || 'administration_generale') as GovDivisionId,
+    secondaryDivisions: (user.govSecondaryDivisions || []) as GovDivisionId[],
+    permissions: (user.govPermissions || []) as any[],
+    status: user.govStatus || 'actif',
+  } : null;
 
   const mockDossiers = store.getGlobalDossiers();
 
@@ -38,12 +36,15 @@ const Dossiers = () => {
     const matchesSearch = (title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           id.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    // RBAC Visibility Rules
-    const isGovernor = user?.role === 'gouverneur';
+    // Division-based RBAC
+    if (isGovernmentAdmin(govAccess) || isGovernmentGovernor(govAccess)) {
+      return matchesSearch;
+    }
+    const canAccess = canAccessGovernmentCase(govAccess, { division_id: dossier.division_id });
     const isOwner = dossier.service_id === user?.service_id;
     const inACL = user?.id ? acl.includes(user.id) : false;
 
-    return matchesSearch && (isGovernor || isOwner || inACL);
+    return matchesSearch && (canAccess || isOwner || inACL);
   });
 
   return (
