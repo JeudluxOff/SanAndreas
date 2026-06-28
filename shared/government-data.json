@@ -582,6 +582,15 @@
   ],
   "auditLogs": [
     {
+      "id": "1782641595224",
+      "timestamp": "2026-06-28T10:13:15.224Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Signature officielle sur le document: Décret sur les subventions SAMS"
+    },
+    {
       "id": "1782641566478",
       "timestamp": "2026-06-28T10:12:46.478Z",
       "user_id": "admin",
