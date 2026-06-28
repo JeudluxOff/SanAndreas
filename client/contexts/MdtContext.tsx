@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { MdtUser, MdtPermission, MdtServiceId, MDT_ROLE_PERMISSIONS } from '@/lib/mdt-types';
 import { mdtStore } from '@/lib/mdt-store';
 
 interface MdtContextType {
   mdtUser: MdtUser | null;
   isMdtUser: boolean;
+  isLoading: boolean;
   hasMdtPermission: (perm: MdtPermission) => boolean;
   mdtLogout: () => void;
   updateMdtStatus: (status: MdtUser['status']) => void;
@@ -13,20 +14,24 @@ interface MdtContextType {
 const MdtContext = createContext<MdtContextType>({
   mdtUser: null,
   isMdtUser: false,
+  isLoading: false,
   hasMdtPermission: () => false,
   mdtLogout: () => {},
   updateMdtStatus: () => {},
 });
 
-export function MdtProvider({ children }: { children: React.ReactNode }) {
-  const [mdtUser, setMdtUser] = useState<MdtUser | null>(null);
-
-  useEffect(() => {
+function readStoredMdtUser(): MdtUser | null {
+  try {
     const saved = localStorage.getItem('sa_mdt_user');
-    if (saved) {
-      try { setMdtUser(JSON.parse(saved)); } catch { localStorage.removeItem('sa_mdt_user'); }
-    }
-  }, []);
+    if (saved) return JSON.parse(saved);
+  } catch {
+    localStorage.removeItem('sa_mdt_user');
+  }
+  return null;
+}
+
+export function MdtProvider({ children }: { children: React.ReactNode }) {
+  const [mdtUser, setMdtUser] = useState<MdtUser | null>(readStoredMdtUser);
 
   const hasMdtPermission = (perm: MdtPermission) => {
     if (!mdtUser) return false;
@@ -46,7 +51,7 @@ export function MdtProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <MdtContext.Provider value={{ mdtUser, isMdtUser: !!mdtUser, hasMdtPermission, mdtLogout, updateMdtStatus }}>
+    <MdtContext.Provider value={{ mdtUser, isMdtUser: !!mdtUser, isLoading: false, hasMdtPermission, mdtLogout, updateMdtStatus }}>
       {children}
     </MdtContext.Provider>
   );

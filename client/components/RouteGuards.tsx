@@ -54,8 +54,9 @@ export const GovernmentIntranetRoute = ({ children }: { children: React.ReactNod
 };
 
 export const MdtRoute = ({ children }: { children: React.ReactNode }) => {
-  const { mdtUser } = useMdt();
+  const { mdtUser, isLoading } = useMdt();
 
+  if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-[#080A0F] text-white font-bold">Chargement du terminal...</div>;
   if (!mdtUser) return <Navigate to="/login" replace />;
 
   return <>{children}</>;
