@@ -190,6 +190,14 @@ const Login = () => {
                             <p key={u}><code className={cn("px-1 py-0.5 rounded text-[10px]", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200 text-slate-700")}>{u}</code></p>
                           ))}
                         </div>
+                        <p className={cn("text-[9px] font-black uppercase tracking-widest mt-2 mb-1", emergencyMode ? "text-red-400" : "text-slate-400")}>
+                          MDT — Comptes Admin
+                        </p>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {['usss_admin', 'lspd_admin', 'fib_admin', 'lssd_admin', 'sams_admin'].map(u => (
+                            <p key={u}><code className={cn("px-1 py-0.5 rounded text-[10px]", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200 text-red-700 font-black")}>{u}</code></p>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>

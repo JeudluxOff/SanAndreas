@@ -76,4 +76,7 @@ export function buildMdtUser(username: string): MdtUser | null {
 }
 
 // MDT usernames that should redirect to /mdt after login
-export const MDT_USERNAMES = new Set(['usss', 'lspd', 'lssd', 'fib', 'sams', 'lsfd', 'mdt_admin']);
+export const MDT_USERNAMES = new Set([
+  'usss', 'lspd', 'lssd', 'fib', 'sams', 'lsfd', 'mdt_admin',
+  'usss_admin', 'lspd_admin', 'fib_admin', 'lssd_admin', 'sams_admin',
+]);
