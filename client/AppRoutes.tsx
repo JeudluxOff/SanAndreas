@@ -47,7 +47,38 @@ import AuditLogs from "@/pages/intranet/AuditLogs";
 import Communication from "@/pages/intranet/Communication";
 import LegalIntranetLayout from "@/pages/cabinet/intranet/LegalIntranetLayout";
 import AdminPublish from "@/pages/AdminPublish";
-import { ProtectedRoute, PermissionRoute, GovernmentIntranetRoute } from "@/components/RouteGuards";
+import { ProtectedRoute, PermissionRoute, GovernmentIntranetRoute, MdtRoute } from "@/components/RouteGuards";
+import { MdtLayout } from "@/components/MdtLayout";
+
+// MDT pages
+import MdtBureau from "@/pages/mdt/Bureau";
+import MdtDispatch from "@/pages/mdt/Dispatch";
+import MdtUnits from "@/pages/mdt/Units";
+import MdtHotspots from "@/pages/mdt/Hotspots";
+import MdtEffectifs from "@/pages/mdt/Effectifs";
+import MdtCitizens from "@/pages/mdt/Citizens";
+import MdtVehicles from "@/pages/mdt/Vehicles";
+import MdtProperties from "@/pages/mdt/Properties";
+import MdtWeapons from "@/pages/mdt/Weapons";
+import MdtReports from "@/pages/mdt/Reports";
+import MdtFines from "@/pages/mdt/Fines";
+import MdtInvestigations from "@/pages/mdt/Investigations";
+import MdtShootingReports from "@/pages/mdt/ShootingReports";
+import MdtWarrants from "@/pages/mdt/Warrants";
+import MdtBallistics from "@/pages/mdt/Ballistics";
+import MdtLab from "@/pages/mdt/Lab";
+import MdtSeizures from "@/pages/mdt/Seizures";
+import MdtVehicleSeizures from "@/pages/mdt/VehicleSeizures";
+import MdtBolo from "@/pages/mdt/Bolo";
+import MdtGangs from "@/pages/mdt/Gangs";
+import MdtEvidence from "@/pages/mdt/Evidence";
+import MdtAnnouncements from "@/pages/mdt/Announcements";
+import MdtBracelets from "@/pages/mdt/Bracelets";
+import MdtComplaints from "@/pages/mdt/Complaints";
+import MdtDepositions from "@/pages/mdt/Depositions";
+import MdtPenalCode from "@/pages/mdt/PenalCode";
+import MdtServiceHours from "@/pages/mdt/ServiceHours";
+import MdtSettings from "@/pages/mdt/Settings";
 
 export const AppRoutes = () => (
   <Routes>
@@ -125,6 +156,48 @@ export const AppRoutes = () => (
             </Routes>
           </GovernmentIntranetRoute>
         </ProtectedRoute>
+      }
+    />
+
+    {/* MDT Routes */}
+    <Route
+      path="/mdt/*"
+      element={
+        <MdtRoute>
+          <MdtLayout>
+            <Routes>
+              <Route path="/" element={<MdtBureau />} />
+              <Route path="/dispatch" element={<MdtDispatch />} />
+              <Route path="/units" element={<MdtUnits />} />
+              <Route path="/hotspots" element={<MdtHotspots />} />
+              <Route path="/effectifs" element={<MdtEffectifs />} />
+              <Route path="/citizens" element={<MdtCitizens />} />
+              <Route path="/vehicles" element={<MdtVehicles />} />
+              <Route path="/properties" element={<MdtProperties />} />
+              <Route path="/weapons" element={<MdtWeapons />} />
+              <Route path="/reports" element={<MdtReports />} />
+              <Route path="/fines" element={<MdtFines />} />
+              <Route path="/investigations" element={<MdtInvestigations />} />
+              <Route path="/shooting-reports" element={<MdtShootingReports />} />
+              <Route path="/warrants" element={<MdtWarrants />} />
+              <Route path="/ballistics" element={<MdtBallistics />} />
+              <Route path="/lab" element={<MdtLab />} />
+              <Route path="/seizures" element={<MdtSeizures />} />
+              <Route path="/vehicle-seizures" element={<MdtVehicleSeizures />} />
+              <Route path="/bolo" element={<MdtBolo />} />
+              <Route path="/gangs" element={<MdtGangs />} />
+              <Route path="/evidence" element={<MdtEvidence />} />
+              <Route path="/announcements" element={<MdtAnnouncements />} />
+              <Route path="/bracelets" element={<MdtBracelets />} />
+              <Route path="/complaints" element={<MdtComplaints />} />
+              <Route path="/depositions" element={<MdtDepositions />} />
+              <Route path="/penal-code" element={<MdtPenalCode />} />
+              <Route path="/service-hours" element={<MdtServiceHours />} />
+              <Route path="/settings" element={<MdtSettings />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </MdtLayout>
+        </MdtRoute>
       }
     />
 

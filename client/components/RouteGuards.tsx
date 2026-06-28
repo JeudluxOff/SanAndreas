@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate } from "react-router-dom";
 import { useAuth, Permission, ServiceID } from "@/contexts/AuthContext";
+import { useMdt } from "@/contexts/MdtContext";
 import { Shield, TriangleAlert as AlertTriangle } from 'lucide-react';
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -48,6 +49,14 @@ export const GovernmentIntranetRoute = ({ children }: { children: React.ReactNod
       </div>
     );
   }
+
+  return <>{children}</>;
+};
+
+export const MdtRoute = ({ children }: { children: React.ReactNode }) => {
+  const { mdtUser } = useMdt();
+
+  if (!mdtUser) return <Navigate to="/login" replace />;
 
   return <>{children}</>;
 };

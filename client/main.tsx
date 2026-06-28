@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AdminProvider } from "@/contexts/AdminContext";
+import { MdtProvider } from "@/contexts/MdtContext";
 import App from "@/App";
 
 const queryClient = new QueryClient();
@@ -19,11 +20,13 @@ root.render(
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <AdminProvider>
-          <Toaster />
-          <Sonner />
-          <App />
-        </AdminProvider>
+        <MdtProvider>
+          <AdminProvider>
+            <Toaster />
+            <Sonner />
+            <App />
+          </AdminProvider>
+        </MdtProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

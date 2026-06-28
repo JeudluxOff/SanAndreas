@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Shield, Lock, User as UserIcon, CircleAlert as AlertCircle, Info, ArrowLeft } from "lucide-react";
+import { Shield, Lock, User as UserIcon, CircleAlert as AlertCircle, Info, ArrowLeft, Monitor } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useMdt, buildMdtUser, MDT_USERNAMES } from "@/contexts/MdtContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
@@ -16,6 +17,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { login, emergencyMode } = useAuth();
+  const { mdtUser } = useMdt();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,6 +26,19 @@ const Login = () => {
     setError("");
 
     try {
+      // Check if this is an MDT user
+      if (MDT_USERNAMES.has(username) && password === 'admin') {
+        const mdtUserData = buildMdtUser(username);
+        if (mdtUserData) {
+          localStorage.setItem('sa_mdt_user', JSON.stringify(mdtUserData));
+          // Reload so MdtProvider picks up the new session
+          navigate('/mdt');
+          window.location.href = '/mdt';
+          return;
+        }
+      }
+
+      // Regular government / cabinet login
       const success = await login(username, password);
       if (success) {
         navigate("/intranet");
@@ -55,7 +70,7 @@ const Login = () => {
               "text-3xl font-extrabold tracking-tight uppercase transition-colors",
               emergencyMode ? "text-white" : "text-slate-900"
             )}>
-              {emergencyMode ? "PORTAIL DE CRISE" : "Portail Intranet"}
+              {emergencyMode ? "PORTAIL DE CRISE" : "Portail Unifié"}
             </h2>
             <p className={cn(
               "mt-2 text-sm font-medium uppercase tracking-widest transition-colors",
@@ -97,7 +112,7 @@ const Login = () => {
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="username">Identifiant Employé</Label>
+                  <Label htmlFor="username">Identifiant</Label>
                   <div className="relative">
                     <UserIcon className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                     <Input
@@ -146,22 +161,36 @@ const Login = () => {
               )}>
                 <div className="flex gap-3">
                   <Info className={cn("w-5 h-5 flex-shrink-0", emergencyMode ? "text-red-400" : "text-blue-600")} />
-                  <div className={cn("text-xs space-y-3", emergencyMode ? "text-red-200" : "text-slate-600")}>
+                  <div className={cn("text-xs space-y-3 w-full", emergencyMode ? "text-red-200" : "text-slate-600")}>
                     <p className={cn(
                       "font-bold uppercase border-b pb-1 text-[10px] tracking-widest",
                       emergencyMode ? "text-white border-red-800" : "text-slate-900 border-slate-200"
                     )}>Identifiants de Test (Mots de passe : admin)</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      <p><code className={cn("px-1 py-0.5 rounded", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200 text-blue-700")}>admin</code> (Accès Total)</p>
-                      <p><code className={cn("px-1 py-0.5 rounded", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200")}>governor</code> (Gov.)</p>
-                      <p><code className={cn("px-1 py-0.5 rounded", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200")}>lt_governor</code> (Lt.)</p>
-                      <p><code className={cn("px-1 py-0.5 rounded", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200")}>sec_etat</code> (Admin)</p>
-                      <p><code className={cn("px-1 py-0.5 rounded", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200")}>sec_securite</code> (Sécu.)</p>
-                      <p><code className={cn("px-1 py-0.5 rounded", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200")}>press</code> (Presse.)</p>
-                      <p><code className={cn("px-1 py-0.5 rounded", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200")}>sec_justice</code> (Just.)</p>
-                      <p><code className={cn("px-1 py-0.5 rounded", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200")}>sec_sante</code> (Santé)</p>
-                      <p><code className={cn("px-1 py-0.5 rounded", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200")}>sec_tresor</code> (Éco.)</p>
-                      <p><code className={cn("px-1 py-0.5 rounded", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200")}>rh</code> (RH)</p>
+
+                    <div className="space-y-3">
+                      {/* Gov */}
+                      <div>
+                        <p className={cn("text-[9px] font-black uppercase tracking-widest mb-1", emergencyMode ? "text-red-400" : "text-slate-400")}>
+                          Intranet Gouvernemental
+                        </p>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {['admin', 'governor', 'lt_governor', 'sec_etat', 'sec_securite', 'sec_justice', 'sec_sante', 'sec_tresor', 'press', 'rh'].map(u => (
+                            <p key={u}><code className={cn("px-1 py-0.5 rounded text-[10px]", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200 text-blue-700")}>{u}</code></p>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* MDT */}
+                      <div className={cn("border-t pt-2", emergencyMode ? "border-red-800" : "border-slate-200")}>
+                        <p className={cn("text-[9px] font-black uppercase tracking-widest mb-1 flex items-center gap-1", emergencyMode ? "text-red-400" : "text-slate-400")}>
+                          <Monitor className="w-3 h-3" /> MDT — Terminal Mobile
+                        </p>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {['usss', 'lspd', 'lssd', 'fib', 'lsfd', 'sams', 'mdt_admin'].map(u => (
+                            <p key={u}><code className={cn("px-1 py-0.5 rounded text-[10px]", emergencyMode ? "bg-red-800 text-white" : "bg-slate-200 text-slate-700")}>{u}</code></p>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
