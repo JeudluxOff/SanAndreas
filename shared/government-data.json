@@ -582,6 +582,15 @@
   ],
   "auditLogs": [
     {
+      "id": "1782641607343",
+      "timestamp": "2026-06-28T10:13:27.343Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Suppression sur le document: Arrêté préfectoral zone de sécurité"
+    },
+    {
       "id": "1782641605287",
       "timestamp": "2026-06-28T10:13:25.287Z",
       "user_id": "admin",
