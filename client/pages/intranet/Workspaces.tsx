@@ -100,9 +100,8 @@ export default function Workspaces() {
 
   const govAccess: GovUserAccess | null = user ? {
     id: user.id,
-    roleTechnique: (user.govRoleTechnique || 'employee') as any,
-    primaryDivision: (user.govPrimaryDivision || 'administration_generale') as GovDivisionId,
-    secondaryDivisions: (user.govSecondaryDivisions || []) as GovDivisionId[],
+    rolesTechniques: (user.govRolesTechniques || ['employee']) as any[],
+    divisions: (user.govDivisions || ['administration_generale']) as GovDivisionId[],
     permissions: (user.govPermissions || []) as any[],
     status: user.govStatus || 'actif',
   } : null;
@@ -219,9 +218,9 @@ export default function Workspaces() {
               </div>
               <div className="flex flex-wrap justify-center gap-8">
                  {[
-                    { label: "Utilisateurs actifs", value: "153" },
-                    { label: "Dossiers partagés", value: "2,482" },
-                    { label: "Procédures à jour", value: "124" }
+                    { label: "Employes actifs", value: store.getEmployeesV2().filter(e => e.status === 'actif').length.toString() },
+                    { label: "Dossiers en cours", value: store.getTotalDossiersCount().toString() },
+                    { label: "Documents actifs", value: store.getTotalDocumentsCount().toString() }
                  ].map((stat, idx) => (
                     <div key={idx} className="text-center space-y-1">
                        <span className="text-3xl font-black text-secondary tracking-tighter block">{stat.value}</span>

@@ -55,10 +55,9 @@ export interface User {
   access_method?: 'email_password' | 'token';
   token_expires_at?: string;
   // Government RBAC V2 fields
-  govRoleTechnique?: string;
+  govRolesTechniques?: string[];
+  govDivisions?: string[];
   govGrade?: string;
-  govPrimaryDivision?: string;
-  govSecondaryDivisions?: string[];
   govPermissions?: string[];
   govStatus?: string;
   govEmployeeId?: string;

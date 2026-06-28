@@ -199,9 +199,8 @@ export interface GovEmployeeV2 {
   avatar?: string;
   grade: string;
   functionTitle: string;
-  roleTechnique: string;
-  primaryDivision: string;
-  secondaryDivisions: string[];
+  rolesTechniques: string[];
+  divisions: string[];
   permissions: string[];
   status: string;
   phone?: string;

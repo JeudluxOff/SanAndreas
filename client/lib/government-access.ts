@@ -10,21 +10,20 @@ import {
 
 export interface GovUserAccess {
   id: string;
-  roleTechnique: GovRoleTechnique;
-  primaryDivision: GovDivisionId;
-  secondaryDivisions: GovDivisionId[];
+  rolesTechniques: GovRoleTechnique[];
+  divisions: GovDivisionId[];
   permissions: GovPermission[];
   status: string;
 }
 
 export function isGovernmentAdmin(user: GovUserAccess | null | undefined): boolean {
   if (!user) return false;
-  return user.roleTechnique === 'admin';
+  return user.rolesTechniques.includes('admin');
 }
 
 export function isGovernmentGovernor(user: GovUserAccess | null | undefined): boolean {
   if (!user) return false;
-  return user.roleTechnique === 'governor';
+  return user.rolesTechniques.includes('governor');
 }
 
 export function hasGovernmentPermission(user: GovUserAccess | null | undefined, permission: GovPermission): boolean {
@@ -37,7 +36,7 @@ export function hasGovernmentDivision(user: GovUserAccess | null | undefined, di
   if (!user) return false;
   if (isGovernmentAdmin(user)) return true;
   if (isGovernmentGovernor(user)) return true;
-  return user.primaryDivision === divisionId || user.secondaryDivisions.includes(divisionId);
+  return user.divisions.includes(divisionId);
 }
 
 export function canAccessGovernmentWorkspace(user: GovUserAccess | null | undefined, divisionId: GovDivisionId): boolean {
@@ -76,17 +75,14 @@ export function getGovernmentAccessibleDivisions(user: GovUserAccess | null | un
   if (isGovernmentAdmin(user) || isGovernmentGovernor(user)) {
     return Object.values(GOV_DIVISIONS);
   }
-  const divisions = new Set<GovDivisionId>();
-  divisions.add(user.primaryDivision);
-  user.secondaryDivisions.forEach(d => divisions.add(d));
-  return Array.from(divisions);
+  return [...new Set(user.divisions)];
 }
 
 export function canAccessHRPage(user: GovUserAccess | null | undefined): boolean {
   if (!user) return false;
   if (isGovernmentAdmin(user)) return true;
   if (isGovernmentGovernor(user)) return true;
-  if (user.roleTechnique === 'hr') return true;
+  if (user.rolesTechniques.includes('hr')) return true;
   return user.permissions.includes('manage_employees');
 }
 

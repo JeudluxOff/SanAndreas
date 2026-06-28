@@ -43,12 +43,14 @@ const Documents = () => {
   const [filterType, setFilterType] = useState("all");
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [sortAsc, setSortAsc] = useState(false);
+  const [createForm, setCreateForm] = useState({ title: "", type: "Rapport", content: "" });
 
   const govAccess: GovUserAccess | null = user ? {
     id: user.id,
-    roleTechnique: (user.govRoleTechnique || 'employee') as any,
-    primaryDivision: (user.govPrimaryDivision || 'administration_generale') as GovDivisionId,
-    secondaryDivisions: (user.govSecondaryDivisions || []) as GovDivisionId[],
+    rolesTechniques: (user.govRolesTechniques || ['employee']) as any[],
+    divisions: (user.govDivisions || ['administration_generale']) as GovDivisionId[],
     permissions: (user.govPermissions || []) as any[],
     status: user.govStatus || 'actif',
   } : null;
@@ -71,7 +73,6 @@ const Documents = () => {
                           doc.id.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesType = (filterType === "all" || doc.type === filterType);
 
-    // Division-based RBAC
     if (isGovernmentAdmin(govAccess) || isGovernmentGovernor(govAccess)) {
       return matchesSearch && matchesType;
     }
@@ -80,11 +81,53 @@ const Documents = () => {
     const inACL = user?.id && doc.acl.includes(user.id);
 
     return matchesSearch && matchesType && (canAccess || isOwner || inACL);
-  });
+  }).sort((a, b) => sortAsc
+    ? a.title.localeCompare(b.title)
+    : b.title.localeCompare(a.title)
+  );
 
   const handleAction = (action: string, docTitle: string) => {
     logAction(`${action} sur le document: ${docTitle}`);
-    // In a real app, this would trigger an API call to update doc status
+  };
+
+  const handleDownload = (doc: any) => {
+    const content = doc.content || `${doc.title}\n\nType: ${doc.type}\nStatut: ${doc.status}\nAuteur: ${doc.author}\nDate: ${doc.date}\n\nAucun contenu disponible.`;
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${doc.id}-${doc.title.replace(/\s+/g, '_')}.txt`;
+    link.click();
+    logAction('Telechargement document', { docId: doc.id, title: doc.title });
+  };
+
+  const handlePrintList = () => {
+    const printContent = filteredDocs.map(d => `${d.id} | ${d.title} | ${d.type} | ${d.status} | ${d.date}`).join('\n');
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.write(`<pre style="font-family:monospace;padding:20px">${printContent}</pre>`);
+      win.print();
+    }
+  };
+
+  const handleCreateDocument = () => {
+    if (!createForm.title.trim()) { alert("Titre requis"); return; }
+    const serviceId = user?.service_id || 'CABINET';
+    const doc = {
+      id: `DOC-${Date.now()}`,
+      title: createForm.title,
+      type: createForm.type,
+      content: createForm.content,
+      status: 'Brouillon',
+      date: new Date().toISOString().slice(0, 10),
+      author: user?.name || 'Systeme',
+      archived: false,
+      acl: [],
+      division_id: (user as any)?.govDivisions?.[0] || null,
+    };
+    store.createDocument(serviceId, doc);
+    logAction('Creation document', { id: doc.id, title: doc.title });
+    setShowCreateModal(false);
+    setCreateForm({ title: '', type: 'Rapport', content: '' });
   };
 
   return (
@@ -105,12 +148,12 @@ const Documents = () => {
           </div>
           <div className="flex items-center gap-2">
             {hasPermission('documents:create') && (
-              <Button className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold flex items-center gap-2">
+              <Button className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold flex items-center gap-2" onClick={() => setShowCreateModal(true)}>
                 <Plus className="w-4 h-4" />
                 Nouveau Document
               </Button>
             )}
-            <Button variant="outline" className="border-slate-300 font-bold flex items-center gap-2">
+            <Button variant="outline" className="border-slate-300 font-bold flex items-center gap-2" onClick={handlePrintList}>
               <Printer className="w-4 h-4" />
               Imprimer Liste
             </Button>
@@ -150,7 +193,7 @@ const Documents = () => {
                   <Filter className="w-4 h-4 mr-2" />
                   Filtres Avancés
                 </Button>
-                <Button variant="ghost" size="icon" className="h-10 w-10 border border-slate-200">
+                <Button variant="ghost" size="icon" className="h-10 w-10 border border-slate-200" onClick={() => setSortAsc(s => !s)} title={sortAsc ? "Z → A" : "A → Z"}>
                   <ArrowUpDown className="w-4 h-4" />
                 </Button>
               </div>
@@ -274,8 +317,8 @@ const Documents = () => {
                               )}
 
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem className="flex items-center gap-2">
-                                <Download className="w-4 h-4" /> Télécharger PDF
+                              <DropdownMenuItem className="flex items-center gap-2" onClick={() => handleDownload(documents.find(d => d.id === doc.id))}>
+                                <Download className="w-4 h-4" /> Telecharger
                               </DropdownMenuItem>
 
                               {hasPermission('documents:archive') && (
@@ -382,8 +425,8 @@ const Documents = () => {
 
               <DialogFooter className="flex justify-between items-center w-full">
                 <div className="flex gap-4">
-                  <Button variant="outline" size="sm" className="font-bold uppercase text-[10px] tracking-widest h-10 px-6 gap-2">
-                    <Download className="w-4 h-4" /> Télécharger PDF
+                  <Button variant="outline" size="sm" className="font-bold uppercase text-[10px] tracking-widest h-10 px-6 gap-2" onClick={() => handleDownload(documents.find(d => d.id === selectedDocId))}>
+                    <Download className="w-4 h-4" /> Telecharger
                   </Button>
                 </div>
                 <Button
@@ -395,6 +438,45 @@ const Documents = () => {
               </DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+      {/* Create Document Modal */}
+      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="uppercase font-black tracking-tight">Nouveau Document</DialogTitle>
+            <DialogDescription>Creez un nouveau document gouvernemental en brouillon.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-widest text-slate-500">Titre</label>
+              <Input placeholder="Titre du document" value={createForm.title} onChange={e => setCreateForm({ ...createForm, title: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-widest text-slate-500">Type</label>
+              <Select value={createForm.type} onValueChange={v => setCreateForm({ ...createForm, type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {['Rapport', 'Decret', 'Arrete', 'Mandat', 'Licence', 'Note Interne'].map(t => (
+                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-widest text-slate-500">Contenu (optionnel)</label>
+              <textarea
+                className="w-full h-32 border border-slate-200 rounded-lg p-3 text-sm font-medium resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+                placeholder="Contenu du document..."
+                value={createForm.content}
+                onChange={e => setCreateForm({ ...createForm, content: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateModal(false)} className="font-bold uppercase text-[10px]">Annuler</Button>
+            <Button onClick={handleCreateDocument} className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold uppercase text-[10px]">Creer le Document</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </IntranetLayout>

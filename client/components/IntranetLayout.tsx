@@ -65,9 +65,8 @@ export function IntranetLayout({ children }: { children: React.ReactNode }) {
   const store = useGovernmentStore();
   const govAccess: GovUserAccess | null = user ? {
     id: user.id,
-    roleTechnique: (user.govRoleTechnique || 'employee') as any,
-    primaryDivision: (user.govPrimaryDivision || 'administration_generale') as GovDivisionId,
-    secondaryDivisions: (user.govSecondaryDivisions || []) as GovDivisionId[],
+    rolesTechniques: (user.govRolesTechniques || ['employee']) as any[],
+    divisions: (user.govDivisions || ['administration_generale']) as GovDivisionId[],
     permissions: (user.govPermissions || []) as any[],
     status: user.govStatus || 'actif',
   } : null;

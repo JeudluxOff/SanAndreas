@@ -11,10 +11,9 @@ function getGovFieldsForUser(username: string) {
   const emp = governmentStore.getEmployeeByUsername(username);
   if (!emp) return {};
   return {
-    govRoleTechnique: emp.roleTechnique,
+    govRolesTechniques: emp.rolesTechniques,
+    govDivisions: emp.divisions,
     govGrade: emp.grade,
-    govPrimaryDivision: emp.primaryDivision,
-    govSecondaryDivisions: emp.secondaryDivisions,
     govPermissions: emp.permissions,
     govStatus: emp.status,
     govEmployeeId: emp.id,

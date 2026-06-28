@@ -1,40 +1,23 @@
-import {
-  Bell,
-  Calendar,
-  FileText,
-  FolderOpen,
-  MessageSquare,
-  PlusCircle,
-  Clock,
-  CheckCircle2,
-  AlertTriangle,
-  ChevronRight,
-  TrendingUp,
-  Activity,
-  User as UserIcon,
-  ShieldAlert,
-  Search,
-  Filter,
-  ArrowRight,
-  ArrowLeft
-} from "lucide-react";
+import { Bell, Calendar, FileText, FolderOpen, MessageSquare, CirclePlus as PlusCircle, Clock, CircleCheck as CheckCircle2, TriangleAlert as AlertTriangle, ChevronRight, TrendingUp, Activity, User as UserIcon, ShieldAlert, ArrowRight, ArrowLeft } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { UserStatus } from "@/contexts/AuthContext";
 import { useGovernmentStore } from "@/hooks/useGovernmentStore";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 const Dashboard = () => {
   const { user, hasPermission, logAction, updateStatus, emergencyMode } = useAuth();
   const store = useGovernmentStore();
+  const navigate = useNavigate();
 
   if (!user) return null;
 
@@ -63,9 +46,9 @@ const Dashboard = () => {
       title: d.title,
       status: d.status,
       service: ws.name,
-      date: '2024',
+      date: d.creationDate ? new Date(d.creationDate).toLocaleDateString('fr-FR') : '—',
       service_id: wsId.toUpperCase(),
-      acl: [] as string[]
+      acl: d.acl || [] as string[]
     }))
   ).filter(d => d.status !== 'Archivé');
 
@@ -82,10 +65,52 @@ const Dashboard = () => {
     return isGovernor || isSameService;
   });
 
+  const unreadCount = filteredNotifications.length;
+
+  const handleMarkAllRead = () => {
+    store.clearNotifications();
+    logAction('Marquer toutes les notifications comme lues');
+  };
+
+  const now = new Date();
+  const currentMonthLabel = format(now, 'MMMM yyyy', { locale: fr }).toUpperCase();
+
+  const shortcuts = [
+    {
+      icon: <FileText className="w-6 h-6" />,
+      label: 'Nouveau Document',
+      color: 'bg-blue-50 text-blue-600',
+      hoverColor: 'group-hover:bg-primary group-hover:text-white',
+      action: () => navigate('/intranet/documents'),
+      permission: 'documents:create',
+    },
+    {
+      icon: <PlusCircle className="w-6 h-6" />,
+      label: 'Créer Dossier',
+      color: 'bg-amber-50 text-amber-600',
+      hoverColor: 'group-hover:bg-primary group-hover:text-white',
+      action: () => navigate('/intranet/dossiers'),
+      permission: 'dossiers:create',
+    },
+    {
+      icon: <MessageSquare className="w-6 h-6" />,
+      label: 'Note Interne',
+      color: 'bg-emerald-50 text-emerald-600',
+      hoverColor: 'group-hover:bg-primary group-hover:text-white',
+      action: () => navigate('/intranet/communication'),
+    },
+    {
+      icon: <MessageSquare className="w-6 h-6" />,
+      label: 'Ouvrir Messagerie',
+      color: 'bg-slate-50 text-slate-600',
+      hoverColor: 'group-hover:bg-primary group-hover:text-white',
+      action: () => navigate('/intranet/communication'),
+    },
+  ];
+
   return (
     <IntranetLayout>
       <div className="space-y-8">
-        {/* Emergency Mode Alert */}
         {emergencyMode && (
           <Card className="bg-red-600 border-none shadow-2xl animate-pulse overflow-hidden relative">
             <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.1)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.1)_50%,rgba(255,255,255,0.1)_75%,transparent_75%,transparent)] bg-[length:40px_40px] opacity-20" />
@@ -108,7 +133,6 @@ const Dashboard = () => {
           </Card>
         )}
 
-        {/* Welcome Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight uppercase">Tableau de Bord</h1>
@@ -124,19 +148,25 @@ const Dashboard = () => {
               </Button>
             </Link>
             {hasPermission('dossiers:create') && (
-              <Button className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold rounded shadow-lg flex items-center gap-2 h-10 px-4 uppercase text-[10px] tracking-widest" onClick={() => logAction('Création nouveau dossier (interface)')}>
+              <Button
+                className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold rounded shadow-lg flex items-center gap-2 h-10 px-4 uppercase text-[10px] tracking-widest"
+                onClick={() => navigate('/intranet/dossiers')}
+              >
                 <PlusCircle className="w-4 h-4" />
                 Nouveau Dossier
               </Button>
             )}
-            <Button variant="outline" className="border-slate-300 font-bold flex items-center gap-2 h-10 px-4 uppercase text-[10px] tracking-widest" onClick={() => logAction('Consultation journal activité')}>
+            <Button
+              variant="outline"
+              className="border-slate-300 font-bold flex items-center gap-2 h-10 px-4 uppercase text-[10px] tracking-widest"
+              onClick={() => { logAction('Consultation journal activité'); navigate('/intranet/audit-logs'); }}
+            >
               <Clock className="w-4 h-4" />
               Journal d'activité
             </Button>
           </div>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="border-l-4 border-blue-600 shadow-md">
             <CardContent className="pt-6">
@@ -148,9 +178,6 @@ const Dashboard = () => {
               </div>
               <div className="flex items-baseline gap-2">
                 <h3 className="text-3xl font-black text-slate-900">{store.getTotalDossiersCount()}</h3>
-                <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
-                  <TrendingUp className="w-3 h-3" /> +5
-                </span>
               </div>
               <p className="text-[10px] text-slate-400 mt-2 uppercase font-bold tracking-tighter italic">Mis à jour en temps réel</p>
             </CardContent>
@@ -168,14 +195,14 @@ const Dashboard = () => {
                 <h3 className="text-3xl font-black text-slate-900">{store.getPendingValidationsCount()}</h3>
                 <span className="text-xs font-bold text-slate-400">En attente</span>
               </div>
-              <Progress value={65} className="h-1.5 mt-4" />
+              <Progress value={store.getTotalDossiersCount() > 0 ? (store.getPendingValidationsCount() / store.getTotalDossiersCount()) * 100 : 0} className="h-1.5 mt-4" />
             </CardContent>
           </Card>
 
           <Card className="border-l-4 border-emerald-600 shadow-md">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Documents Signés</p>
+                <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Documents</p>
                 <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
@@ -184,7 +211,7 @@ const Dashboard = () => {
                 <h3 className="text-3xl font-black text-slate-900">{store.getTotalDocumentsCount()}</h3>
                 <span className="text-xs font-bold text-emerald-600">Total</span>
               </div>
-              <p className="text-[10px] text-slate-400 mt-2 uppercase font-bold tracking-tighter italic">Total annuel: 1,402</p>
+              <p className="text-[10px] text-slate-400 mt-2 uppercase font-bold tracking-tighter italic">Mis à jour en temps réel</p>
             </CardContent>
           </Card>
 
@@ -197,11 +224,11 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="flex items-baseline gap-2">
-                <h3 className="text-3xl font-black text-slate-900">7</h3>
-                <Badge className="bg-red-500 text-white animate-pulse">URGENT</Badge>
+                <h3 className="text-3xl font-black text-slate-900">{unreadCount}</h3>
+                {unreadCount > 0 && <Badge className="bg-red-500 text-white animate-pulse">URGENT</Badge>}
               </div>
               <div className="flex gap-1 mt-4">
-                <div className="h-1.5 flex-grow bg-red-500 rounded-full" />
+                <div className={cn("h-1.5 flex-grow rounded-full", unreadCount > 0 ? "bg-red-500" : "bg-slate-200")} />
                 <div className="h-1.5 flex-grow bg-slate-200 rounded-full" />
                 <div className="h-1.5 flex-grow bg-slate-200 rounded-full" />
               </div>
@@ -210,34 +237,21 @@ const Dashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Dashboard Column */}
           <div className="lg:col-span-2 space-y-8">
             {/* Shortcuts */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <button className="flex flex-col items-center justify-center p-6 bg-white border border-slate-200 rounded-xl hover:border-primary hover:shadow-lg transition-all group">
-                <div className="p-3 bg-blue-50 text-blue-600 rounded-full group-hover:bg-primary group-hover:text-white transition-all mb-3">
-                  <FileText className="w-6 h-6" />
-                </div>
-                <span className="text-sm font-bold text-slate-700 uppercase tracking-tighter">Nouveau Document</span>
-              </button>
-              <button className="flex flex-col items-center justify-center p-6 bg-white border border-slate-200 rounded-xl hover:border-primary hover:shadow-lg transition-all group">
-                <div className="p-3 bg-amber-50 text-amber-600 rounded-full group-hover:bg-primary group-hover:text-white transition-all mb-3">
-                  <PlusCircle className="w-6 h-6" />
-                </div>
-                <span className="text-sm font-bold text-slate-700 uppercase tracking-tighter">Créer Dossier</span>
-              </button>
-              <button className="flex flex-col items-center justify-center p-6 bg-white border border-slate-200 rounded-xl hover:border-primary hover:shadow-lg transition-all group">
-                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-full group-hover:bg-primary group-hover:text-white transition-all mb-3">
-                  <MessageSquare className="w-6 h-6" />
-                </div>
-                <span className="text-sm font-bold text-slate-700 uppercase tracking-tighter">Note Interne</span>
-              </button>
-              <button className="flex flex-col items-center justify-center p-6 bg-white border border-slate-200 rounded-xl hover:border-primary hover:shadow-lg transition-all group">
-                <div className="p-3 bg-slate-50 text-slate-600 rounded-full group-hover:bg-primary group-hover:text-white transition-all mb-3">
-                  <MessageSquare className="w-6 h-6" />
-                </div>
-                <span className="text-sm font-bold text-slate-700 uppercase tracking-tighter">Ouvrir Messagerie</span>
-              </button>
+              {shortcuts.map((sc, i) => (
+                <button
+                  key={i}
+                  onClick={sc.action}
+                  className="flex flex-col items-center justify-center p-6 bg-white border border-slate-200 rounded-xl hover:border-primary hover:shadow-lg transition-all group"
+                >
+                  <div className={cn("p-3 rounded-full transition-all mb-3", sc.color, sc.hoverColor)}>
+                    {sc.icon}
+                  </div>
+                  <span className="text-sm font-bold text-slate-700 uppercase tracking-tighter">{sc.label}</span>
+                </button>
+              ))}
             </div>
 
             {/* Recent Dossiers */}
@@ -247,7 +261,12 @@ const Dashboard = () => {
                   <CardTitle className="text-lg font-bold uppercase tracking-tight">Statut des Dossiers Récents</CardTitle>
                   <CardDescription>Dernières modifications sur vos dossiers assignés</CardDescription>
                 </div>
-                <Button variant="ghost" size="sm" className="font-bold text-primary flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="font-bold text-primary flex items-center gap-1"
+                  onClick={() => navigate('/intranet/dossiers')}
+                >
                   Voir tout <ChevronRight className="w-4 h-4" />
                 </Button>
               </CardHeader>
@@ -265,7 +284,7 @@ const Dashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {filteredFiles.map((file) => (
+                      {filteredFiles.slice(0, 5).map((file) => (
                         <tr key={file.id} className="hover:bg-slate-50/80 transition-colors group">
                           <td className="px-6 py-4 font-mono text-xs font-bold text-primary">{file.id}</td>
                           <td className="px-6 py-4">
@@ -319,7 +338,11 @@ const Dashboard = () => {
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-slate-400 leading-relaxed mb-4">{ann.text}</p>
-                      <Button variant="link" className="text-primary p-0 h-auto font-bold text-xs flex items-center gap-1">
+                      <Button
+                        variant="link"
+                        className="text-primary p-0 h-auto font-bold text-xs flex items-center gap-1"
+                        onClick={() => navigate('/intranet/documents')}
+                      >
                         Lire la note complète <ArrowRight className="w-3 h-3" />
                       </Button>
                     </CardContent>
@@ -369,8 +392,8 @@ const Dashboard = () => {
                             <span className="w-1 h-1 rounded-full bg-slate-300" />
                             <span className={cn(
                               "text-[10px] font-black uppercase tracking-tighter",
-                              notif.priority === 'high' ? "text-red-500" : 
-                              notif.priority === 'medium' ? "text-amber-500" : 
+                              notif.priority === 'high' ? "text-red-500" :
+                              notif.priority === 'medium' ? "text-amber-500" :
                               "text-slate-500"
                             )}>
                               Priorité {notif.priority}
@@ -379,10 +402,21 @@ const Dashboard = () => {
                         </div>
                       </div>
                     ))}
+                    {filteredNotifications.length === 0 && (
+                      <div className="p-8 text-center text-slate-400">
+                        <CheckCircle2 className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                        <p className="text-xs font-bold uppercase tracking-widest">Aucune notification</p>
+                      </div>
+                    )}
                   </div>
                 </ScrollArea>
                 <div className="p-4 bg-slate-50 border-t border-slate-100">
-                  <Button variant="outline" className="w-full text-xs font-bold uppercase tracking-widest border-slate-200 bg-white">
+                  <Button
+                    variant="outline"
+                    className="w-full text-xs font-bold uppercase tracking-widest border-slate-200 bg-white"
+                    onClick={handleMarkAllRead}
+                    disabled={filteredNotifications.length === 0}
+                  >
                     Tout marquer comme lu
                   </Button>
                 </div>
@@ -397,26 +431,36 @@ const Dashboard = () => {
                     <Calendar className="w-4 h-4" />
                     Agenda de la Semaine
                   </CardTitle>
-                  <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">MAI 2024</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">{currentMonthLabel}</span>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="p-4 flex gap-2 overflow-x-auto bg-slate-50 border-b border-slate-100">
-                  {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, i) => (
-                    <button 
-                      key={i} 
-                      className={cn(
-                        "flex-1 flex flex-col items-center justify-center p-2 rounded-lg transition-all",
-                        i === 1 ? "bg-primary text-white shadow-lg scale-110" : "hover:bg-slate-200 text-slate-600"
-                      )}
-                    >
-                      <span className="text-[8px] font-bold uppercase">{day}</span>
-                      <span className="text-sm font-black">{20 + i}</span>
-                    </button>
-                  ))}
+                  {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, i) => {
+                    const today = new Date();
+                    const dayOfWeek = today.getDay(); // 0=Sun
+                    const mondayOffset = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+                    const weekStart = new Date(today);
+                    weekStart.setDate(today.getDate() + mondayOffset);
+                    const thisDay = new Date(weekStart);
+                    thisDay.setDate(weekStart.getDate() + i);
+                    const isToday = thisDay.toDateString() === today.toDateString();
+                    return (
+                      <div
+                        key={i}
+                        className={cn(
+                          "flex-1 flex flex-col items-center justify-center p-2 rounded-lg transition-all",
+                          isToday ? "bg-primary text-white shadow-lg scale-110" : "text-slate-600"
+                        )}
+                      >
+                        <span className="text-[8px] font-bold uppercase">{day}</span>
+                        <span className="text-sm font-black">{thisDay.getDate()}</span>
+                      </div>
+                    );
+                  })}
                 </div>
                 <div className="p-4 space-y-4">
-                  {calendarEvents.map((event, i) => (
+                  {calendarEvents.slice(0, 3).map((event, i) => (
                     <div key={i} className="flex gap-4 items-start group">
                       <span className="text-xs font-black text-slate-400 w-10 text-right group-hover:text-primary transition-colors">{event.time}</span>
                       <div className="flex-grow space-y-1">
@@ -431,19 +475,23 @@ const Dashboard = () => {
                           <span className="text-sm font-bold text-slate-900 tracking-tight">{event.title}</span>
                         </div>
                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter ml-3.5">
-                          {event.type.replace('_', ' ')} — Salle 4B
+                          {event.type.replace('_', ' ')} — {event.location}
                         </p>
                       </div>
                     </div>
                   ))}
-                  <Button variant="ghost" className="w-full text-xs font-bold text-primary mt-2">
+                  <Button
+                    variant="ghost"
+                    className="w-full text-xs font-bold text-primary mt-2"
+                    onClick={() => navigate('/intranet/calendar')}
+                  >
                     Voir le calendrier complet
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Quick Status / Help */}
+            {/* Quick Status */}
             <Card className="shadow-lg border-none overflow-hidden">
               <CardHeader className="bg-slate-50 border-b border-slate-100 py-4">
                 <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
@@ -495,7 +543,11 @@ const Dashboard = () => {
                 <p className="text-xs text-slate-300 mb-4 leading-relaxed">
                   Besoin d'aide avec un document ou une procédure ? Contactez le service informatique ou consultez les guides RH.
                 </p>
-                <Button size="sm" className="bg-white text-primary hover:bg-slate-100 font-bold px-6">
+                <Button
+                  size="sm"
+                  className="bg-white text-primary hover:bg-slate-100 font-bold px-6"
+                  onClick={() => navigate('/intranet/documents')}
+                >
                   Documentation
                 </Button>
               </div>

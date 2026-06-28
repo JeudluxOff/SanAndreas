@@ -1,24 +1,21 @@
-import { useState, useEffect } from "react";
-import { 
-  Activity, 
-  Search, 
-  Filter, 
-  Download, 
+import { useState } from "react";
+import {
+  Activity,
+  Search,
+  Download,
   ChevronLeft,
-  Calendar,
-  User,
-  Shield,
   ExternalLink,
   Trash2,
   FileSpreadsheet
 } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
 import { Link, Navigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGovernmentStore } from "@/hooks/useGovernmentStore";
@@ -27,6 +24,7 @@ const AuditLogs = () => {
   const { user, hasPermission, logAction } = useAuth();
   const store = useGovernmentStore();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedLog, setSelectedLog] = useState<any>(null);
 
   const logs = store.getAuditLogs();
 
@@ -34,7 +32,7 @@ const AuditLogs = () => {
     return <Navigate to="/intranet" replace />;
   }
 
-  const filteredLogs = logs.filter(log => 
+  const filteredLogs = logs.filter(log =>
     log.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
     log.role.toLowerCase().includes(searchTerm.toLowerCase())
@@ -42,8 +40,25 @@ const AuditLogs = () => {
 
   const handleExport = () => {
     logAction('Export des registres d\'audit');
-    // Mock export
-    alert("Export des données en cours... (Format CSV)");
+    const rows = [
+      ['Horodatage', 'Agent', 'Service', 'Rôle', 'Action', 'IP'],
+      ...filteredLogs.map(log => [
+        new Date(log.timestamp).toLocaleString('fr-FR'),
+        log.user_name,
+        log.service_id || '',
+        log.role,
+        log.action,
+        log.ip || ''
+      ])
+    ];
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const clearLogs = () => {
@@ -56,7 +71,6 @@ const AuditLogs = () => {
   return (
     <IntranetLayout>
       <div className="space-y-6 pb-20">
-        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Link to="/intranet">
@@ -85,7 +99,6 @@ const AuditLogs = () => {
           </div>
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="border-none shadow-md">
             <CardContent className="pt-6">
@@ -109,13 +122,12 @@ const AuditLogs = () => {
           </Card>
         </div>
 
-        {/* Filters */}
         <Card className="border-none shadow-md">
           <CardContent className="p-4">
             <div className="relative">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-              <Input 
-                placeholder="Filtrer par agent, action, rôle..." 
+              <Input
+                placeholder="Filtrer par agent, action, rôle..."
                 className="pl-10 h-10 border-slate-200"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -124,7 +136,6 @@ const AuditLogs = () => {
           </CardContent>
         </Card>
 
-        {/* Logs Table */}
         <Card className="border-none shadow-lg overflow-hidden">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
@@ -143,8 +154,8 @@ const AuditLogs = () => {
                     <tr key={log.id} className="hover:bg-slate-50/80 transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
-                          <span className="text-xs font-bold text-slate-900">{new Date(log.timestamp).toLocaleDateString()}</span>
-                          <span className="text-[10px] font-medium text-slate-400">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                          <span className="text-xs font-bold text-slate-900">{new Date(log.timestamp).toLocaleDateString('fr-FR')}</span>
+                          <span className="text-[10px] font-medium text-slate-400">{new Date(log.timestamp).toLocaleTimeString('fr-FR')}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -176,7 +187,12 @@ const AuditLogs = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 group-hover:text-primary">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-slate-400 group-hover:text-primary"
+                          onClick={() => setSelectedLog(log)}
+                        >
                           <ExternalLink className="w-4 h-4" />
                         </Button>
                       </td>
@@ -194,6 +210,43 @@ const AuditLogs = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={!!selectedLog} onOpenChange={() => setSelectedLog(null)}>
+        <DialogContent className="sm:max-w-[520px]">
+          <DialogHeader>
+            <DialogTitle className="uppercase font-black tracking-tight flex items-center gap-2">
+              <Activity className="w-4 h-4 text-primary" /> Détails de l'entrée
+            </DialogTitle>
+            <DialogDescription>Données complètes de l'entrée d'audit sélectionnée.</DialogDescription>
+          </DialogHeader>
+          {selectedLog && (
+            <div className="space-y-3 py-2">
+              {[
+                { label: 'ID', value: selectedLog.id },
+                { label: 'Agent', value: selectedLog.user_name },
+                { label: 'Rôle', value: selectedLog.role },
+                { label: 'Service', value: selectedLog.service_id || '—' },
+                { label: 'Action', value: selectedLog.action },
+                { label: 'Horodatage', value: new Date(selectedLog.timestamp).toLocaleString('fr-FR') },
+                { label: 'IP', value: selectedLog.ip || '—' },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex items-start gap-4 py-2 border-b border-slate-100 last:border-0">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 w-24 flex-shrink-0 pt-0.5">{label}</span>
+                  <span className="text-sm font-bold text-slate-900 break-all">{value}</span>
+                </div>
+              ))}
+              {selectedLog.details && (
+                <div className="py-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Données supplémentaires</span>
+                  <pre className="text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg p-3 overflow-auto max-h-40 text-slate-700">
+                    {JSON.stringify(selectedLog.details, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </IntranetLayout>
   );
 };

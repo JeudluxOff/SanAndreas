@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Users, Search, UserPlus, ChevronLeft, MoveVertical as MoreVertical, Shield, Eye, Archive, Ban, Download } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Users, Search, UserPlus, ChevronLeft, MoveVertical as MoreVertical, Shield, Eye, Archive, Ban, Download, SquareCheck as CheckSquare, Square } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGovernmentStore } from "@/hooks/useGovernmentStore";
@@ -43,19 +44,20 @@ import {
   GOV_STATUSES,
   GOV_STATUS_LABELS,
   GOV_STATUS_COLORS,
-  GovDivisionId
+  GovDivisionId,
+  GovRoleTechnique
 } from "@/lib/government-rbac";
 import { GovUserAccess, isGovernmentAdmin, canAccessHRPage } from "@/lib/government-access";
 
 const HR = () => {
-  const { user } = useAuth();
+  const { user, logAction } = useAuth();
   const store = useGovernmentStore();
+  const navigate = useNavigate();
 
   const govAccess: GovUserAccess | null = user ? {
     id: user.id,
-    roleTechnique: (user.govRoleTechnique || 'employee') as any,
-    primaryDivision: (user.govPrimaryDivision || 'administration_generale') as any,
-    secondaryDivisions: (user.govSecondaryDivisions || []) as any[],
+    rolesTechniques: (user.govRolesTechniques || ['employee']) as any[],
+    divisions: (user.govDivisions || ['administration_generale']) as any[],
     permissions: (user.govPermissions || []) as any[],
     status: user.govStatus || 'actif',
   } : null;
@@ -77,9 +79,10 @@ const HR = () => {
     firstName: "",
     lastName: "",
     matricule: "",
+    functionTitle: "",
     grade: "",
-    roleTechnique: "",
-    primaryDivision: "",
+    selectedRoles: [] as string[],
+    selectedDivisions: [] as string[],
   });
 
   const employees = store.getEmployeesV2();
@@ -91,15 +94,33 @@ const HR = () => {
       emp.matricule?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesGrade = !gradeFilter || emp.grade === gradeFilter;
-    const matchesDivision = !divisionFilter || emp.govPrimaryDivision === divisionFilter;
-    const matchesStatus = !statusFilter || emp.govStatus === statusFilter;
+    const matchesDivision = !divisionFilter || emp.divisions?.includes(divisionFilter);
+    const matchesStatus = !statusFilter || emp.status === statusFilter;
 
     return matchesSearch && matchesGrade && matchesDivision && matchesStatus;
   });
 
   const totalEmployees = employees.length;
-  const activeEmployees = employees.filter(e => e.govStatus === 'actif').length;
-  const suspendedEmployees = employees.filter(e => e.govStatus === 'suspendu').length;
+  const activeEmployees = employees.filter(e => e.status === 'actif').length;
+  const suspendedEmployees = employees.filter(e => e.status === 'suspendu').length;
+
+  const toggleRole = (role: string) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedRoles: prev.selectedRoles.includes(role)
+        ? prev.selectedRoles.filter(r => r !== role)
+        : [...prev.selectedRoles, role]
+    }));
+  };
+
+  const toggleDivision = (div: string) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedDivisions: prev.selectedDivisions.includes(div)
+        ? prev.selectedDivisions.filter(d => d !== div)
+        : [...prev.selectedDivisions, div]
+    }));
+  };
 
   const handleCreateEmployee = async () => {
     if (
@@ -109,50 +130,105 @@ const HR = () => {
       !formData.lastName ||
       !formData.matricule ||
       !formData.grade ||
-      !formData.roleTechnique ||
-      !formData.primaryDivision
+      formData.selectedRoles.length === 0 ||
+      formData.selectedDivisions.length === 0
     ) {
-      alert("Tous les champs sont requis");
+      alert("Tous les champs sont requis, et au moins un role et une division doivent etre selectionnes");
       return;
     }
 
     const newEmployee = {
+      id: `emp-${Date.now()}`,
       username: formData.username,
-      password: formData.password,
       firstName: formData.firstName,
       lastName: formData.lastName,
       matricule: formData.matricule,
       grade: formData.grade,
-      govRoleTechnique: formData.roleTechnique,
-      govPrimaryDivision: formData.primaryDivision as GovDivisionId,
-      govStatus: 'actif' as const,
+      functionTitle: formData.functionTitle || formData.grade,
+      rolesTechniques: formData.selectedRoles,
+      divisions: formData.selectedDivisions,
+      permissions: [],
+      status: 'actif',
+      joinedAt: new Date().toISOString().slice(0, 10),
+      gradeHistory: [],
+      hrHistory: []
     };
 
-    governmentStore.createEmployee(newEmployee);
+    const success = governmentStore.createEmployeeV2(newEmployee);
+    if (!success) {
+      alert("Nom d'utilisateur ou matricule deja utilise");
+      return;
+    }
+
+    // Register auth credentials
+    const regUsers = JSON.parse(localStorage.getItem('sa_gov_registered_users') || '{}');
+    regUsers[formData.username] = {
+      user: {
+        id: formData.username,
+        username: formData.username,
+        name: `${formData.firstName} ${formData.lastName}`,
+        role: 'admin',
+        service_id: 'CABINET',
+        service_name: 'Gouvernement',
+        grade: formData.grade,
+        permissions: [],
+        status: 'available',
+      },
+      password: formData.password
+    };
+    localStorage.setItem('sa_gov_registered_users', JSON.stringify(regUsers));
+
+    logAction('Création employe', { username: formData.username, matricule: formData.matricule });
+
     setIsCreateDialogOpen(false);
     setFormData({
-      username: "",
-      password: "",
-      firstName: "",
-      lastName: "",
-      matricule: "",
-      grade: "",
-      roleTechnique: "",
-      primaryDivision: "",
+      username: "", password: "", firstName: "", lastName: "",
+      matricule: "", functionTitle: "", grade: "", selectedRoles: [], selectedDivisions: [],
     });
+  };
+
+  const handleSuspend = (empId: string, empName: string) => {
+    const success = governmentStore.suspendEmployee(empId, user?.name || 'Admin');
+    if (!success) {
+      alert("Impossible de suspendre ce compte (dernier administrateur actif)");
+    } else {
+      logAction('Suspension employe', { employeeId: empId, name: empName });
+    }
+  };
+
+  const handleReactivate = (empId: string, empName: string) => {
+    governmentStore.updateEmployeeV2(empId, { status: 'actif' });
+    governmentStore.addHRHistoryEntry(empId, {
+      id: `hr-${Date.now()}`,
+      date: new Date().toISOString(),
+      author: user?.name || 'Admin',
+      action: 'Reactivation',
+      oldValue: 'suspendu',
+      newValue: 'actif'
+    });
+    logAction('Reactivation employe', { employeeId: empId, name: empName });
+  };
+
+  const handleArchive = (empId: string, empName: string) => {
+    const success = governmentStore.archiveEmployeeV2(empId, user?.name || 'Admin');
+    if (!success) {
+      alert("Impossible d'archiver ce compte (dernier administrateur actif)");
+    } else {
+      logAction('Archivage employe', { employeeId: empId, name: empName });
+    }
   };
 
   const handleExport = () => {
     const csvContent = [
-      ["Matricule", "Nom", "Prénom", "Grade", "Rôle Technique", "Division", "Statut"],
+      ["Matricule", "Nom", "Prenom", "Grade", "Roles Techniques", "Divisions", "Statut"],
       ...filteredEmployees.map(emp => [
         emp.matricule,
         emp.lastName,
         emp.firstName,
         emp.grade,
-        GOV_ROLE_LABELS[emp.govRoleTechnique] || emp.govRoleTechnique,
-        GOV_DIVISION_LABELS[emp.govPrimaryDivision] || emp.govPrimaryDivision,
-        GOV_STATUS_LABELS[emp.govStatus] || emp.govStatus
+        (emp.rolesTechniques || []).map(r => GOV_ROLE_LABELS[r as GovRoleTechnique] || r).join(' | '),
+        (emp.divisions || []).map(d => GOV_DIVISION_LABELS[d as GovDivisionId] || d).join(' | '),
+        GOV_STATUS_LABELS[emp.status as any] || emp.status
       ])
     ]
       .map(row => row.map(cell => `"${cell}"`).join(","))
@@ -173,11 +249,11 @@ const HR = () => {
             <div className="mb-4">
               <Shield className="w-16 h-16 mx-auto text-slate-400 mb-4" />
             </div>
-            <h2 className="text-2xl font-black text-slate-900 uppercase mb-2">Accès Refusé</h2>
-            <p className="text-slate-500 font-medium mb-6">Vous n'avez pas la permission d'accéder à cette page.</p>
+            <h2 className="text-2xl font-black text-slate-900 uppercase mb-2">Acces Refuse</h2>
+            <p className="text-slate-500 font-medium mb-6">Vous n'avez pas la permission d'acceder a cette page.</p>
             <Link to="/intranet">
               <Button className="bg-[#1B365D] hover:bg-[#1B365D]/90 text-white font-bold">
-                Retour à l'intranet
+                Retour a l'intranet
               </Button>
             </Link>
           </Card>
@@ -199,7 +275,7 @@ const HR = () => {
             </Link>
             <div>
               <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Ressources Humaines</h1>
-              <p className="text-slate-500 font-medium italic">Gestion des employés gouvernementaux</p>
+              <p className="text-slate-500 font-medium italic">Gestion des employes gouvernementaux</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -322,122 +398,155 @@ const HR = () => {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-widest border-b border-slate-200">
-                  <tr>
-                    <th className="px-6 py-4">Employe</th>
-                    <th className="px-6 py-4">Grade</th>
-                    <th className="px-6 py-4">Role Technique</th>
-                    <th className="px-6 py-4">Division</th>
-                    <th className="px-6 py-4">Statut</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredEmployees.map((emp) => (
-                    <tr key={emp.id} className="hover:bg-slate-50/80 transition-all group">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-4">
-                          <Avatar className="h-10 w-10 border-2 border-slate-100 shadow-sm">
-                            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${emp.id}`} />
-                            <AvatarFallback className="bg-primary text-white">
-                              {emp.firstName?.charAt(0)}{emp.lastName?.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex flex-col">
-                            <span className="text-sm font-black text-slate-900 uppercase">
-                              {emp.firstName} {emp.lastName}
-                            </span>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                              {emp.matricule}
-                            </span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-xs font-bold text-slate-700">{emp.grade}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-slate-200 bg-white">
-                          {GOV_ROLE_LABELS[emp.govRoleTechnique] || emp.govRoleTechnique}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-xs font-bold text-slate-700">
-                          {GOV_DIVISION_LABELS[emp.govPrimaryDivision] || emp.govPrimaryDivision}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <Badge
-                          className={cn(
-                            "font-bold text-white text-[9px]",
-                            GOV_STATUS_COLORS[emp.govStatus] || "bg-slate-600"
-                          )}
-                        >
-                          {GOV_STATUS_LABELS[emp.govStatus] || emp.govStatus}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Link to={`/intranet/hr/${emp.id}`}>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-slate-400 hover:text-primary"
-                              title="Voir le profil"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                          </Link>
-                          {isGovernmentAdmin(govAccess!) && (
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-slate-400"
-                                >
-                                  <MoreVertical className="w-4 h-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-48 font-bold text-xs uppercase tracking-tighter">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-                                  <Eye className="w-4 h-4" /> Editer
-                                </DropdownMenuItem>
-                                {emp.govStatus === 'actif' && (
-                                  <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-amber-600">
-                                    <Ban className="w-4 h-4" /> Suspendre
-                                  </DropdownMenuItem>
-                                )}
-                                {emp.govStatus === 'suspendu' && (
-                                  <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-emerald-600">
-                                    <Shield className="w-4 h-4" /> Reactiver
-                                  </DropdownMenuItem>
-                                )}
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-red-600">
-                                  <Archive className="w-4 h-4" /> Archiver
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          )}
-                        </div>
-                      </td>
+            {filteredEmployees.length === 0 ? (
+              <div className="text-center py-20 text-slate-400">
+                <Users className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                <p className="font-bold text-sm">Aucun employe enregistre</p>
+                {isGovernmentAdmin(govAccess!) && (
+                  <p className="text-xs mt-1">Cliquez sur "Creer un Employe" pour ajouter le premier compte</p>
+                )}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-widest border-b border-slate-200">
+                    <tr>
+                      <th className="px-6 py-4">Employe</th>
+                      <th className="px-6 py-4">Grade</th>
+                      <th className="px-6 py-4">Roles Techniques</th>
+                      <th className="px-6 py-4">Divisions</th>
+                      <th className="px-6 py-4">Statut</th>
+                      <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredEmployees.map((emp) => (
+                      <tr key={emp.id} className="hover:bg-slate-50/80 transition-all group">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-4">
+                            <Avatar className="h-10 w-10 border-2 border-slate-100 shadow-sm">
+                              <AvatarImage src={emp.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${emp.id}`} />
+                              <AvatarFallback className="bg-primary text-white">
+                                {emp.firstName?.charAt(0)}{emp.lastName?.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-black text-slate-900 uppercase">
+                                {emp.firstName} {emp.lastName}
+                              </span>
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                {emp.matricule}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-xs font-bold text-slate-700">{emp.grade}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-wrap gap-1">
+                            {(emp.rolesTechniques || []).map(r => (
+                              <Badge key={r} variant="outline" className="text-[9px] font-black uppercase tracking-widest border-slate-200 bg-white">
+                                {GOV_ROLE_LABELS[r as GovRoleTechnique] || r}
+                              </Badge>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col gap-0.5">
+                            {(emp.divisions || []).slice(0, 2).map((d, i) => (
+                              <span key={d} className={cn("text-xs font-bold", i === 0 ? "text-slate-800" : "text-slate-400")}>
+                                {i === 0 ? '' : '↳ '}{GOV_DIVISION_LABELS[d as GovDivisionId] || d}
+                              </span>
+                            ))}
+                            {(emp.divisions || []).length > 2 && (
+                              <span className="text-[9px] text-slate-400">+{emp.divisions!.length - 2} autres</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <Badge
+                            className={cn(
+                              "font-bold text-white text-[9px]",
+                              GOV_STATUS_COLORS[emp.status as any] || "bg-slate-600"
+                            )}
+                          >
+                            {GOV_STATUS_LABELS[emp.status as any] || emp.status}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Link to={`/intranet/hr/${emp.id}`}>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-slate-400 hover:text-primary"
+                                title="Voir le profil"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            </Link>
+                            {isGovernmentAdmin(govAccess!) && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-slate-400"
+                                  >
+                                    <MoreVertical className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48 font-bold text-xs uppercase tracking-tighter">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    className="flex items-center gap-2 cursor-pointer"
+                                    onClick={() => navigate(`/intranet/hr/${emp.id}`)}
+                                  >
+                                    <Eye className="w-4 h-4" /> Editer
+                                  </DropdownMenuItem>
+                                  {emp.status === 'actif' && (
+                                    <DropdownMenuItem
+                                      className="flex items-center gap-2 cursor-pointer text-amber-600"
+                                      onClick={() => handleSuspend(emp.id, `${emp.firstName} ${emp.lastName}`)}
+                                    >
+                                      <Ban className="w-4 h-4" /> Suspendre
+                                    </DropdownMenuItem>
+                                  )}
+                                  {emp.status === 'suspendu' && (
+                                    <DropdownMenuItem
+                                      className="flex items-center gap-2 cursor-pointer text-emerald-600"
+                                      onClick={() => handleReactivate(emp.id, `${emp.firstName} ${emp.lastName}`)}
+                                    >
+                                      <Shield className="w-4 h-4" /> Reactiver
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    className="flex items-center gap-2 cursor-pointer text-red-600"
+                                    onClick={() => handleArchive(emp.id, `${emp.firstName} ${emp.lastName}`)}
+                                  >
+                                    <Archive className="w-4 h-4" /> Archiver
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
 
       {/* Create Employee Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="uppercase font-black tracking-tight">Creer un Nouvel Employe</DialogTitle>
           </DialogHeader>
@@ -488,36 +597,61 @@ const HR = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Role Technique</Label>
-                <Select value={formData.roleTechnique} onValueChange={(value) => setFormData({ ...formData, roleTechnique: value })}>
-                  <SelectTrigger className="border-slate-200 font-bold">
-                    <SelectValue placeholder="Selectionner" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {GOV_ROLES_TECHNIQUES.map(role => (
-                      <SelectItem key={role} value={role} disabled={role === 'admin' && !isGovernmentAdmin(govAccess!)}>
+            <div className="space-y-2">
+              <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Titre de Fonction</Label>
+              <Input
+                placeholder="Ex: Agent de terrain LSPD"
+                value={formData.functionTitle}
+                onChange={(e) => setFormData({ ...formData, functionTitle: e.target.value })}
+                className="border-slate-200"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-black uppercase tracking-widest text-slate-500">
+                Roles Techniques <span className="text-slate-400 normal-case">(plusieurs possibles)</span>
+              </Label>
+              <div className="grid grid-cols-2 gap-2 p-3 border border-slate-200 rounded-lg bg-slate-50">
+                {GOV_ROLES_TECHNIQUES.map(role => {
+                  const isAdmin = role === 'admin';
+                  const disabled = isAdmin && !isGovernmentAdmin(govAccess!);
+                  return (
+                    <div key={role} className={cn("flex items-center gap-2", disabled && "opacity-40")}>
+                      <Checkbox
+                        id={`role-${role}`}
+                        checked={formData.selectedRoles.includes(role)}
+                        onCheckedChange={() => !disabled && toggleRole(role)}
+                        disabled={disabled}
+                      />
+                      <label htmlFor={`role-${role}`} className="text-xs font-bold cursor-pointer select-none">
                         {GOV_ROLE_LABELS[role] || role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      </label>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Division</Label>
-                <Select value={formData.primaryDivision} onValueChange={(value) => setFormData({ ...formData, primaryDivision: value })}>
-                  <SelectTrigger className="border-slate-200 font-bold">
-                    <SelectValue placeholder="Selectionner" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.values(GOV_DIVISIONS).map(div => (
-                      <SelectItem key={div} value={div}>
-                        {GOV_DIVISION_LABELS[div] || div}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-black uppercase tracking-widest text-slate-500">
+                Divisions <span className="text-slate-400 normal-case">(plusieurs possibles, la 1ere est principale)</span>
+              </Label>
+              <div className="grid grid-cols-2 gap-2 p-3 border border-slate-200 rounded-lg bg-slate-50 max-h-48 overflow-y-auto">
+                {Object.values(GOV_DIVISIONS).map(div => (
+                  <div key={div} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`div-${div}`}
+                      checked={formData.selectedDivisions.includes(div)}
+                      onCheckedChange={() => toggleDivision(div)}
+                    />
+                    <label htmlFor={`div-${div}`} className="text-xs font-bold cursor-pointer select-none leading-tight">
+                      {GOV_DIVISION_LABELS[div as GovDivisionId] || div}
+                      {formData.selectedDivisions[0] === div && (
+                        <span className="ml-1 text-[9px] text-emerald-600 font-black">(PRINCIPALE)</span>
+                      )}
+                    </label>
+                  </div>
+                ))}
               </div>
             </div>
 

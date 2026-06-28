@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { MessageSquare, Send, Users, Hash, Search, MoveVertical as MoreVertical, Plus, AtSign, Paperclip, Smile, Bell, ShieldAlert, CircleCheck as CheckCircle2, Clock, ArrowRight, Settings, User as UserIcon, ListFilter as Filter, FileText, Volume2, ChevronLeft, ChevronRight } from "lucide-react";
+import { MessageSquare, Send, Users, Hash, Search, MoveVertical as MoreVertical, Plus, AtSign, Paperclip, Smile, Bell, CircleCheck as CheckCircle2, Settings, User as UserIcon, FileText, Volume2, ChevronLeft, ChevronRight } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
 import { Link } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -17,12 +16,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useAuth, ServiceID } from "@/contexts/AuthContext";
 import { useGovernmentStore } from "@/hooks/useGovernmentStore";
 import { GovUserAccess, isGovernmentAdmin, isGovernmentGovernor, canAccessGovernmentChannel } from '@/lib/government-access';
 import { GovDivisionId, GOV_CHANNELS } from '@/lib/government-rbac';
+import { ShieldAlert } from "lucide-react";
 
 const allChannels = [
   { id: 'general', name: 'annonces-officielles', type: 'announcement', icon: <Volume2 className="w-4 h-4" />, service_id: 'CABINET' as ServiceID },
@@ -34,22 +35,14 @@ const allChannels = [
   { id: 'admin', name: 'administration-coordination', type: 'channel', icon: <Hash className="w-4 h-4" />, service_id: 'ADMINISTRATION_GENERALE' as ServiceID },
 ];
 
-const directMessages = [
-  { id: 'governor', name: 'Ethan Hunt', role: 'Gouverneur', status: 'online' },
-  { id: 'lt_governor', name: 'Elena Rodriguez', role: 'Lt-Gouverneur', status: 'online' },
-  { id: 'sec_securite', name: 'Jackson Teller', role: 'Secrétaire Sécurité', status: 'offline' },
-  { id: 'sec_justice', name: 'Thomas Vercetti', role: 'Secrétaire Justice', status: 'online' },
-];
-
 const Communication = () => {
   const { user, canAccessService, hasPermission, logAction, updateStatus } = useAuth();
   const store = useGovernmentStore();
 
   const govAccess: GovUserAccess | null = user ? {
     id: user.id,
-    roleTechnique: (user.govRoleTechnique || 'employee') as any,
-    primaryDivision: (user.govPrimaryDivision || 'administration_generale') as GovDivisionId,
-    secondaryDivisions: (user.govSecondaryDivisions || []) as GovDivisionId[],
+    rolesTechniques: (user.govRolesTechniques || ['employee']) as any[],
+    divisions: (user.govDivisions || ['administration_generale']) as GovDivisionId[],
     permissions: (user.govPermissions || []) as any[],
     status: user.govStatus || 'actif',
   } : null;
@@ -71,17 +64,22 @@ const Communication = () => {
   const visibleChannels = allChannels.filter(channel => {
     if (isGovernmentAdmin(govAccess) || isGovernmentGovernor(govAccess)) return true;
     if (channel.id === 'general') return true;
-    // Use division-based check via the gov RBAC system
     const matchingGovChannel = GOV_CHANNELS.find(gc => gc.id === channel.id || gc.name.toLowerCase().includes(channel.name.replace(/-/g, ' ').toLowerCase()));
     if (matchingGovChannel) {
       return canAccessGovernmentChannel(govAccess, matchingGovChannel);
     }
-    // Fallback to old service-based check
     return canAccessService(channel.service_id);
   });
 
   const [activeChannel, setActiveChannel] = useState(visibleChannels[0]);
   const [message, setMessage] = useState("");
+  const [showNewChannelDialog, setShowNewChannelDialog] = useState(false);
+  const [showNewDMDialog, setShowNewDMDialog] = useState(false);
+  const [newChannelName, setNewChannelName] = useState("");
+  const [newDMUsername, setNewDMUsername] = useState("");
+  const [showMembersPanel, setShowMembersPanel] = useState(false);
+
+  const employees = store.getEmployeesV2().filter(e => e.status === 'actif');
 
   const messages = store.getMessages(activeChannel.id).map(m => ({
     id: m.id,
@@ -116,10 +114,24 @@ const Communication = () => {
     setMessage("");
   };
 
+  const handleCreateChannel = () => {
+    if (!newChannelName.trim()) return;
+    logAction('Création salon', { name: newChannelName });
+    setNewChannelName("");
+    setShowNewChannelDialog(false);
+  };
+
+  const handleCreateDM = () => {
+    if (!newDMUsername.trim()) return;
+    logAction('Ouverture message direct', { target: newDMUsername });
+    setNewDMUsername("");
+    setShowNewDMDialog(false);
+  };
+
   return (
     <IntranetLayout>
       <div className="h-[calc(100vh-12rem)] flex overflow-hidden border border-slate-200 rounded-2xl bg-white shadow-xl">
-        {/* Left Sidebar - Channels & DMs */}
+        {/* Left Sidebar */}
         <aside className="w-64 md:w-80 flex-shrink-0 border-r border-slate-200 flex flex-col bg-slate-50">
           <div className="p-4 border-b border-slate-200 bg-white">
             <h2 className="text-xl font-black uppercase tracking-tight text-slate-900 flex items-center gap-2">
@@ -128,8 +140,8 @@ const Communication = () => {
             </h2>
             <div className="mt-4 relative">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Rechercher salon, agent..."
                 className="w-full pl-9 pr-4 py-2 bg-slate-100 border border-slate-200 rounded-md text-xs font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
@@ -138,11 +150,16 @@ const Communication = () => {
 
           <ScrollArea className="flex-grow p-2">
             <div className="space-y-6 pt-2">
-              {/* Channels Section */}
+              {/* Channels */}
               <div className="space-y-1">
                 <div className="px-3 flex items-center justify-between mb-2">
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Salons Officiels</span>
-                  <Plus className="w-3 h-3 text-slate-400 hover:text-primary cursor-pointer" />
+                  <button
+                    onClick={() => setShowNewChannelDialog(true)}
+                    className="text-slate-400 hover:text-primary transition-colors"
+                  >
+                    <Plus className="w-3 h-3" />
+                  </button>
                 </div>
                 {visibleChannels.map((channel) => (
                   <button
@@ -169,33 +186,41 @@ const Communication = () => {
                 ))}
               </div>
 
-              {/* DMs Section */}
+              {/* DMs — from real employees */}
               <div className="space-y-1">
                 <div className="px-3 flex items-center justify-between mb-2">
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Messages Directs</span>
-                  <Plus className="w-3 h-3 text-slate-400 hover:text-primary cursor-pointer" />
-                </div>
-                {directMessages.map((dm) => (
                   <button
-                    key={dm.id}
+                    onClick={() => setShowNewDMDialog(true)}
+                    className="text-slate-400 hover:text-primary transition-colors"
+                  >
+                    <Plus className="w-3 h-3" />
+                  </button>
+                </div>
+                {employees.filter(e => e.id !== user?.govEmployeeId).slice(0, 5).map((emp) => (
+                  <button
+                    key={emp.id}
                     className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-white hover:text-primary hover:shadow-sm transition-all group"
                   >
                     <div className="relative">
                       <Avatar className="h-8 w-8 border border-slate-200">
-                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${dm.name}`} />
-                        <AvatarFallback>{dm.name.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${emp.username}`} />
+                        <AvatarFallback>{emp.firstName.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div className={cn(
                         "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 border-2 border-white rounded-full",
-                        dm.status === 'online' ? "bg-emerald-500" : "bg-slate-300"
+                        emp.status === 'actif' ? "bg-emerald-500" : "bg-slate-300"
                       )} />
                     </div>
                     <div className="flex flex-col text-left overflow-hidden">
-                      <span className="text-xs font-bold text-slate-900 group-hover:text-primary transition-colors truncate uppercase">{dm.name}</span>
-                      <span className="text-[9px] font-bold text-slate-400 truncate uppercase">{dm.role}</span>
+                      <span className="text-xs font-bold text-slate-900 group-hover:text-primary transition-colors truncate uppercase">{emp.firstName} {emp.lastName}</span>
+                      <span className="text-[9px] font-bold text-slate-400 truncate uppercase">{emp.functionTitle}</span>
                     </div>
                   </button>
                 ))}
+                {employees.filter(e => e.id !== user?.govEmployeeId).length === 0 && (
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest px-3 py-2">Aucun agent disponible</p>
+                )}
               </div>
             </div>
           </ScrollArea>
@@ -239,16 +264,29 @@ const Communication = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white">
-                <Settings className="w-4 h-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white">
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="font-bold text-xs uppercase tracking-widest">
+                  <DropdownMenuLabel>Paramètres</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => logAction('Ouverture préférences notification')}>
+                    Notifications
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => logAction('Ouverture profil messagerie')}>
+                    Mon Profil
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </aside>
 
         {/* Main Chat Area */}
         <main className="flex-grow flex flex-col min-w-0 bg-white relative">
-          {/* Chat Header */}
           <header className="h-16 flex items-center justify-between px-6 border-b border-slate-200 bg-white/80 backdrop-blur-md z-10">
             <div className="flex items-center gap-4">
               <Link to="/intranet" className="md:hidden">
@@ -265,23 +303,55 @@ const Communication = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="text-slate-400 hover:text-primary">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-slate-400 hover:text-primary"
+                onClick={() => setShowMembersPanel(v => !v)}
+                title="Membres du salon"
+              >
                 <Users className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="text-slate-400 hover:text-primary">
-                <Bell className="w-4 h-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-primary" title="Notifications">
+                    <Bell className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="font-bold text-xs uppercase tracking-widest">
+                  <DropdownMenuLabel>Notifications du salon</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => logAction('Notifications salon: toutes')}>Toutes les notifications</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => logAction('Notifications salon: mentions')}>Mentions seulement</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => logAction('Notifications salon: aucune')}>Aucune notification</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <div className="h-6 w-px bg-slate-200 mx-2" />
-              <Button variant="ghost" size="icon" className="text-slate-400">
-                <MoreVertical className="w-4 h-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-slate-400">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="font-bold text-xs uppercase tracking-widest">
+                  <DropdownMenuItem onClick={() => logAction('Voir fichiers partagés', { channel: activeChannel.name })}>
+                    Fichiers partagés
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => logAction('Recherche dans salon', { channel: activeChannel.name })}>
+                    Rechercher dans ce salon
+                  </DropdownMenuItem>
+                  {hasPermission('manage_settings') && (
+                    <DropdownMenuItem onClick={() => logAction('Paramètres salon', { channel: activeChannel.name })} className="text-red-600">
+                      Paramètres du salon
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </header>
 
-          {/* Messages Area */}
           <ScrollArea className="flex-grow p-6">
             <div className="space-y-8 pb-10">
-              {/* Channel Welcome Info */}
               <div className="flex flex-col items-center justify-center py-10 text-center space-y-4">
                 <div className="p-6 bg-slate-50 rounded-full border border-slate-100 text-slate-300">
                   <MessageSquare className="w-12 h-12" />
@@ -315,8 +385,8 @@ const Communication = () => {
                     </div>
                     <div className={cn(
                       "p-4 rounded-2xl shadow-sm text-sm font-medium leading-relaxed",
-                      msg.isMe 
-                        ? "bg-primary text-white rounded-tr-none" 
+                      msg.isMe
+                        ? "bg-primary text-white rounded-tr-none"
                         : "bg-slate-100 text-slate-700 rounded-tl-none border border-slate-200"
                     )}>
                       {msg.text}
@@ -324,7 +394,7 @@ const Communication = () => {
                     {msg.isMe && (
                       <div className="flex items-center gap-1 mt-1 px-1">
                         <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Lu par Ethan H.</span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Envoyé</span>
                       </div>
                     )}
                   </div>
@@ -333,7 +403,6 @@ const Communication = () => {
             </div>
           </ScrollArea>
 
-          {/* Chat Input */}
           <footer className="p-6 bg-white border-t border-slate-200">
             <form onSubmit={handleSendMessage} className="relative bg-slate-50 border border-slate-200 rounded-2xl p-2 shadow-inner focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
               <textarea
@@ -350,25 +419,25 @@ const Communication = () => {
               />
               <div className="flex items-center justify-between px-2 pb-1 pt-1 border-t border-slate-100 mt-1">
                 <div className="flex items-center gap-1">
-                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary">
+                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary" title="Joindre fichier" onClick={() => logAction('Joindre fichier (messagerie)')}>
                     <Plus className="w-4 h-4" />
                   </Button>
-                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary">
+                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary" title="Pièce jointe" onClick={() => logAction('Pièce jointe messagerie')}>
                     <Paperclip className="w-4 h-4" />
                   </Button>
-                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary">
+                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary" title="Mention" onClick={() => setMessage(m => m + '@')}>
                     <AtSign className="w-4 h-4" />
                   </Button>
-                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary">
+                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary" title="Emoji" onClick={() => logAction('Ouverture sélecteur emoji')}>
                     <Smile className="w-4 h-4" />
                   </Button>
                   <div className="h-4 w-px bg-slate-200 mx-2" />
-                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary">
+                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary" title="Note interne" onClick={() => logAction('Note interne messagerie')}>
                     <FileText className="w-4 h-4" />
                   </Button>
                 </div>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={!message.trim()}
                   className="bg-primary hover:bg-[#1B365D] text-white font-black uppercase text-[10px] tracking-widest h-8 px-4 rounded-lg shadow-md disabled:opacity-50"
                 >
@@ -382,7 +451,7 @@ const Communication = () => {
           </footer>
         </main>
 
-        {/* Right Sidebar - Info (Desktop) */}
+        {/* Right Sidebar */}
         <aside className="hidden lg:flex w-64 flex-col border-l border-slate-200 bg-slate-50 overflow-auto">
           <div className="p-6 space-y-8">
             <div className="space-y-4 text-center">
@@ -399,27 +468,38 @@ const Communication = () => {
 
             <Separator className="bg-slate-200" />
 
-            <div className="space-y-4">
-              <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Derniers Fichiers Partagés</h5>
-              <div className="space-y-3">
-                {[
-                  { name: "Decret-Urbanisme.pdf", time: "Hier" },
-                  { name: "Planning-Briefing.xlsx", time: "Hier" },
-                  { name: "Photo-Site-Sud.jpg", time: "2 jrs" }
-                ].map((file, i) => (
-                  <div key={i} className="flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-100 group cursor-pointer hover:border-primary transition-all shadow-sm">
-                    <div className="p-1.5 bg-slate-50 rounded text-slate-400 group-hover:text-primary transition-colors">
-                      <FileText className="w-4 h-4" />
+            {showMembersPanel ? (
+              <div className="space-y-4">
+                <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Membres ({employees.length})</h5>
+                <div className="space-y-3">
+                  {employees.slice(0, 8).map(emp => (
+                    <div key={emp.id} className="flex items-center gap-2">
+                      <Avatar className="h-6 w-6 border border-slate-200">
+                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${emp.username}`} />
+                        <AvatarFallback>{emp.firstName.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[10px] font-bold text-slate-700 truncate uppercase">{emp.firstName} {emp.lastName}</span>
+                      </div>
                     </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-[10px] font-bold text-slate-700 truncate uppercase">{file.name}</span>
-                      <span className="text-[9px] font-medium text-slate-400">{file.time}</span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-              <Button variant="ghost" size="sm" className="w-full text-[9px] font-black text-slate-400 uppercase tracking-widest">Voir tout</Button>
-            </div>
+            ) : (
+              <div className="space-y-4">
+                <h5 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Informations</h5>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+                    <Users className="w-3.5 h-3.5 text-primary" />
+                    <span>{employees.length} membre(s) actif(s)</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+                    <MessageSquare className="w-3.5 h-3.5 text-primary" />
+                    <span>{store.getMessages(activeChannel.id).length} message(s)</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 text-amber-900 space-y-2">
               <div className="flex items-center gap-2">
@@ -433,6 +513,71 @@ const Communication = () => {
           </div>
         </aside>
       </div>
+
+      {/* New Channel Dialog */}
+      <Dialog open={showNewChannelDialog} onOpenChange={setShowNewChannelDialog}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="uppercase font-black tracking-tight">Nouveau Salon</DialogTitle>
+            <DialogDescription>Créez un nouveau salon de discussion interne.</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-1.5">Nom du salon</label>
+            <Input
+              placeholder="ex: coordination-budget"
+              value={newChannelName}
+              onChange={e => setNewChannelName(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewChannelDialog(false)}>Annuler</Button>
+            <Button onClick={handleCreateChannel} disabled={!newChannelName.trim()}>Créer le Salon</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New DM Dialog */}
+      <Dialog open={showNewDMDialog} onOpenChange={setShowNewDMDialog}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="uppercase font-black tracking-tight">Nouveau Message Direct</DialogTitle>
+            <DialogDescription>Démarrez une conversation privée avec un agent.</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-1.5">Nom d'utilisateur ou agent</label>
+            <Input
+              placeholder="ex: jean.dupont"
+              value={newDMUsername}
+              onChange={e => setNewDMUsername(e.target.value)}
+            />
+            {employees.length > 0 && (
+              <div className="mt-3 space-y-1 max-h-40 overflow-y-auto">
+                {employees.filter(e =>
+                  e.id !== user?.govEmployeeId &&
+                  (newDMUsername === '' || `${e.firstName} ${e.lastName}`.toLowerCase().includes(newDMUsername.toLowerCase()) || e.username.toLowerCase().includes(newDMUsername.toLowerCase()))
+                ).slice(0, 5).map(emp => (
+                  <button
+                    key={emp.id}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 text-left transition-all"
+                    onClick={() => setNewDMUsername(`${emp.firstName} ${emp.lastName}`)}
+                  >
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${emp.username}`} />
+                      <AvatarFallback>{emp.firstName.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs font-bold text-slate-700 uppercase">{emp.firstName} {emp.lastName}</span>
+                    <span className="text-[9px] font-medium text-slate-400 ml-auto">{emp.functionTitle}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewDMDialog(false)}>Annuler</Button>
+            <Button onClick={handleCreateDM} disabled={!newDMUsername.trim()}>Démarrer la conversation</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </IntranetLayout>
   );
 };
