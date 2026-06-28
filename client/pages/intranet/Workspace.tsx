@@ -1,30 +1,6 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import {
-  Briefcase, 
-  FileText, 
-  FolderOpen, 
-  Users, 
-  MessageSquare, 
-  Book, 
-  Plus, 
-  Search, 
-  Filter, 
-  ChevronRight,
-  ChevronLeft,
-  ShieldCheck,
-  TrendingUp,
-  HeartPulse,
-  Gavel,
-  ShieldAlert,
-  Download,
-  Printer,
-  Lock,
-  Archive,
-  Edit,
-  Trash2,
-  MoreVertical
-} from "lucide-react";
+import { Briefcase, FileText, FolderOpen, Users, MessageSquare, Book, Plus, Search, ListFilter as Filter, ChevronRight, ChevronLeft, ShieldCheck, TrendingUp, HeartPulse, Gavel, ShieldAlert, Download, Printer, Lock, Archive, CreditCard as Edit, Trash2, MoveVertical as MoreVertical } from "lucide-react";
 import { IntranetLayout } from "@/components/IntranetLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

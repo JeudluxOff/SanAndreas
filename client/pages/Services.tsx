@@ -1,24 +1,5 @@
 import { Layout } from "@/components/Layout";
-import {
-  Building2,
-  Shield,
-  ShieldCheck,
-  HeartPulse,
-  MapPin,
-  Info,
-  ChevronRight,
-  Phone,
-  Clock,
-  ExternalLink,
-  Users as UsersIcon,
-  ZoomIn,
-  ZoomOut,
-  RotateCcw,
-  Edit2,
-  Copy,
-  Check,
-  Save
-} from "lucide-react";
+import { Building2, Shield, ShieldCheck, HeartPulse, MapPin, Info, ChevronRight, Phone, Clock, ExternalLink, Users as UsersIcon, ZoomIn, ZoomOut, RotateCcw, CreditCard as Edit2, Copy, Check, Save } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";

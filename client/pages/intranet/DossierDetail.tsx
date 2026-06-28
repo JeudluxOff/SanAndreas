@@ -1,24 +1,4 @@
-import {
-  FolderOpen,
-  ChevronLeft,
-  Clock,
-  FileText,
-  Plus,
-  Download,
-  Printer,
-  Users,
-  Settings,
-  CheckCircle2,
-  AlertCircle,
-  MessageSquare,
-  Paperclip,
-  Share2,
-  Trash2,
-  Calendar,
-  History,
-  Activity,
-  Eye
-} from "lucide-react";
+import { FolderOpen, ChevronLeft, Clock, FileText, Plus, Download, Printer, Users, Settings, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, MessageSquare, Paperclip, Share2, Trash2, Calendar, History, Activity, Eye } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useState } from "react";
 import { IntranetLayout } from "@/components/IntranetLayout";
