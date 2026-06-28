@@ -582,6 +582,15 @@
   ],
   "auditLogs": [
     {
+      "id": "1782639738682",
+      "timestamp": "2026-06-28T09:42:18.682Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Création nouveau dossier (interface)"
+    },
+    {
       "id": "1782639378985",
       "timestamp": "2026-06-28T09:36:18.985Z",
       "user_id": "admin",
