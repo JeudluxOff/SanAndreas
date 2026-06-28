@@ -286,7 +286,7 @@ const HR = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Toutes divisions</SelectItem>
-                  {GOV_DIVISIONS.map(div => (
+                  {Object.values(GOV_DIVISIONS).map(div => (
                     <SelectItem key={div} value={div}>
                       {GOV_DIVISION_LABELS[div] || div}
                     </SelectItem>
@@ -511,7 +511,7 @@ const HR = () => {
                     <SelectValue placeholder="Selectionner" />
                   </SelectTrigger>
                   <SelectContent>
-                    {GOV_DIVISIONS.map(div => (
+                    {Object.values(GOV_DIVISIONS).map(div => (
                       <SelectItem key={div} value={div}>
                         {GOV_DIVISION_LABELS[div] || div}
                       </SelectItem>
