@@ -582,6 +582,15 @@
   ],
   "auditLogs": [
     {
+      "id": "1782642670733",
+      "timestamp": "2026-06-28T10:31:10.733Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Déconnexion"
+    },
+    {
       "id": "1782642668118",
       "timestamp": "2026-06-28T10:31:08.118Z",
       "user_id": "system",
