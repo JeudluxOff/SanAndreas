@@ -582,6 +582,18 @@
   ],
   "auditLogs": [
     {
+      "id": "1782636901920",
+      "timestamp": "2026-06-28T08:55:01.920Z",
+      "user_id": "admin",
+      "user_name": "Administrateur Système",
+      "role": "admin",
+      "service_id": "CABINET",
+      "action": "Mise à jour statut",
+      "metadata": {
+        "status": "available"
+      }
+    },
+    {
       "id": "1782636900893",
       "timestamp": "2026-06-28T08:55:00.893Z",
       "user_id": "admin",
