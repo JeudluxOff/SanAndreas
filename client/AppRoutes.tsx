@@ -79,6 +79,7 @@ import MdtDepositions from "@/pages/mdt/Depositions";
 import MdtPenalCode from "@/pages/mdt/PenalCode";
 import MdtServiceHours from "@/pages/mdt/ServiceHours";
 import MdtSettings from "@/pages/mdt/Settings";
+import MdtArrestDossiers from "@/pages/mdt/ArrestDossiers";
 
 export const AppRoutes = () => (
   <Routes>
@@ -193,6 +194,7 @@ export const AppRoutes = () => (
               <Route path="/depositions" element={<MdtDepositions />} />
               <Route path="/penal-code" element={<MdtPenalCode />} />
               <Route path="/service-hours" element={<MdtServiceHours />} />
+              <Route path="/arrest-dossiers" element={<MdtArrestDossiers />} />
               <Route path="/settings" element={<MdtSettings />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

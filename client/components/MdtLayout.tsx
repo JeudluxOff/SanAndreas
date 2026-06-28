@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useMdt } from '@/contexts/MdtContext';
 import { MDT_SERVICES } from '@/lib/mdt-types';
-import { Monitor, Radio, Car, MapPin, Users, User, Truck, Building2, Crosshair, FileText, Banknote, Search, Flame, Scroll, FlaskConical, Package, CircleParking as ParkingCircle, CircleAlert as AlertCircle, Shield, Camera, Megaphone, Link2, ClipboardList, BookOpen, Clock, Settings, LogOut, Bell, ChevronRight, Menu, X, Chrome as Home, Siren } from 'lucide-react';
+import { Monitor, Radio, Car, MapPin, Users, User, Truck, Building2, Crosshair, FileText, Banknote, Search, Flame, Scroll, FlaskConical, Package, CircleParking as ParkingCircle, CircleAlert as AlertCircle, Shield, Camera, Megaphone, Link2, ClipboardList, BookOpen, Clock, Settings, LogOut, Bell, ChevronRight, Menu, X, Chrome as Home, Siren, HandMetal as Handcuffs } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -17,6 +17,7 @@ type NavItem = {
   path: string;
   icon: React.ReactNode;
   perm?: string;
+  services?: string[]; // if set, only show for these services
 };
 
 type NavSection = {
@@ -47,6 +48,7 @@ const NAV: NavSection[] = [
   {
     section: 'Opérations',
     items: [
+      { label: 'Dossiers d\'arrestation', path: '/mdt/arrest-dossiers', icon: <Handcuffs className="w-4 h-4" />, services: ['USSS', 'LSPD', 'LSSD', 'FIB'] },
       { label: 'Rapports', path: '/mdt/reports', icon: <FileText className="w-4 h-4" /> },
       { label: 'Amendes', path: '/mdt/fines', icon: <Banknote className="w-4 h-4" /> },
       { label: 'Enquêtes', path: '/mdt/investigations', icon: <Search className="w-4 h-4" /> },
@@ -125,7 +127,9 @@ export function MdtLayout({ children }: MdtLayoutProps) {
             <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-600 px-3 py-2">
               {section.section}
             </p>
-            {section.items.map((item) => (
+            {section.items.map((item) => {
+              if (item.services && !item.services.includes(mdtUser?.service ?? '')) return null;
+              return (
               <Link
                 key={item.path}
                 to={item.path}
@@ -142,7 +146,8 @@ export function MdtLayout({ children }: MdtLayoutProps) {
                 <span className="uppercase tracking-wider">{item.label}</span>
                 {isActive(item.path) && <ChevronRight className="w-3 h-3 ml-auto opacity-60" />}
               </Link>
-            ))}
+              );
+            })}
           </div>
         ))}
       </div>
