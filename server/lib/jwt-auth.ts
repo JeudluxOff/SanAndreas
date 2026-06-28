@@ -8,6 +8,7 @@ export interface JWTPayload {
   user_id: string;
   name: string;
   role: 'admin' | 'avocat' | 'client' | 'guest';
+  client_id?: string;
   iat: number;
   exp: number;
 }

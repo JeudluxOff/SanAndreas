@@ -31,7 +31,7 @@ export default function Services() {
   const store = useGovernmentStore();
   const [dynamicLocations, setDynamicLocations] = useState<GovLocation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<GovLocation | null>(null);
   const [filter, setFilter] = useState<'all' | 'police' | 'hospital' | 'government'>('all');
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -90,7 +90,7 @@ export default function Services() {
     }
   };
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = (e: globalThis.MouseEvent) => {
     if (isEditMode && isDraggingMarker && mapRef.current) {
       const rect = mapRef.current.getBoundingClientRect();
       // Calculate position relative to the map container, accounting for zoom and offset
@@ -140,7 +140,7 @@ export default function Services() {
     }
   };
 
-  const onMarkerTouchStart = (e: React.TouchEvent, loc: Location) => {
+  const onMarkerTouchStart = (e: React.TouchEvent, loc: GovLocation) => {
     if (isEditMode) {
       e.stopPropagation();
       setIsDraggingMarker(loc.id);
@@ -163,7 +163,7 @@ export default function Services() {
     };
   }, [isDraggingMap, isDraggingMarker, zoom, offset, dragStart]);
 
-  const onMapTouchMove = (e: TouchEvent) => {
+  const onMapTouchMove = (e: globalThis.TouchEvent) => {
     if (isEditMode && isDraggingMarker && mapRef.current) {
       const rect = mapRef.current.getBoundingClientRect();
       const touch = e.touches[0];
@@ -403,11 +403,9 @@ export default function Services() {
                   zoom > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-default"
                 )}
                 onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
                 onTouchStart={onMapTouchStart}
-                onTouchMove={onMapTouchMove}
                 onTouchEnd={handleMouseUp}
               >
                 {isLoading && (

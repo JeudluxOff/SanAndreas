@@ -25,12 +25,13 @@ export type Permission =
   | 'intranet:view'
   | 'dashboard:view'
   | 'documents:view' | 'documents:create' | 'documents:edit' | 'documents:delete' | 'documents:submit_review' | 'documents:approve_service' | 'documents:approve_state' | 'documents:sign' | 'documents:publish' | 'documents:archive'
-  | 'dossiers:view' | 'dossiers:create' | 'dossiers:edit' | 'dossiers:close' | 'dossiers:assign_members' | 'dossiers:confidential_access'
+  | 'dossiers:view' | 'dossiers:create' | 'dossiers:edit' | 'dossiers:delete' | 'dossiers:close' | 'dossiers:assign_members' | 'dossiers:confidential_access'
   | 'communication:view' | 'communication:post' | 'communication:announcements_post'
-  | 'planning:view' | 'planning:create' | 'planning:edit'
+  | 'planning:view' | 'planning:create' | 'planning:edit' | 'planning:delete'
+  | 'tasks:view' | 'tasks:create' | 'tasks:edit' | 'tasks:delete' | 'tasks:assign'
   | 'directory:view'
-  | 'admin:users_manage' | 'admin:roles_manage'
-  | 'audit:logs_view' | 'audit:reports_export'
+  | 'admin:users_manage' | 'admin:roles_manage' | 'admin:settings'
+  | 'audit:logs_view' | 'audit:reports_export' | 'audit:delete_logs'
   | 'lawyer:intranet_access';
 
 export type UserStatus = 'available' | 'busy' | 'away' | 'offline';

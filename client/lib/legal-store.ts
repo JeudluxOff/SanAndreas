@@ -195,13 +195,13 @@ class LegalStoreManager {
       invoices: mergeEntities(local.invoices, server.invoices),
       staff: mergeEntities(local.staff, server.staff),
       // Audit logs and conflict checks: always append server versions (immutable)
-      auditLogs: [...new Map([
-        ...local.auditLogs.map(l => [l.id, l]),
-        ...server.auditLogs.map(l => [l.id, l])
+      auditLogs: [...new Map<string, AuditLog>([
+        ...local.auditLogs.map(l => [l.id, l] as [string, AuditLog]),
+        ...server.auditLogs.map(l => [l.id, l] as [string, AuditLog])
       ]).values()],
-      conflictChecks: [...new Map([
-        ...local.conflictChecks.map(c => [c.id, c]),
-        ...server.conflictChecks.map(c => [c.id, c])
+      conflictChecks: [...new Map<string, ConflictCheck>([
+        ...local.conflictChecks.map(c => [c.id, c] as [string, ConflictCheck]),
+        ...server.conflictChecks.map(c => [c.id, c] as [string, ConflictCheck])
       ]).values()],
       messages: mergeEntities(local.messages, server.messages),
       settings: server.settings // Settings are global, server wins

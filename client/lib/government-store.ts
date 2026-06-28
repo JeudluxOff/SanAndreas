@@ -8,7 +8,8 @@ import {
   GovDossier,
   GovNotification,
   GovMessage,
-  GovAuditLog
+  GovAuditLog,
+  GovLocation
 } from '@shared/gov-api';
 import { notifyDraftChange } from '@/contexts/AdminContext';
 

@@ -118,10 +118,13 @@ const Workspace = () => {
       title: docTitle,
       type: docType,
       date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
-      archived: false
+      archived: false,
+      status: 'Brouillon',
+      author: user?.name || 'System',
+      acl: []
     };
 
-    store.createDocument(serviceId, newDoc);
+    store.createDocument(serviceId, newDoc as any);
 
     setDocTitle("");
     setIsDocumentModalOpen(false);
@@ -171,10 +174,11 @@ const Workspace = () => {
       id: `DOS-${upperServiceId}-${Math.floor(Math.random() * 9999)}`,
       title: dossierTitle,
       status: "En cours",
-      archived: false
+      archived: false,
+      acl: []
     };
 
-    store.createDossier(serviceId, newDossier);
+    store.createDossier(serviceId, newDossier as any);
 
     setDossierTitle("");
     setIsDossierModalOpen(false);

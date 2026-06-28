@@ -1,14 +1,14 @@
-import { 
-  FolderOpen, 
-  ChevronLeft, 
-  Clock, 
-  FileText, 
-  Plus, 
-  Download, 
-  Printer, 
-  Users, 
-  Settings, 
-  CheckCircle2, 
+import {
+  FolderOpen,
+  ChevronLeft,
+  Clock,
+  FileText,
+  Plus,
+  Download,
+  Printer,
+  Users,
+  Settings,
+  CheckCircle2,
   AlertCircle,
   MessageSquare,
   Paperclip,
@@ -16,9 +16,11 @@ import {
   Trash2,
   Calendar,
   History,
-  Activity
+  Activity,
+  Eye
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
+import { useState } from "react";
 import { IntranetLayout } from "@/components/IntranetLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

@@ -1,6 +1,10 @@
 // Noxwood & Partner - Shared Types
 
-export type LegalRole = 'Associé' | 'Avocat' | 'Juriste' | 'Secrétaire' | 'Comptable' | 'Stagiaire' | 'Auditeur';
+export interface DemoResponse {
+  message: string;
+}
+
+export type LegalRole = 'Associé' | 'Associée' | 'Avocat' | 'Avocate' | 'Avocat Senior' | 'Juriste' | 'Secrétaire' | 'Comptable' | 'Stagiaire' | 'Auditeur';
 
 export type CaseType = 'Pénal' | 'Civil' | 'Affaires' | 'Admin';
 export type CaseStatus = 'En cours' | 'En attente' | 'Clos' | 'Archivé' | 'Scellé';
@@ -146,11 +150,13 @@ export interface Hearing {
 
 export interface Invoice {
   id: string;
+  number?: string;
   case_id: string;
   client_id: string;
   amount: number;
   currency: string;
-  status: 'Brouillon' | 'Envoyé' | 'Payé' | 'Annulé' | 'En retard';
+  status: 'Brouillon' | 'En attente' | 'Envoyé' | 'Payé' | 'Annulé' | 'En retard';
+  date?: string;
   due_date: string;
   created_at: string;
   items: {
@@ -167,6 +173,7 @@ export interface AuditLog {
   action: string;
   target_type: string;
   target_id: string;
+  description?: string;
   metadata?: any;
 }
 
@@ -185,6 +192,7 @@ export interface Message {
   sender_id: string;
   content: string;
   timestamp: string;
+  created_at?: string;
   attachments?: string[];
   // Client messaging fields
   type?: 'internal' | 'client'; // internal = lawyer-only, client = shared with client
